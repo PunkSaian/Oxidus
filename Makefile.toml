@@ -1,0 +1,33 @@
+[env]
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+
+[tasks.default]
+dependencies = ["format", "lint", "build"]
+
+[tasks.pre-commit-checks]
+description = "Run pre-commit checks: build, fmt, clippy"
+dependencies = ["fmt-check", "clippy-check", "build-check"]
+
+[tasks.build-check]
+command = "cargo"
+args = ["check"]
+
+[tasks.fmt-check]
+command = "cargo"
+args = ["fmt", "--", "--check"]
+
+[tasks.clippy-check]
+command = "cargo"
+args = ["clippy", "--", "-D", "warnings"]
+
+[tasks.format]
+command = "cargo"
+args = ["fmt", "--", "--emit=files"]
+
+[tasks.lint]
+command = "cargo"
+args = ["clippy", "--", "-D", "warnings"]
+
+[tasks.build]
+command = "cargo"
+args = ["build"]
