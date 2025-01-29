@@ -1,7 +1,16 @@
 use std::thread;
 
+use prelude::*;
+
 #[macro_use]
 extern crate log;
+
+mod error;
+mod prelude;
+
+pub fn main() -> OxidusResult{
+    Ok(())
+}
 
 unsafe extern "C" fn load() {
     thread::spawn(|| {
