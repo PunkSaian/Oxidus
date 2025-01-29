@@ -24,7 +24,7 @@ args = ["build"]
 
 [tasks.pre-commit-checks]
 description = "Run pre-commit checks: build, fmt, clippy"
-dependencies = ["fmt-check", "clippy-check", "check"]
+dependencies = ["lint", "format", "check"]
 
 
 [tasks.default]

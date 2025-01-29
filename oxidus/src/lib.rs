@@ -1,4 +1,4 @@
-use std::{arch::asm, thread};
+use std::thread;
 
 #[macro_use]
 extern crate log;
@@ -13,14 +13,6 @@ unsafe extern "C" fn load() {
 
         info!("Loading");
     });
-}
-
-///# Safety
-/// very fucking unsafe
-#[no_mangle]
-#[allow(unused)]
-pub unsafe extern "C" fn self_unload() {
-    asm!("int3");
 }
 
 extern "C" fn unload() {
