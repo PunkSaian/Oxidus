@@ -1,29 +1,18 @@
-use std::arch::asm;
+use std::{arch::asm, thread};
 
 #[macro_use]
 extern crate log;
 
 unsafe extern "C" fn load() {
-    eprintln!("oxidus: before load");
-    libc::atexit(unload);
+    thread::spawn(|| {
+        eprintln!("oxidus: before load");
+        env_logger::builder()
+            .filter(Some("oxidus"), log::LevelFilter::Trace)
+            .try_init()
+            .unwrap();
 
-    env_logger::builder()
-        .filter(Some("oxidus"), log::LevelFilter::Trace)
-        .try_init()
-        .unwrap();
-
-    info!("Loading");
-}
-
-///# Safety
-/// very fucking unsafe
-pub unsafe fn print_all_keys() {
-    for i in 0..libc::KEY_MAX {
-        let info = libc::pthread_getspecific(i.into());
-        if !info.is_null() {
-            dbg!(i, info);
-        }
-    }
+        info!("Loading");
+    });
 }
 
 ///# Safety
@@ -35,7 +24,8 @@ pub unsafe extern "C" fn self_unload() {
 }
 
 extern "C" fn unload() {
-    eprintln!("oxidus: unloaded");
+    info!("Unloading");
+    eprintln!("oxidus: after unload");
 }
 
 #[link_section = ".init_array"]
