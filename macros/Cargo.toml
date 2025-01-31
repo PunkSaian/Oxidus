@@ -1,0 +1,12 @@
+[package]
+name = "macros"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.92"
+quote = "1.0.37"
+serde_plain = "1.0.2"
+syn = { version = "2.0.90", features = ["full"] }

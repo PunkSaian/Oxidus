@@ -1,3 +1,6 @@
+#![allow(clippy::missing_errors_doc)]
+
+extern crate thiserror;
 use std::thread;
 
 use prelude::*;
@@ -7,8 +10,9 @@ extern crate log;
 
 mod error;
 mod prelude;
+mod sdk;
 
-pub fn main() -> OxidusResult{
+pub const fn main() -> OxidusResult {
     Ok(())
 }
 
@@ -19,6 +23,9 @@ unsafe extern "C" fn load() {
             .filter(Some("oxidus"), log::LevelFilter::Trace)
             .try_init()
             .unwrap();
+        if let Err(e) = main() {
+            eprintln!("{e}");
+        }
 
         info!("Loading");
     });

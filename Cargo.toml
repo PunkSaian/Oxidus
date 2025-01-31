@@ -1,7 +1,12 @@
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Kane Bezadas <kane.bezadas@gmail.com>"]
+description = "An internal tf2 cheat"
+license = "MIT+"
+repository = "https://github.com/PunkSaian/Oxidus"
+readme = "README.md"
+
 [workspace]
 resolver = "2"
-members = [
-    "oxidus"
-]
-
-
+members = ["macros", "oxidus"]

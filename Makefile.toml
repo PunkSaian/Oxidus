@@ -78,7 +78,7 @@ cd ~/.local/share/Steam/steamapps/common/Team\ Fortress\ 2
 export RUST_BACKTRACE=FULL;
 export LD_LIBRARY_PATH='bin/linux64';
 #export LD_DEBUG=all;
-#export LD_DEBUG=libs;
+export LD_DEBUG=libs;
 ./tf_linux64 -game tf -steam -novid -nojoy -nosteamcontroller -nohltv -particles 1 -precachefontchars -noquicktime -nobreakpad
 '''
 
