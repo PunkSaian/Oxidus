@@ -7,15 +7,20 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
+macros = { path = "../macros"}
+
 env_logger = "0.11.6"
 log = "0.4.25"
 libc = "0.2.169"
 thiserror = "2.0.11"
-lazy_static = "1.5.0"
-parking_lot = "0.12.3"
-ash = { version = "0.38", features = ["loaded"] }
 libloading = "0.7"
-imgui-rs = "1.47.0"
-imgui-rs-vulkan-renderer = "1.16.0"
-imgui = "0.12.0"
 goblin = "0.9.3"
+once_cell = "1.20.2"
+
+sdl2 = "0.34.5"
+imgui-rs = "1.47.0"
+imgui-sdl2 = "0.15.3"
+imgui-opengl-renderer = "0.12.1"
+sdl2-sys = "=0.34.5"
+ash = "0.38.0"
+

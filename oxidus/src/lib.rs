@@ -6,11 +6,14 @@
 
 extern crate thiserror;
 
-use std::thread;
+use std::{
+    sync::{Arc, Mutex},
+    thread,
+};
 
 use detour::DetourHook;
+use once_cell::sync::Lazy;
 use prelude::*;
-use util::resolve_fn;
 
 #[macro_use]
 extern crate log;
@@ -21,32 +24,10 @@ mod prelude;
 mod sdk;
 mod util;
 
-unsafe extern "C" fn original_hokable() {
-    debug!("original hookable");
-}
-
-unsafe extern "C" fn my_hook_function() {
-    debug!("Hooked function called!");
-}
+#[allow(unused)]
+static HOOKS: Lazy<Arc<Mutex<Vec<DetourHook>>>> = Lazy::new(|| Arc::new(Mutex::new(Vec::new())));
 
 pub fn main() -> OxidusResult {
-    // Initialize overlay
-    unsafe {
-        //let target_fn = resolve_fn("/usr/lib/libvulkan.so.1", "vkQueuePresentKHR").expect("test");
-        let hook_fn = my_hook_function as *mut ();
-        let target_fn = original_hokable as *mut ();
-
-        let hook = DetourHook::new(target_fn, hook_fn)?;
-
-        original_hokable();
-        original_hokable();
-        original_hokable();
-        original_hokable();
-        hook.call_original(());
-
-
-        //hook.restore();
-    }
     Ok(())
 }
 

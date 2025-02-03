@@ -1,3 +1,4 @@
+#[allow(deprecated)]
 use std::{
     env::home_dir,
     ffi::{CStr, CString},
@@ -9,6 +10,7 @@ use std::{
 use goblin::elf::Elf;
 use libc::{dl_iterate_phdr, dl_phdr_info, dlclose, dlopen, dlsym, RTLD_NOLOAD, RTLD_NOW};
 
+#[allow(unused)]
 pub unsafe fn resolve_fn(module: &str, name: &str) -> Option<*mut ()> {
     let module = CString::new(module).unwrap();
     let handle = dlopen(module.as_ptr(), RTLD_NOLOAD | RTLD_NOW);
@@ -24,6 +26,7 @@ pub unsafe fn resolve_fn(module: &str, name: &str) -> Option<*mut ()> {
     Some(res)
 }
 
+#[allow(unused)]
 extern "C" fn callback(info: *mut dl_phdr_info, _size: usize, _data: *mut std::ffi::c_void) -> i32 {
     unsafe {
         let info = &*info;
@@ -77,7 +80,7 @@ extern "C" fn callback(info: *mut dl_phdr_info, _size: usize, _data: *mut std::f
     }
     0
 }
-
+#[allow(unused)]
 pub fn print_resolvable_names() {
     #[allow(deprecated)]
     let mut path = home_dir().unwrap();
