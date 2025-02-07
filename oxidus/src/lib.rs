@@ -11,6 +11,7 @@ use std::{
     cell::RefCell,
     ffi::c_void,
     pin::Pin,
+    ptr,
     sync::{Arc, Mutex},
     thread,
     time::Instant,
@@ -47,7 +48,7 @@ static HOOKS: Lazy<Arc<Mutex<Vec<Pin<Box<DetourHook>>>>>> =
 
 thread_local! {
     #[allow(clippy::type_complexity)]
-    static IMGUI_STATE: RefCell<Option<(imgui::Context, Renderer, Instant)>> = const { RefCell::new(None) };
+    static IMGUI_STATE: RefCell<Option<(imgui::Context, Renderer, Instant, *mut c_void, *mut c_void)>> = const { RefCell::new(None) };
 }
 
 #[detour_hook]
@@ -58,6 +59,9 @@ unsafe extern "C" fn my_sdl_gl_swap_window(window: *mut SDL_Window) {
         if state.is_none() {
             // Initialize ImGui context
             let mut context = imgui::Context::create();
+
+            let tf2_gl_ctx = sdl2_sys::SDL_GL_GetCurrentContext();
+            let overlay_gl_ctx = sdl2_sys::SDL_GL_CreateContext(window);
 
             // Get initial window size
             let mut window_width = 0;
@@ -70,20 +74,23 @@ unsafe extern "C" fn my_sdl_gl_swap_window(window: *mut SDL_Window) {
             sdl2_sys::SDL_SetWindowTitle(window, c"Tf2 Oxidus x64 sdl".as_ptr().cast::<_>());
 
             // Create SDL renderer
-            let sdl_renderer = sdl2_sys::SDL_CreateRenderer(
-                window,
-                -1,
-                sdl2_sys::SDL_RendererFlags::SDL_RENDERER_ACCELERATED as u32
-                    | sdl2_sys::SDL_RendererFlags::SDL_RENDERER_PRESENTVSYNC as u32,
-            );
+            let sdl_renderer = sdl2_sys::SDL_CreateRenderer(window, -1, 0);
 
             let renderer = Renderer::new(sdl_renderer, &mut context);
+            sdl2_sys::SDL_GL_MakeCurrent(window, tf2_gl_ctx);
 
-            *state = Some((context, renderer, Instant::now()));
+            *state = Some((
+                context,
+                renderer,
+                Instant::now(),
+                tf2_gl_ctx,
+                overlay_gl_ctx,
+            ));
             info!("Overlay initialized");
         }
 
-        let (context, renderer, last_frame) = state.as_mut().unwrap();
+        let (context, renderer, last_frame, tf2_gl_ctx, overlay_gl_ctx) = state.as_mut().unwrap();
+        sdl2_sys::SDL_GL_MakeCurrent(window, *overlay_gl_ctx);
         let now = Instant::now();
         let delta = now.duration_since(*last_frame);
         *last_frame = now;
@@ -105,8 +112,7 @@ unsafe extern "C" fn my_sdl_gl_swap_window(window: *mut SDL_Window) {
             });
 
         renderer.render(context);
-
-        // Present the rendered frame
+        sdl2_sys::SDL_GL_MakeCurrent(window, *tf2_gl_ctx);
     });
 
     original_function(window);

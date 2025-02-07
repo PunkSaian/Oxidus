@@ -2,7 +2,7 @@ extern crate imgui;
 extern crate sdl2_sys;
 
 use imgui::{Context, DrawCmd, DrawIdx};
-use std::mem;
+use std::{mem, ptr::null_mut};
 
 pub struct Renderer {
     pub sdl_renderer: *mut sdl2_sys::SDL_Renderer,
@@ -12,7 +12,7 @@ pub struct Renderer {
 impl Renderer {
     pub fn new(sdl_renderer: *mut sdl2_sys::SDL_Renderer, imgui: &mut Context) -> Self {
         unsafe {
-            // Create font texture
+            //Create font texture
             let atlas = imgui.fonts();
             let texture = atlas.build_rgba32_texture();
 
@@ -26,7 +26,7 @@ impl Renderer {
                 texture.height as i32,
             );
 
-            // Upload texture data
+            //Upload texture data
             #[allow(clippy::cast_possible_wrap)]
             sdl2_sys::SDL_UpdateTexture(
                 font_texture,
@@ -42,11 +42,12 @@ impl Renderer {
             );
 
             // Store texture reference in imgui
-            atlas.tex_id = *(font_texture as *const _);
+            dbg!(&font_texture);
+            atlas.tex_id = (font_texture as usize).into();
 
             Self {
                 sdl_renderer,
-                font_texture,
+                font_texture: null_mut(),
             }
         }
     }
@@ -56,9 +57,6 @@ impl Renderer {
         let draw_data = ctx.render();
 
         unsafe {
-            // Save current render state
-            let old_clip = self.get_clip_rect();
-
             for draw_list in draw_data.draw_lists() {
                 let vtx_buffer = draw_list.vtx_buffer();
                 let idx_buffer = draw_list.idx_buffer();
@@ -119,9 +117,6 @@ impl Renderer {
                     }
                 }
             }
-
-            // Restore clip rect
-            sdl2_sys::SDL_RenderSetClipRect(self.sdl_renderer, &old_clip);
             sdl2_sys::SDL_RenderPresent(self.sdl_renderer);
         }
     }
