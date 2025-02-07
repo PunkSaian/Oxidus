@@ -49,6 +49,8 @@ impl Display for ContextFrame {
 pub enum OxidusErrorType {
     #[error("Hooking {}", .0)]
     Hooking(String),
+    #[error("Generic {}", .0)]
+    Generic(String),
 }
 
 pub type OxidusResult<T = (), E = OxidusError> = Result<T, E>;

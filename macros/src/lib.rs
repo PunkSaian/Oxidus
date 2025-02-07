@@ -28,18 +28,34 @@ pub fn detour_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
         #unsafety #abi fn(#(#param_types),*) #output
     };
 
-    let injected = quote! {
-        let original_function: #gateway_type;
-        unsafe {
-            ::std::arch::asm!("mov {}, r10", out(reg) original_function);
-        }
+    let before = quote! {
+        let mut hook: Box<DetourHook> = {
+            let res: *mut DetourHook;
+            unsafe {
+                ::std::arch::asm!("mov {}, r10", out(reg) res);
+            }
+                Box::from_raw(res)
+        };
+
+        let original_function  = std::mem::transmute::<_,#gateway_type>(hook.target_fn);
+
+        hook.restore();
+    };
+
+    let after = quote! {
+        hook.install().unwrap();
+        std::mem::forget(hook);
     };
 
     let original_block = &input_fn.block;
     input_fn.block = syn::parse2(quote! {
         {
-            #injected
-            #original_block
+            #before
+            let res = {
+                #original_block
+            };
+            #after
+            res
         }
     })
     .expect("Failed to parse modified block");
