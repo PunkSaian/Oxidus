@@ -13,6 +13,7 @@ fi
 
 echo $pid
 lib_path=$(cargo build --message-format=json | jq -r 'select(.profile.test == false) | select(.target.name == "oxidus" ) | .filenames[0]')
+//lib_path=./target/debug/liboxidus.so
 if [ ! -f "$lib_path" ]; then
     echo "liboxidus.so not found"
     exit 1
@@ -86,13 +87,13 @@ sudo rust-gdb -n -q -batch \
     -ex "set \$dlerror = (char* (*)(void))dlerror" \
     -ex "set \$self = \$dlopen(\"/tmp/liboxidus.so\", 6)" \
     -ex "call \$dlerror()" \
+    -ex "call oxidus_cleanup()" \
     -ex "call \$dlclose(\$self)" \
     -ex "call \$dlerror()" \
     -ex "call \$dlclose(\$self)" \
     -ex "call \$dlerror()" \
     -ex "detach" \
     -ex "quit"
-    #-ex "call self_unload()" \
 
 if [ $? -ne 0 ]; then
     echo "failed to unload"

@@ -7,39 +7,57 @@
 
 extern crate thiserror;
 
-use std::{
-    pin::Pin,
-    sync::{Arc, Mutex},
-    thread,
-};
+use std::{sync::Mutex, thread};
 
-use hook::detour::DetourHook;
+use hook::detour::WrappedDetourHook;
 use log::{error, info};
 use once_cell::sync::Lazy;
-use overlay::init as init_overlay;
+//use overlay::unload as unload_overlay;
+//use overlay::{init as init_overlay, IMGUI_STATE};
 use prelude::*;
 
 #[macro_use]
 extern crate log;
 
 mod hook;
-mod overlay;
+//mod overlay;
 mod prelude;
 mod sdk;
 mod util;
 
-#[allow(clippy::type_complexity)]
-static HOOKS: Lazy<Arc<Mutex<Vec<Pin<Box<DetourHook>>>>>> =
-    Lazy::new(|| Arc::new(Mutex::new(Vec::new())));
+//#[allow(clippy::type_complexity)]
+//static HOOKS: Lazy<Mutex<Vec<WrappedDetourHook>>> = Lazy::new(|| Mutex::new(Vec::new()));
 
 pub fn main() -> OxidusResult {
-    init_overlay()?;
+    //init_overlay()?;
+    Ok(())
+}
+
+///
+/// # Panics
+/// panics if hooks in use
+pub fn cleanup() -> OxidusResult {
+    //let mut hooks = HOOKS.lock().unwrap();
+    //for hook in hooks.iter() {
+    //    dbg!("locking");
+    //    if let Err(e) = hook.write().unwrap().restore() {
+    //        warn!("Hook already resotred when dropping: {e}");
+    //    };
+    //    dbg!("locked");
+    //}
+    //hooks.clear();
+    //FIXME: figure out htis locking issue
+    //sleep(Duration::from_secs(1));
+    //IMGUI_STATE.with(|state| {
+    //    let state = state.read().unwrap();
+    //    dbg!(state);
+    //});
+    //unload_overlay();
     Ok(())
 }
 
 unsafe extern "C" fn load() {
     thread::spawn(|| {
-        eprintln!("oxidus: before load");
         env_logger::builder()
             .filter(Some("oxidus"), log::LevelFilter::Trace)
             .try_init()
@@ -47,27 +65,33 @@ unsafe extern "C" fn load() {
         info!("Loading");
         if let Err(e) = main() {
             error!("Failed to load\n{e}");
-            //TODO: propper unloading
-            //unsafe {
-            //    let handle = dlopen("/tmp/liboxidus.so".as_ptr().cast::<i8>(), 6);
-            //    dlclose(handle);
-            //    dlclose(handle);
-            //}
+            oxidus_cleanup();
         } else {
-            info!("Loaded sucessfully");
+            info!("Loaded");
         }
     });
 }
 
-extern "C" fn unload() {
+/// cleanup function to remove all thread_local storage instances and restore all hooks
+#[allow(unused)]
+#[no_mangle]
+extern "C" fn oxidus_cleanup() {
     info!("Unloading");
-    info!("Unloaded");
+    if let Err(e) = cleanup() {
+        error!("Failed to unload\n{e}");
+    } else {
+        info!("Unloaded");
+    }
 }
 
 #[link_section = ".init_array"]
 #[allow(unused)]
 static LOAD: unsafe extern "C" fn() = { load };
 
+extern "C" fn fini() {
+    info!("fini");
+}
+
 #[link_section = ".fini_array"]
 #[allow(unused)]
-static UNLOAD: unsafe extern "C" fn() = { unload };
+static UNLOAD: unsafe extern "C" fn() = { fini };

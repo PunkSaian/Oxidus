@@ -1,5 +1,5 @@
 use libc::{mprotect, PROT_EXEC, PROT_READ, PROT_WRITE};
-use std::{pin::Pin, ptr};
+use std::{pin::Pin, ptr, sync::RwLock};
 
 const NOP: u8 = 0x90;
 
@@ -19,29 +19,35 @@ pub struct DetourHook {
     pub target_fn: *mut (),
     pub proxy: Option<*mut ()>,
     original_bytes: [u8; PATCH_SIZE],
+    pub hooked: bool,
 }
 
 unsafe impl Sync for DetourHook {}
 unsafe impl Send for DetourHook {}
 
+pub type WrappedDetourHook = Pin<Box<RwLock<DetourHook>>>;
+
 #[allow(unused)]
 impl DetourHook {
-    pub unsafe fn new(target_fn: *mut (), hook_fn: *mut ()) -> OxidusResult<Pin<Box<Self>>> {
+    pub unsafe fn new(target_fn: *mut (), hook_fn: *mut ()) -> OxidusResult<WrappedDetourHook> {
         if target_fn.is_null() || hook_fn.is_null() {
             return OxidusErrorType::Hooking("Null function pointer".to_owned()).into();
         }
 
         let original_bytes = ptr::read(target_fn as *const [u8; PATCH_SIZE]);
 
-        let mut hook = Box::pin(Self {
+        let mut hook = Box::pin(RwLock::new(Self {
             target_fn,
             proxy: None,
             original_bytes,
-        });
+            hooked: false,
+        }));
 
-        let proxy = Self::create_proxy(hook.as_mut().get_mut(), hook_fn)?;
+        let proxy = Self::create_proxy(&hook, hook_fn)?;
 
-        hook.proxy = Some(proxy);
+        let mut hook_locked = hook.write().unwrap();
+        hook_locked.proxy = Some(proxy);
+        drop(hook_locked);
 
         Ok(hook)
     }
@@ -49,13 +55,16 @@ impl DetourHook {
     pub unsafe fn new_and_install(
         target_fn: *mut (),
         hook_fn: *mut (),
-    ) -> OxidusResult<Pin<Box<Self>>> {
+    ) -> OxidusResult<WrappedDetourHook> {
         let mut hook = Self::new(target_fn, hook_fn)?;
-        hook.install()?;
+        hook.write().unwrap().install()?;
         Ok(hook)
     }
 
-    unsafe fn create_proxy(hook: *mut Self, hook_fn: *mut ()) -> OxidusResult<*mut ()> {
+    unsafe fn create_proxy(
+        hook: *const WrappedDetourHook,
+        hook_fn: *mut (),
+    ) -> OxidusResult<*mut ()> {
         let proxy_size = MOVABS_R10_SIZE + JMP_SIZE;
         let proxy = libc::mmap(
             ptr::null_mut(),
@@ -74,7 +83,9 @@ impl DetourHook {
         let mut mov_instr = [NOP; MOVABS_R10_SIZE];
         mov_instr[..2].copy_from_slice(&MOVABS_R10);
 
-        mov_instr[2..].copy_from_slice(&(hook as usize).to_ne_bytes());
+        mov_instr[2..].copy_from_slice(
+            &(std::mem::transmute::<WrappedDetourHook, usize>(hook.read())).to_ne_bytes(),
+        );
 
         ptr::copy_nonoverlapping(mov_instr.as_ptr(), proxy, mov_instr.len());
 
@@ -89,6 +100,9 @@ impl DetourHook {
     }
 
     pub unsafe fn install(&mut self) -> OxidusResult {
+        if self.hooked {
+            return OxidusErrorType::Hooking("Hook already installed".to_owned()).into();
+        }
         #[allow(clippy::cast_sign_loss)]
         let page_size = libc::sysconf(libc::_SC_PAGESIZE) as usize;
         let addr = self.target_fn as usize;
@@ -109,6 +123,7 @@ impl DetourHook {
 
         mprotect(aligned_addr as *mut _, protect_size, PROT_READ | PROT_EXEC);
 
+        self.hooked = true;
         Ok(())
     }
 
@@ -126,35 +141,41 @@ impl DetourHook {
         patch
     }
 
-    pub unsafe fn restore(&mut self) {
-        #[allow(clippy::cast_sign_loss)]
-        let page_size = libc::sysconf(libc::_SC_PAGESIZE) as usize;
-        let addr = self.target_fn as usize;
-        let aligned_addr = addr & !(page_size - 1);
-        let protect_size = (addr - aligned_addr) + PATCH_SIZE;
+    pub fn restore(&mut self) -> OxidusResult {
+        if !self.hooked {
+            return OxidusErrorType::Hooking("Hook not installed".to_owned()).into();
+        }
+        unsafe {
+            #[allow(clippy::cast_sign_loss)]
+            let page_size = libc::sysconf(libc::_SC_PAGESIZE) as usize;
+            let addr = self.target_fn as usize;
+            let aligned_addr = addr & !(page_size - 1);
+            let protect_size = (addr - aligned_addr) + PATCH_SIZE;
 
-        mprotect(
-            aligned_addr as *mut _,
-            protect_size,
-            PROT_READ | PROT_WRITE | PROT_EXEC,
-        );
+            mprotect(
+                aligned_addr as *mut _,
+                protect_size,
+                PROT_READ | PROT_WRITE | PROT_EXEC,
+            );
 
-        ptr::copy_nonoverlapping(
-            self.original_bytes.as_ptr(),
-            self.target_fn.cast::<u8>(),
-            PATCH_SIZE,
-        );
+            ptr::copy_nonoverlapping(
+                self.original_bytes.as_ptr(),
+                self.target_fn.cast::<u8>(),
+                PATCH_SIZE,
+            );
 
-        mprotect(aligned_addr as *mut _, protect_size, PROT_READ | PROT_EXEC);
+            mprotect(aligned_addr as *mut _, protect_size, PROT_READ | PROT_EXEC);
+            self.hooked = false;
+        }
+        Ok(())
     }
 }
 
 impl Drop for DetourHook {
     fn drop(&mut self) {
-        unsafe {
-            info!("dropping {:?} hook", self.target_fn);
-            self.restore();
-        }
+        if let Err(e) = self.restore() {
+            warn!("Hook already resotred when dropping: {e}");
+        };
     }
 }
 

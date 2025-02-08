@@ -24,27 +24,46 @@ pub fn detour_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
         })
         .collect();
 
+    let param_vals: Vec<_> = sig
+        .inputs
+        .iter()
+        .map(|arg| match arg {
+            FnArg::Receiver(_) => panic!("Receiver not allowed in hook function"),
+            FnArg::Typed(pat_type) => &pat_type.pat,
+        })
+        .collect();
+
     let gateway_type = quote! {
         #unsafety #abi fn(#(#param_types),*) #output
     };
 
     let before = quote! {
-        let mut hook: Box<crate::hook::detour::DetourHook> = {
-            let res: *mut crate::hook::detour::DetourHook;
+        let hook_lock = {
+            let res: usize;
             unsafe {
                 ::std::arch::asm!("mov {}, r10", out(reg) res);
             }
-                Box::from_raw(res)
+            std::mem::ManuallyDrop::new(std::mem::transmute::<_,std::pin::Pin<Box<std::sync::RwLock<crate::hook::detour::DetourHook>>>>(res))
         };
+        //dbg!("locking");
+        let mut hook = hook_lock.write().unwrap();
+        //dbg!("locked");
 
         let original_function  = std::mem::transmute::<_,#gateway_type>(hook.target_fn);
 
-        hook.restore();
+
+        if let Err(e) = hook.restore(){
+            error!("Failed to restore hook: {:?}", e);
+            return original_function(#(#param_vals),*);
+        }
+        //drop(hook);
     };
 
     let after = quote! {
-        hook.install().unwrap();
-        std::mem::forget(hook);
+        //dbg!("locking");
+        //let mut hook = hook_lock.write().unwrap();
+        //dbg!("locked");
+        (*hook).install().unwrap();
     };
 
     let original_block = &input_fn.block;

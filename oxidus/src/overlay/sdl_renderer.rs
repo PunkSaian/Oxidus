@@ -4,6 +4,7 @@ extern crate sdl2_sys;
 use imgui::{Context, DrawCmd, DrawIdx};
 use std::mem;
 
+#[derive(Debug)]
 pub struct Renderer {
     pub sdl_renderer: *mut sdl2_sys::SDL_Renderer,
     font_texture: *mut sdl2_sys::SDL_Texture,
@@ -133,6 +134,7 @@ impl Renderer {
 impl Drop for Renderer {
     fn drop(&mut self) {
         unsafe {
+            dbg!("dropping renderer");
             sdl2_sys::SDL_DestroyTexture(self.font_texture);
         }
     }
