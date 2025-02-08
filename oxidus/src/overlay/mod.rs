@@ -9,12 +9,15 @@ use imgui::MouseButton;
 use scan_code_map::sdl_scancode_to_imgui_key;
 use sdl2_sys::{
     SDL_Event, SDL_EventType, SDL_GL_CreateContext, SDL_GL_GetCurrentContext, SDL_GetWindowSize,
-    SDL_GetWindowTitle, SDL_SetWindowTitle, SDL_Window, SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE,
-    SDL_BUTTON_RIGHT, SDL_PRESSED,
+    SDL_GetWindowTitle, SDL_SetWindowIcon, SDL_SetWindowTitle, SDL_Window, SDL_BUTTON_LEFT,
+    SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT, SDL_PRESSED,
 };
 use sdl_renderer::Renderer;
 
-use crate::{hook::detour::install_detour_from_symbol, util::consts};
+use crate::{
+    hook::detour::install_detour_from_symbol,
+    util::consts::{self, OXIDE_LOGO},
+};
 
 pub mod hooks;
 pub mod menu;
@@ -34,7 +37,7 @@ pub struct Overlay {
 const IMGUI_CONFIG_FLAGS: imgui::ConfigFlags = imgui::ConfigFlags::DOCKING_ENABLE;
 
 impl Overlay {
-    pub fn initialize(window: *mut SDL_Window) -> Self {
+    pub fn new(window: *mut SDL_Window) -> OxidusResult<Self> {
         unsafe {
             let mut context = imgui::Context::create();
 
@@ -59,12 +62,25 @@ impl Overlay {
                     " - {} v{} by {}",
                     consts::NAME,
                     consts::VERSION,
-                    consts::AUTHOR
+                    consts::AUTHORS
                 )
                 .as_str(),
             );
             let c_title = CString::new(title).unwrap();
             SDL_SetWindowTitle(window, c_title.as_ptr());
+
+            let rw =
+                sdl2_sys::SDL_RWFromConstMem(OXIDE_LOGO.as_ptr().cast(), OXIDE_LOGO.len() as i32);
+
+            // Load surface from memory
+            let icon_surface = sdl2_sys::SDL_LoadBMP_RW(rw, 1); // The '1' auto-frees the RWops
+
+            if icon_surface.is_null() {
+                return OxidusErrorType::Overlay("Failed to load embedded window icon".to_string())
+                    .into();
+            }
+            SDL_SetWindowIcon(window, icon_surface);
+            sdl2_sys::SDL_FreeSurface(icon_surface);
 
             // Create SDL renderer
             let sdl_renderer = sdl2_sys::SDL_CreateRenderer(
@@ -76,13 +92,13 @@ impl Overlay {
             let renderer = Renderer::new(sdl_renderer, &mut context);
             sdl2_sys::SDL_GL_MakeCurrent(window, tf2_gl_ctx);
 
-            Self {
+            Ok(Self {
                 context,
                 renderer,
                 last_frame: Instant::now(),
                 tf2_gl_ctx,
                 oxidus_gl_ctx,
-            }
+            })
         }
     }
     pub fn run(&mut self, window: *mut SDL_Window) {
@@ -154,6 +170,15 @@ impl Overlay {
 unsafe impl Send for Overlay {}
 unsafe impl Sync for Overlay {}
 
+impl Drop for Overlay {
+    fn drop(&mut self) {
+        unsafe {
+            sdl2_sys::SDL_DestroyRenderer(self.renderer.sdl_renderer);
+            sdl2_sys::SDL_GL_DeleteContext(self.oxidus_gl_ctx);
+        }
+    }
+}
+
 #[allow(clippy::type_complexity)]
 pub static OVERLAY_STATE: RwLock<Option<Overlay>> = const { RwLock::new(None) };
 
@@ -170,16 +195,5 @@ pub fn init() -> OxidusResult {
 pub fn unload() {
     let mut state = OVERLAY_STATE.write().unwrap();
 
-    if let Some(Overlay {
-        renderer,
-        oxidus_gl_ctx: overlay_gl_ctx,
-        ..
-    }) = state.as_mut()
-    {
-        unsafe {
-            sdl2_sys::SDL_DestroyRenderer(renderer.sdl_renderer);
-            sdl2_sys::SDL_GL_DeleteContext(*overlay_gl_ctx);
-        }
-    }
     *state = None;
 }

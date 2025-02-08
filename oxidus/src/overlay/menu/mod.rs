@@ -29,14 +29,10 @@ pub fn show_oxidus_overlay(ui: &mut imgui::Ui) {
         .no_decoration()
         .no_nav()
         .build(|| {
-            if let Some(_token) = ui.begin_popup_context_window() {
-                ui.text("test");
-                ui.menu_item(format!(
-                    "Oxidus {} by {}",
-                    env!("CARGO_PKG_VERSION"),
-                    env!("CARGO_PKG_AUTHORS")
-                ));
-                ui.text("a test");
-            };
+            ui.menu_item(format!(
+                "Oxidus {} by {}",
+                env!("CARGO_PKG_VERSION"),
+                env!("CARGO_PKG_AUTHORS")
+            ));
         });
 }

@@ -48,6 +48,8 @@ impl Display for ContextFrame {
 pub enum OxidusErrorType {
     #[error("Hooking {}", .0)]
     Hooking(String),
+    #[error("Overlay {}", .0)]
+    Overlay(String),
     #[error("Generic {}", .0)]
     Generic(String),
 }

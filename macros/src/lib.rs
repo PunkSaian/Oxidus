@@ -1,3 +1,4 @@
+#![allow(clippy::cargo_common_metadata)]
 extern crate proc_macro;
 
 use proc_macro::TokenStream;

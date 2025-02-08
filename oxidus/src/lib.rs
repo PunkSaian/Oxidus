@@ -3,7 +3,9 @@
     clippy::cast_possible_truncation,
     clippy::multiple_crate_versions,
     clippy::cast_precision_loss,
-    clippy::module_name_repetitions
+    clippy::module_name_repetitions,
+    clippy::cast_possible_wrap,
+    clippy::cargo_common_metadata
 )]
 
 extern crate thiserror;
