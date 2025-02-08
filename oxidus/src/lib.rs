@@ -12,8 +12,8 @@ use std::{sync::Mutex, thread};
 use hook::detour::WrappedDetourHook;
 use log::{error, info};
 use once_cell::sync::Lazy;
+use overlay::init as init_overlay;
 use overlay::unload as unload_overlay;
-use overlay::{init as init_overlay, OVERLAY_STATE};
 use prelude::*;
 
 #[macro_use]
@@ -33,6 +33,7 @@ pub fn main() -> OxidusResult {
     Ok(())
 }
 
+#[allow(clippy::missing_panics_doc)]
 pub fn cleanup() -> OxidusResult {
     let mut hooks = HOOKS.lock().unwrap();
     for hook in hooks.iter() {
@@ -61,7 +62,6 @@ unsafe extern "C" fn load() {
     });
 }
 
-/// cleanup function to remove all thread_local storage instances and restore all hooks
 #[allow(unused)]
 #[no_mangle]
 extern "C" fn oxidus_cleanup() {

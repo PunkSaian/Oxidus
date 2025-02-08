@@ -1,8 +1,7 @@
 extern crate imgui;
 extern crate sdl2_sys;
 
-use imgui::{Context, DrawCmd, DrawIdx};
-use std::mem;
+use imgui::{Context, DrawCmd};
 
 #[derive(Debug)]
 pub struct Renderer {

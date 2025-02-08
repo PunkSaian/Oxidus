@@ -1,10 +1,4 @@
-use std::{
-    cell::RefCell,
-    ffi::c_void,
-    marker::PhantomData,
-    sync::{Mutex, RwLock},
-    time::Instant,
-};
+use std::{ffi::c_void, sync::RwLock, time::Instant};
 
 use hooks::{poll_event, swap_window};
 use sdl_renderer::Renderer;
@@ -17,8 +11,7 @@ pub mod sdl_renderer;
 
 pub use crate::prelude::*;
 
-struct SyncWrapper<T>(T);
-
+#[allow(clippy::module_name_repetitions)]
 pub struct OverlayState {
     context: imgui::Context,
     renderer: Renderer,
