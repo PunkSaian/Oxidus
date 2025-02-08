@@ -157,3 +157,20 @@ impl Drop for DetourHook {
         }
     }
 }
+
+#[macro_export]
+macro_rules! detour {
+    ($module:expr, $symbol:expr, $hook_fn:expr) => {
+        unsafe {
+            let target_fn = resolve_fn($module, $symbol).unwrap();
+            let hook = DetourHook::new_and_install(target_fn as _, $hook_fn as _).unwrap();
+            HOOKS.lock().unwrap().push(hook);
+        }
+    };
+    ($target_fn:expr, $hook_fn:expr) => {
+        unsafe {
+            let hook = DetourHook::new_and_install($target_fn as _, $hook_fn as _).unwrap();
+            HOOKS.lock().unwrap().push(hook);
+        }
+    };
+}

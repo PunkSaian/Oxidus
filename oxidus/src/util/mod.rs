@@ -10,6 +10,8 @@ use std::{
 use goblin::elf::Elf;
 use libc::{dl_iterate_phdr, dl_phdr_info, dlclose, dlopen, dlsym, RTLD_NOLOAD, RTLD_NOW};
 
+pub mod error;
+
 #[allow(unused)]
 pub unsafe fn resolve_fn(module: &str, name: &str) -> Option<*mut ()> {
     let module = CString::new(module).unwrap();

@@ -2,7 +2,7 @@ extern crate imgui;
 extern crate sdl2_sys;
 
 use imgui::{Context, DrawCmd, DrawIdx};
-use std::{mem, ptr::null_mut};
+use std::mem;
 
 pub struct Renderer {
     pub sdl_renderer: *mut sdl2_sys::SDL_Renderer,
@@ -42,32 +42,37 @@ impl Renderer {
             );
 
             // Store texture reference in imgui
-            dbg!(&font_texture);
             atlas.tex_id = (font_texture as usize).into();
-
+            sdl2_sys::SDL_SetTextureScaleMode(
+                font_texture,
+                sdl2_sys::SDL_ScaleMode::SDL_ScaleModeLinear,
+            );
             Self {
                 sdl_renderer,
-                font_texture: null_mut(),
+                font_texture,
             }
         }
     }
 
     pub fn render(&self, ctx: &mut Context) {
-        let scale = ctx.io().display_framebuffer_scale;
         let draw_data = ctx.render();
 
         unsafe {
+            sdl2_sys::SDL_SetRenderDrawBlendMode(
+                self.sdl_renderer,
+                sdl2_sys::SDL_BlendMode::SDL_BLENDMODE_BLEND,
+            );
             for draw_list in draw_data.draw_lists() {
                 let vtx_buffer = draw_list.vtx_buffer();
                 let idx_buffer = draw_list.idx_buffer();
 
-                // Convert vertices to SDL format
+                // Convert vertices to SDL format (REMOVED SCALING)
                 let vertices: Vec<sdl2_sys::SDL_Vertex> = vtx_buffer
                     .iter()
                     .map(|v| sdl2_sys::SDL_Vertex {
                         position: sdl2_sys::SDL_FPoint {
-                            x: v.pos[0] * scale[0],
-                            y: v.pos[1] * scale[1],
+                            x: v.pos[0], // Removed scaling
+                            y: v.pos[1], // Removed scaling
                         },
                         color: sdl2_sys::SDL_Color {
                             r: v.col[0],
@@ -82,29 +87,32 @@ impl Renderer {
                     })
                     .collect();
 
-                // Convert indices to u32
+                // Convert indices to u32 (unchanged)
                 let indices: Vec<u32> = idx_buffer.iter().map(|&i| u32::from(i)).collect();
 
                 for cmd in draw_list.commands() {
                     if let DrawCmd::Elements { count, cmd_params } = cmd {
                         let texture = cmd_params.texture_id.id() as *mut sdl2_sys::SDL_Texture;
 
-                        // Set clip rect
+                        sdl2_sys::SDL_SetTextureBlendMode(
+                            texture,
+                            sdl2_sys::SDL_BlendMode::SDL_BLENDMODE_BLEND,
+                        );
+
+                        // Set clip rect (REMOVED SCALING)
                         let clip_rect = sdl2_sys::SDL_Rect {
-                            x: (cmd_params.clip_rect[0] * scale[0]) as i32,
-                            y: (cmd_params.clip_rect[1] * scale[1]) as i32,
-                            w: ((cmd_params.clip_rect[2] - cmd_params.clip_rect[0]) * scale[0])
-                                as i32,
-                            h: ((cmd_params.clip_rect[3] - cmd_params.clip_rect[1]) * scale[1])
-                                as i32,
+                            x: cmd_params.clip_rect[0].round() as i32,
+                            y: cmd_params.clip_rect[1].round() as i32,
+                            w: (cmd_params.clip_rect[2] - cmd_params.clip_rect[0]).round() as i32,
+                            h: (cmd_params.clip_rect[3] - cmd_params.clip_rect[1]).round() as i32,
                         };
                         sdl2_sys::SDL_RenderSetClipRect(self.sdl_renderer, &clip_rect);
 
-                        // Calculate element offset
+                        // Calculate element offset (unchanged)
                         let element_offset = cmd_params.idx_offset / mem::size_of::<DrawIdx>();
                         let cmd_indices = &indices[element_offset..element_offset + count];
 
-                        // Draw command
+                        // Draw command (unchanged)
                         #[allow(clippy::cast_possible_wrap)]
                         sdl2_sys::SDL_RenderGeometry(
                             self.sdl_renderer,
@@ -119,17 +127,6 @@ impl Renderer {
             }
             sdl2_sys::SDL_RenderPresent(self.sdl_renderer);
         }
-    }
-
-    unsafe fn get_clip_rect(&self) -> sdl2_sys::SDL_Rect {
-        let mut rect = sdl2_sys::SDL_Rect {
-            x: 0,
-            y: 0,
-            w: 0,
-            h: 0,
-        };
-        sdl2_sys::SDL_RenderGetClipRect(self.sdl_renderer, &mut rect);
-        rect
     }
 }
 

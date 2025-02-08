@@ -16,7 +16,7 @@ args = ["fmt"]
 
 [tasks.lint]
 command = "cargo"
-args = ["clippy", "--fix"]
+args = ["clippy", "--fix", "--allow-dirty", "--allow-staged"]
 
 [tasks.build]
 command = "cargo"

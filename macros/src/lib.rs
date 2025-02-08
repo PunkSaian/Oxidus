@@ -29,8 +29,8 @@ pub fn detour_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
     };
 
     let before = quote! {
-        let mut hook: Box<DetourHook> = {
-            let res: *mut DetourHook;
+        let mut hook: Box<crate::hook::detour::DetourHook> = {
+            let res: *mut crate::hook::detour::DetourHook;
             unsafe {
                 ::std::arch::asm!("mov {}, r10", out(reg) res);
             }
