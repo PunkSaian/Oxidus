@@ -45,9 +45,7 @@ pub fn detour_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
             }
             std::mem::ManuallyDrop::new(std::mem::transmute::<_,std::pin::Pin<Box<std::sync::RwLock<crate::hook::detour::DetourHook>>>>(res))
         };
-        //dbg!("locking");
         let mut hook = hook_lock.write().unwrap();
-        //dbg!("locked");
 
         let original_function  = std::mem::transmute::<_,#gateway_type>(hook.target_fn);
 
@@ -56,13 +54,9 @@ pub fn detour_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
             error!("Failed to restore hook: {:?}", e);
             return original_function(#(#param_vals),*);
         }
-        //drop(hook);
     };
 
     let after = quote! {
-        //dbg!("locking");
-        //let mut hook = hook_lock.write().unwrap();
-        //dbg!("locked");
         (*hook).install().unwrap();
     };
 

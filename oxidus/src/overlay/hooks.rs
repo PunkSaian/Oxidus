@@ -14,9 +14,7 @@ use super::{scan_code_map::sdl_scancode_to_imgui_key, IMGUI_STATE};
 #[detour_hook]
 pub unsafe extern "C" fn swap_window(window: *mut SDL_Window) {
     IMGUI_STATE.with(|state_cell| {
-        //dbg!("locking imgui");
         let mut state = state_cell.write().unwrap();
-        //dbg!("locked imgui");
 
         if state.is_none() {
             // Initialize ImGui context
@@ -91,9 +89,7 @@ pub unsafe extern "C" fn poll_event(event: *mut c_void) -> i32 {
 
     if result != 0 {
         IMGUI_STATE.with(|state_cell| {
-            //dbg!("locking imgui");
             let mut state = state_cell.write().unwrap();
-            //dbg!("locked imgui");
 
             if let Some((ref mut context, ..)) = state.as_mut() {
                 let event_ptr = event as *const SDL_Event;

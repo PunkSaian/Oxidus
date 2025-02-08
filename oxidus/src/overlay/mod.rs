@@ -11,10 +11,10 @@ pub mod sdl_renderer;
 
 pub use crate::prelude::*;
 
-//thread_local! {
-//    #[allow(clippy::type_complexity)]
-//    pub static IMGUI_STATE: RwLock<Option<(imgui::Context, Renderer, Instant, *mut c_void, *mut c_void)>> = const { RwLock::new(None) };
-//}
+thread_local! {
+    #[allow(clippy::type_complexity)]
+    pub static IMGUI_STATE: RwLock<Option<(imgui::Context, Renderer, Instant, *mut c_void, *mut c_void)>> = const { RwLock::new(None) };
+}
 
 pub fn init() -> OxidusResult {
     unsafe {
@@ -33,10 +33,8 @@ pub fn init() -> OxidusResult {
 
 pub fn unload() {
     IMGUI_STATE.with(|state| {
-        dbg!("locking imgui");
         let mut state = state.write().unwrap();
 
-        dbg!("locked imgui");
         if let Some((_, renderer, _, _, overlay_gl_ctx)) = state.as_mut() {
             unsafe {
                 sdl2_sys::SDL_DestroyRenderer(renderer.sdl_renderer);

@@ -13,11 +13,9 @@ pub struct Renderer {
 impl Renderer {
     pub fn new(sdl_renderer: *mut sdl2_sys::SDL_Renderer, imgui: &mut Context) -> Self {
         unsafe {
-            //Create font texture
             let atlas = imgui.fonts();
             let texture = atlas.build_rgba32_texture();
 
-            // Create SDL texture
             #[allow(clippy::cast_possible_wrap)]
             let font_texture = sdl2_sys::SDL_CreateTexture(
                 sdl_renderer,
@@ -27,7 +25,6 @@ impl Renderer {
                 texture.height as i32,
             );
 
-            //Upload texture data
             #[allow(clippy::cast_possible_wrap)]
             sdl2_sys::SDL_UpdateTexture(
                 font_texture,
@@ -36,13 +33,11 @@ impl Renderer {
                 (texture.width * 4) as i32,
             );
 
-            // Set texture parameters
             sdl2_sys::SDL_SetTextureBlendMode(
                 font_texture,
                 sdl2_sys::SDL_BlendMode::SDL_BLENDMODE_BLEND,
             );
 
-            // Store texture reference in imgui
             atlas.tex_id = (font_texture as usize).into();
             sdl2_sys::SDL_SetTextureScaleMode(
                 font_texture,
@@ -67,13 +62,12 @@ impl Renderer {
                 let vtx_buffer = draw_list.vtx_buffer();
                 let idx_buffer = draw_list.idx_buffer();
 
-                // Convert vertices to SDL format (REMOVED SCALING)
                 let vertices: Vec<sdl2_sys::SDL_Vertex> = vtx_buffer
                     .iter()
                     .map(|v| sdl2_sys::SDL_Vertex {
                         position: sdl2_sys::SDL_FPoint {
-                            x: v.pos[0], // Removed scaling
-                            y: v.pos[1], // Removed scaling
+                            x: v.pos[0],
+                            y: v.pos[1],
                         },
                         color: sdl2_sys::SDL_Color {
                             r: v.col[0],
@@ -88,7 +82,6 @@ impl Renderer {
                     })
                     .collect();
 
-                // Convert indices to u32 (unchanged)
                 let indices: Vec<u32> = idx_buffer.iter().map(|&i| u32::from(i)).collect();
 
                 for cmd in draw_list.commands() {
@@ -100,20 +93,17 @@ impl Renderer {
                             sdl2_sys::SDL_BlendMode::SDL_BLENDMODE_BLEND,
                         );
 
-                        // Set clip rect (REMOVED SCALING)
                         let clip_rect = sdl2_sys::SDL_Rect {
-                            x: cmd_params.clip_rect[0].round() as i32,
+                            x: cmd_params.clip_rect[0] as i32,
                             y: cmd_params.clip_rect[1].round() as i32,
                             w: (cmd_params.clip_rect[2] - cmd_params.clip_rect[0]).round() as i32,
                             h: (cmd_params.clip_rect[3] - cmd_params.clip_rect[1]).round() as i32,
                         };
                         sdl2_sys::SDL_RenderSetClipRect(self.sdl_renderer, &clip_rect);
 
-                        // Calculate element offset (unchanged)
-                        let element_offset = cmd_params.idx_offset / mem::size_of::<DrawIdx>();
+                        let element_offset = cmd_params.idx_offset;
                         let cmd_indices = &indices[element_offset..element_offset + count];
 
-                        // Draw command (unchanged)
                         #[allow(clippy::cast_possible_wrap)]
                         sdl2_sys::SDL_RenderGeometry(
                             self.sdl_renderer,
@@ -134,7 +124,6 @@ impl Renderer {
 impl Drop for Renderer {
     fn drop(&mut self) {
         unsafe {
-            dbg!("dropping renderer");
             sdl2_sys::SDL_DestroyTexture(self.font_texture);
         }
     }
