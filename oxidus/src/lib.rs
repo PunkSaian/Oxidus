@@ -2,7 +2,8 @@
     clippy::missing_errors_doc,
     clippy::cast_possible_truncation,
     clippy::multiple_crate_versions,
-    clippy::cast_precision_loss
+    clippy::cast_precision_loss,
+    clippy::module_name_repetitions
 )]
 
 extern crate thiserror;
@@ -11,7 +12,6 @@ use std::{sync::Mutex, thread};
 
 use hook::detour::WrappedDetourHook;
 use log::{error, info};
-use once_cell::sync::Lazy;
 use overlay::init as init_overlay;
 use overlay::unload as unload_overlay;
 use prelude::*;
@@ -26,7 +26,7 @@ mod sdk;
 mod util;
 
 #[allow(clippy::type_complexity)]
-static HOOKS: Lazy<Mutex<Vec<WrappedDetourHook>>> = Lazy::new(|| Mutex::new(Vec::new()));
+static HOOKS: Mutex<Vec<WrappedDetourHook>> = const { Mutex::new(Vec::new()) };
 
 pub fn main() -> OxidusResult {
     init_overlay()?;
@@ -36,11 +36,6 @@ pub fn main() -> OxidusResult {
 #[allow(clippy::missing_panics_doc)]
 pub fn cleanup() -> OxidusResult {
     let mut hooks = HOOKS.lock().unwrap();
-    for hook in hooks.iter() {
-        if let Err(e) = hook.write().unwrap().restore() {
-            warn!("Hook already resotred when dropping: {e}");
-        };
-    }
     hooks.clear();
     unload_overlay();
     Ok(())
@@ -65,22 +60,24 @@ unsafe extern "C" fn load() {
 #[allow(unused)]
 #[no_mangle]
 extern "C" fn oxidus_cleanup() {
-    info!("Unloading");
-    if let Err(e) = cleanup() {
-        error!("Failed to unload\n{e}");
-    } else {
-        info!("Unloaded");
-    }
+    thread::spawn(|| {
+        info!("Unloading");
+        if let Err(e) = cleanup() {
+            error!("Failed to unload\n{e}");
+        } else {
+            info!("Unloaded");
+        }
+    });
 }
 
 #[link_section = ".init_array"]
 #[allow(unused)]
 static LOAD: unsafe extern "C" fn() = { load };
 
-extern "C" fn fini() {
+extern "C" fn unload() {
     info!("fini");
 }
 
 #[link_section = ".fini_array"]
 #[allow(unused)]
-static UNLOAD: unsafe extern "C" fn() = { fini };
+static UNLOAD: unsafe extern "C" fn() = { unload };

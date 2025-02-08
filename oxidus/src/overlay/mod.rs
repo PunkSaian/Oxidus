@@ -3,7 +3,7 @@ use std::{ffi::c_void, sync::RwLock, time::Instant};
 use hooks::{poll_event, swap_window};
 use sdl_renderer::Renderer;
 
-use crate::{hook::detour::DetourHook, util::resolve_fn, HOOKS};
+use crate::hook::detour::install_detour_from_symbol;
 
 pub mod hooks;
 pub mod scan_code_map;
@@ -11,7 +11,6 @@ pub mod sdl_renderer;
 
 pub use crate::prelude::*;
 
-#[allow(clippy::module_name_repetitions)]
 pub struct OverlayState {
     context: imgui::Context,
     renderer: Renderer,
@@ -26,17 +25,12 @@ unsafe impl Sync for OverlayState {}
 pub static OVERLAY_STATE: RwLock<Option<OverlayState>> = const { RwLock::new(None) };
 
 pub fn init() -> OxidusResult {
-    unsafe {
-        let swap_fn = resolve_fn("libSDL2-2.0.so.0", "SDL_GL_SwapWindow").unwrap();
-        let swap_hook = DetourHook::new_and_install(swap_fn, swap_window as _)?;
-
-        let poll_fn = resolve_fn("libSDL2-2.0.so.0", "SDL_PollEvent").unwrap();
-        let poll_hook = DetourHook::new_and_install(poll_fn, poll_event as _)?;
-
-        let mut hooks = HOOKS.lock().unwrap();
-        hooks.push(swap_hook);
-        hooks.push(poll_hook);
-    }
+    //install_detour_from_symbol("libSDL2-2.0.so.0", "SDL_PollEvent", poll_event as *mut ())?;
+    //install_detour_from_symbol(
+    //    "libSDL2-2.0.so.0",
+    //    "SDL_GL_SwapWindow",
+    //    swap_window as *mut (),
+    //)?;
     Ok(())
 }
 

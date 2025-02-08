@@ -13,19 +13,21 @@ use libc::{dl_iterate_phdr, dl_phdr_info, dlclose, dlopen, dlsym, RTLD_NOLOAD, R
 pub mod error;
 
 #[allow(unused)]
-pub unsafe fn resolve_fn(module: &str, name: &str) -> Option<*mut ()> {
-    let module = CString::new(module).unwrap();
-    let handle = dlopen(module.as_ptr(), RTLD_NOLOAD | RTLD_NOW);
-    if handle.is_null() {
-        return None;
+pub fn resolve_fn(module: &str, name: &str) -> Option<*mut ()> {
+    unsafe {
+        let module = CString::new(module).unwrap();
+        let handle = dlopen(module.as_ptr(), RTLD_NOLOAD | RTLD_NOW);
+        if handle.is_null() {
+            return None;
+        }
+        let name = CString::new(name).unwrap();
+        let res = dlsym(handle, name.as_ptr()).cast::<()>();
+        dlclose(handle);
+        if res.is_null() {
+            return None;
+        }
+        Some(res)
     }
-    let name = CString::new(name).unwrap();
-    let res = dlsym(handle, name.as_ptr()).cast::<()>();
-    dlclose(handle);
-    if res.is_null() {
-        return None;
-    }
-    Some(res)
 }
 
 #[allow(unused)]

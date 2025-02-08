@@ -2,7 +2,6 @@ use std::fmt::Display;
 
 use thiserror::Error;
 
-#[allow(clippy::module_name_repetitions)]
 #[derive(Error, Debug)]
 pub struct OxidusError {
     #[source]
