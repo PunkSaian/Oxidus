@@ -13,7 +13,7 @@ use hook::detour::WrappedDetourHook;
 use log::{error, info};
 use once_cell::sync::Lazy;
 use overlay::unload as unload_overlay;
-use overlay::{init as init_overlay, IMGUI_STATE};
+use overlay::{init as init_overlay, OVERLAY_STATE};
 use prelude::*;
 
 #[macro_use]
@@ -41,9 +41,6 @@ pub fn cleanup() -> OxidusResult {
         };
     }
     hooks.clear();
-    IMGUI_STATE.with(|state| {
-        let state = state.read().unwrap();
-    });
     unload_overlay();
     Ok(())
 }

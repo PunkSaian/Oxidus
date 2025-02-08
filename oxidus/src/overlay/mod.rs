@@ -1,4 +1,10 @@
-use std::{cell::RefCell, ffi::c_void, sync::RwLock, time::Instant};
+use std::{
+    cell::RefCell,
+    ffi::c_void,
+    marker::PhantomData,
+    sync::{Mutex, RwLock},
+    time::Instant,
+};
 
 use hooks::{poll_event, swap_window};
 use sdl_renderer::Renderer;
@@ -11,10 +17,20 @@ pub mod sdl_renderer;
 
 pub use crate::prelude::*;
 
-thread_local! {
-    #[allow(clippy::type_complexity)]
-    pub static IMGUI_STATE: RwLock<Option<(imgui::Context, Renderer, Instant, *mut c_void, *mut c_void)>> = const { RwLock::new(None) };
+struct SyncWrapper<T>(T);
+
+pub struct OverlayState {
+    context: imgui::Context,
+    renderer: Renderer,
+    last_frame: Instant,
+    tf2_gl_ctx: *mut c_void,
+    overlay_gl_ctx: *mut c_void,
 }
+unsafe impl Send for OverlayState {}
+unsafe impl Sync for OverlayState {}
+
+#[allow(clippy::type_complexity)]
+pub static OVERLAY_STATE: RwLock<Option<OverlayState>> = const { RwLock::new(None) };
 
 pub fn init() -> OxidusResult {
     unsafe {
@@ -32,15 +48,18 @@ pub fn init() -> OxidusResult {
 }
 
 pub fn unload() {
-    IMGUI_STATE.with(|state| {
-        let mut state = state.write().unwrap();
+    let mut state = OVERLAY_STATE.write().unwrap();
 
-        if let Some((_, renderer, _, _, overlay_gl_ctx)) = state.as_mut() {
-            unsafe {
-                sdl2_sys::SDL_DestroyRenderer(renderer.sdl_renderer);
-                sdl2_sys::SDL_GL_DeleteContext(*overlay_gl_ctx);
-            }
+    if let Some(OverlayState {
+        renderer,
+        overlay_gl_ctx,
+        ..
+    }) = state.as_mut()
+    {
+        unsafe {
+            sdl2_sys::SDL_DestroyRenderer(renderer.sdl_renderer);
+            sdl2_sys::SDL_GL_DeleteContext(*overlay_gl_ctx);
         }
-        *state = None;
-    });
+    }
+    *state = None;
 }
