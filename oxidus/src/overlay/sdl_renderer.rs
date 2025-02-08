@@ -51,6 +51,9 @@ impl Renderer {
 
     pub fn render(&self, ctx: &mut Context) {
         let draw_data = ctx.render();
+        if draw_data.draw_lists_count() == 0 {
+            return;
+        }
 
         unsafe {
             sdl2_sys::SDL_SetRenderDrawBlendMode(

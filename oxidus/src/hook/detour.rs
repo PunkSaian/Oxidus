@@ -14,6 +14,7 @@ const PATCH_SIZE: usize = JMP_SIZE;
 
 use crate::{prelude::*, util::resolve_fn, HOOKS};
 
+#[allow(clippy::module_name_repetitions)]
 pub struct DetourHook {
     pub target_fn: *mut (),
     pub proxy: Option<*mut ()>,
@@ -80,9 +81,11 @@ impl DetourHook {
             let mut mov_instr = [NOP; MOVABS_R10_SIZE];
             mov_instr[..2].copy_from_slice(&MOVABS_R10);
 
-            mov_instr[2..].copy_from_slice(
-                &(std::mem::transmute::<WrappedDetourHook, usize>(hook.read())).to_ne_bytes(),
-            );
+            let hook_lock = &*hook; // Dereference the raw pointer to access the Pin<Box<RwLock<...>>>
+            let rwlock_ptr = &**hook_lock as *const RwLock<DetourHook>;
+            let hook_lock_ptr = rwlock_ptr as usize;
+
+            mov_instr[2..].copy_from_slice(&hook_lock_ptr.to_ne_bytes());
 
             ptr::copy_nonoverlapping(mov_instr.as_ptr(), proxy, mov_instr.len());
 
@@ -177,10 +180,12 @@ impl Drop for DetourHook {
             warn!("Hook already restored when dropping: {e}");
         };
 
-        if let Some(proxy) = self.proxy {
-            let size = MOVABS_R10_SIZE + JMP_SIZE;
-            if unsafe { libc::munmap(proxy.cast(), size) } != 0 {
-                warn!("Failed to unmap proxy memory");
+        if let Some(proxy_ptr) = self.proxy {
+            let proxy_size = MOVABS_R10_SIZE + JMP_SIZE;
+            let result = unsafe { libc::munmap(proxy_ptr.cast(), proxy_size) };
+            if result != 0 {
+                let errno = std::io::Error::last_os_error();
+                warn!("Failed to unmap proxy memory: {}", errno);
             }
         }
     }

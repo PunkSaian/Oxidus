@@ -10,6 +10,7 @@ use std::{
 use goblin::elf::Elf;
 use libc::{dl_iterate_phdr, dl_phdr_info, dlclose, dlopen, dlsym, RTLD_NOLOAD, RTLD_NOW};
 
+pub mod consts;
 pub mod error;
 
 #[allow(unused)]

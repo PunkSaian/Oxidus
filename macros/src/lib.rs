@@ -38,19 +38,19 @@ pub fn detour_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
     };
 
     let before = quote! {
-        let hook_lock = {
+        let hook_ptr = {
             let res: usize;
             unsafe {
                 ::std::arch::asm!("mov {}, r10", out(reg) res);
             }
-            std::mem::ManuallyDrop::new(std::mem::transmute::<_,std::pin::Pin<Box<std::sync::RwLock<crate::hook::detour::DetourHook>>>>(res))
+            res as *const std::sync::RwLock<crate::hook::detour::DetourHook>
         };
+        let hook_lock = unsafe { &*hook_ptr };
         let mut hook = hook_lock.write().unwrap();
 
-        let original_function  = std::mem::transmute::<_,#gateway_type>(hook.target_fn);
+        let original_function = std::mem::transmute::<_, #gateway_type>(hook.target_fn);
 
-
-        if let Err(e) = hook.restore(){
+        if let Err(e) = hook.restore() {
             error!("Failed to restore hook: {:?}", e);
             return original_function(#(#param_vals),*);
         }
