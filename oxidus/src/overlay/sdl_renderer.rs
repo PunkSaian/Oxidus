@@ -3,10 +3,13 @@ extern crate sdl2_sys;
 
 use imgui::{Context, DrawCmd};
 
+use std::io::Cursor;
+
 #[derive(Debug)]
+#[allow(clippy::struct_field_names)]
 pub struct Renderer {
     pub sdl_renderer: *mut sdl2_sys::SDL_Renderer,
-    font_texture: *mut sdl2_sys::SDL_Texture,
+    managed_textures: Vec<*mut sdl2_sys::SDL_Texture>,
 }
 
 impl Renderer {
@@ -44,7 +47,7 @@ impl Renderer {
             );
             Self {
                 sdl_renderer,
-                font_texture,
+                managed_textures: vec![font_texture],
             }
         }
     }
@@ -121,12 +124,55 @@ impl Renderer {
             sdl2_sys::SDL_RenderPresent(self.sdl_renderer);
         }
     }
+
+    pub fn create_texture_from_bytes(
+        &mut self,
+        bytes: &[u8],
+    ) -> Result<(imgui::TextureId, (u32, u32)), String> {
+        unsafe {
+            use image::io::Reader as ImageReader;
+            let img = ImageReader::new(Cursor::new(bytes))
+                .with_guessed_format()
+                .map_err(|e| e.to_string())?
+                .decode()
+                .map_err(|e| e.to_string())?
+                .to_rgba8();
+
+            let (width, height) = img.dimensions();
+            let pixels = img.into_raw();
+
+            let texture = sdl2_sys::SDL_CreateTexture(
+                self.sdl_renderer,
+                sdl2_sys::SDL_PixelFormatEnum::SDL_PIXELFORMAT_RGBA32 as u32,
+                sdl2_sys::SDL_TextureAccess::SDL_TEXTUREACCESS_STATIC as i32,
+                width as i32,
+                height as i32,
+            );
+
+            sdl2_sys::SDL_UpdateTexture(
+                texture,
+                std::ptr::null(),
+                pixels.as_ptr().cast(),
+                (width * 4) as i32,
+            );
+
+            sdl2_sys::SDL_SetTextureBlendMode(
+                texture,
+                sdl2_sys::SDL_BlendMode::SDL_BLENDMODE_BLEND,
+            );
+            self.managed_textures.push(texture);
+
+            Ok((imgui::TextureId::from(texture as usize), (width, height)))
+        }
+    }
 }
 
 impl Drop for Renderer {
     fn drop(&mut self) {
-        unsafe {
-            sdl2_sys::SDL_DestroyTexture(self.font_texture);
+        for texture in &self.managed_textures {
+            unsafe {
+                sdl2_sys::SDL_DestroyTexture(*texture);
+            }
         }
     }
 }

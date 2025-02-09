@@ -16,7 +16,7 @@ use sdl_renderer::Renderer;
 
 use crate::{
     hook::detour::install_detour_from_symbol,
-    util::consts::{self},
+    util::consts::{self, OXIDE_LOGO_BMP_48},
 };
 
 pub mod hooks;
@@ -54,27 +54,8 @@ impl Overlay {
             context.io_mut().display_framebuffer_scale = [1.0, 1.0];
             context.io_mut().config_flags |= IMGUI_CONFIG_FLAGS;
 
-            let mut title = CStr::from_ptr(SDL_GetWindowTitle(window))
-                .to_str()
-                .unwrap()
-                .to_string();
-            title.push_str(&consts::info_string());
-            let c_title = CString::new(title).unwrap();
-            SDL_SetWindowTitle(window, c_title.as_ptr());
-
-            //TODO: fix the icon
-            //let rw =
-            //    sdl2_sys::SDL_RWFromConstMem(OXIDE_LOGO48.as_ptr().cast(), OXIDE_LOGO.len() as i32);
-
-            //// Load surface from memory
-            //let icon_surface = sdl2_sys::SDL_LoadBMP_RW(rw, 1); // The '1' auto-frees the RWops
-
-            //if icon_surface.is_null() {
-            //    return OxidusErrorType::Overlay("Failed to load embedded window icon".to_string())
-            //        .into();
-            //}
-            //SDL_SetWindowIcon(window, icon_surface);
-            //sdl2_sys::SDL_FreeSurface(icon_surface);
+            Self::set_title(window);
+            Self::set_icon(window);
 
             // Create SDL renderer
             let sdl_renderer = sdl2_sys::SDL_CreateRenderer(
@@ -93,6 +74,40 @@ impl Overlay {
                 tf2_gl_ctx,
                 oxidus_gl_ctx,
             })
+        }
+    }
+
+    pub fn set_icon(window: *mut SDL_Window) {
+        let rw = unsafe {
+            sdl2_sys::SDL_RWFromConstMem(
+                OXIDE_LOGO_BMP_48.as_ptr().cast(),
+                OXIDE_LOGO_BMP_48.len() as i32,
+            )
+        };
+
+        // Load surface from memory
+        let icon_surface = unsafe { sdl2_sys::SDL_LoadBMP_RW(rw, 1) }; // The '1' auto-frees the RWops
+
+        if icon_surface.is_null() {
+            return;
+        }
+        unsafe {
+            sdl2_sys::SDL_SetWindowIcon(window, icon_surface);
+            sdl2_sys::SDL_FreeSurface(icon_surface);
+        }
+    }
+
+    pub fn set_title(window: *mut SDL_Window) {
+        let mut title = unsafe { CStr::from_ptr(SDL_GetWindowTitle(window)) }
+            .to_str()
+            .unwrap()
+            .to_string();
+        title.push_str(" - ");
+        title.push_str(&consts::info_string());
+        let c_title = CString::new(title).unwrap();
+
+        unsafe {
+            SDL_SetWindowTitle(window, c_title.as_ptr());
         }
     }
     pub fn run(&mut self, window: *mut SDL_Window) {

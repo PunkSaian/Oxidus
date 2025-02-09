@@ -3,7 +3,7 @@ use imgui::WindowFlags;
 use crate::util::consts::info_string;
 
 pub fn show(ui: &mut imgui::Ui) {
-    //ui.show_demo_window(&mut false);
+    ui.show_demo_window(&mut false);
 
     show_watermark(ui);
 }
@@ -13,6 +13,7 @@ pub fn show_watermark(ui: &mut imgui::Ui) {
     let viewport = unsafe { imgui::sys::igGetMainViewport().read() };
     let window_pos = [viewport.Pos.x, viewport.Pos.y];
     let window_size = [viewport.Size.x, viewport.Size.y];
+
     ui.window("Oxidus")
         .position(
             [
