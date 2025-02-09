@@ -12,7 +12,7 @@ use sdl2_sys::{
     SDL_GetWindowTitle, SDL_SetWindowTitle, SDL_Window, SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE,
     SDL_BUTTON_RIGHT, SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_PRESSED,
 };
-use sdl_renderer::Renderer;
+use sdl_renderer::{SdlRenderer, Textures};
 
 use crate::{
     hook::detour::install_detour_from_symbol,
@@ -28,7 +28,7 @@ pub use crate::prelude::*;
 
 pub struct Overlay {
     context: imgui::Context,
-    renderer: Renderer,
+    renderer: SdlRenderer,
     last_frame: Instant,
     tf2_gl_ctx: *mut c_void,
     oxidus_gl_ctx: *mut c_void,
@@ -64,7 +64,11 @@ impl Overlay {
                 sdl2_sys::SDL_RendererFlags::SDL_RENDERER_ACCELERATED as u32,
             );
 
-            let renderer = Renderer::new(sdl_renderer, &mut context);
+            let mut renderer = SdlRenderer::new(sdl_renderer, &mut context);
+            TEXTURES
+                .write()
+                .unwrap()
+                .replace(Textures::new(&mut renderer)?);
             sdl2_sys::SDL_GL_MakeCurrent(window, tf2_gl_ctx);
 
             Ok(Self {
@@ -203,8 +207,8 @@ impl Drop for Overlay {
     }
 }
 
-#[allow(clippy::type_complexity)]
-pub static OVERLAY_STATE: RwLock<Option<Overlay>> = const { RwLock::new(None) };
+pub static OVERLAY: RwLock<Option<Overlay>> = const { RwLock::new(None) };
+pub static TEXTURES: RwLock<Option<Textures>> = const { RwLock::new(None) };
 
 pub fn init() -> OxidusResult {
     install_detour_from_symbol("libSDL2-2.0.so.0", "SDL_PollEvent", poll_event as *mut ())?;
@@ -217,7 +221,7 @@ pub fn init() -> OxidusResult {
 }
 
 pub fn unload() {
-    let mut state = OVERLAY_STATE.write().unwrap();
+    let mut state = OVERLAY.write().unwrap();
 
     *state = None;
 }

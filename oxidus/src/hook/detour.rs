@@ -31,7 +31,7 @@ pub type WrappedDetourHook = Pin<Box<RwLock<DetourHook>>>;
 impl DetourHook {
     pub fn new(target_fn: *mut (), hook_fn: *mut ()) -> OxidusResult<WrappedDetourHook> {
         if target_fn.is_null() || hook_fn.is_null() {
-            return OxidusErrorType::Hooking("Null function pointer".to_owned()).into();
+            return Err(OxidusError::Hooking("Null function pointer".to_owned()));
         }
 
         let original_bytes = unsafe { ptr::read(target_fn as *const [u8; PATCH_SIZE]) };
@@ -76,7 +76,7 @@ impl DetourHook {
             .cast::<u8>();
 
             if proxy.is_null() {
-                return OxidusErrorType::Hooking("Proxy allocation failed".to_owned()).into();
+                return Err(OxidusError::Hooking("Proxy allocation failed".to_owned()));
             }
 
             let mut mov_instr = [NOP; MOVABS_R10_SIZE];
@@ -114,7 +114,7 @@ impl DetourHook {
                 PROT_READ | PROT_WRITE | PROT_EXEC,
             ) != 0
             {
-                return OxidusErrorType::Hooking("Memory protection failed".to_owned()).into();
+                return Err(OxidusError::Hooking("Memory protection failed".to_owned()));
             }
 
             Ok(())
@@ -124,7 +124,7 @@ impl DetourHook {
     pub fn install(&mut self) -> OxidusResult {
         unsafe {
             if self.hooked {
-                return OxidusErrorType::Hooking("Hook already installed".to_owned()).into();
+                return Err(OxidusError::Hooking("Hook already installed".to_owned()));
             }
 
             let patch = Self::create_patch(self.proxy.unwrap());
@@ -151,7 +151,7 @@ impl DetourHook {
 
     pub fn restore(&mut self) -> OxidusResult {
         if !self.hooked {
-            return OxidusErrorType::Hooking("Hook not installed".to_owned()).into();
+            return Err(OxidusError::Hooking("Hook not installed".to_owned()));
         }
         unsafe {
             ptr::copy_nonoverlapping(
@@ -190,8 +190,9 @@ pub fn install_detour(target_fn: *mut (), hook_fn: *mut ()) -> OxidusResult {
 }
 pub fn install_detour_from_symbol(module: &str, symbol: &str, hook_fn: *mut ()) -> OxidusResult {
     let Some(target_fn) = resolve_fn(module, symbol) else {
-        return OxidusErrorType::Hooking(format!("Failed to resolve symbol {symbol} in {module}"))
-            .into();
+        return Err(OxidusError::Hooking(format!(
+            "Failed to resolve symbol {symbol} in {module}"
+        )));
     };
     install_detour(target_fn, hook_fn)?;
     Ok(())

@@ -1,1 +1,1 @@
-pub use crate::util::error::{OxidusErrorType, OxidusResult};
+pub use crate::util::error::{OxidusError, OxidusResult};

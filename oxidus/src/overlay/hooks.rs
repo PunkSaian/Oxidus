@@ -4,20 +4,22 @@ use std::ffi::c_void;
 
 use crate::overlay::Overlay;
 
-use super::OVERLAY_STATE;
+use super::OVERLAY;
 
 #[detour_hook]
 pub unsafe extern "C" fn swap_window(window: *mut SDL_Window) {
-    let mut state = OVERLAY_STATE.write().unwrap();
+    let mut overlay = OVERLAY.write().unwrap();
 
-    if state.is_none() {
+    if overlay.is_none() {
         info!("Initializing overlay");
         // Initialize ImGui context
-        *state = Some(Overlay::new(window).unwrap());
+        //
+        *overlay = Some(Overlay::new(window).unwrap());
+
         info!("Overlay initialized");
     }
 
-    let state = state.as_mut().unwrap();
+    let state = overlay.as_mut().unwrap();
     state.run(window);
 
     original_function(window);
@@ -28,7 +30,7 @@ pub unsafe extern "C" fn poll_event(event: *mut c_void) -> i32 {
     let result = original_function(event);
 
     if result != 0 {
-        let mut state = OVERLAY_STATE.write().unwrap();
+        let mut state = OVERLAY.write().unwrap();
         if let Some(state) = state.as_mut() {
             state.poll_event(event);
         }

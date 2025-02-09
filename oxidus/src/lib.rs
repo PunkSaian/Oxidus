@@ -11,7 +11,6 @@
 
 extern crate thiserror;
 
-use std::sync::atomic::AtomicBool;
 use std::{sync::Mutex, thread};
 
 use hook::detour::WrappedDetourHook;
@@ -31,7 +30,6 @@ mod util;
 
 #[allow(clippy::type_complexity)]
 static HOOKS: Mutex<Vec<WrappedDetourHook>> = const { Mutex::new(Vec::new()) };
-static UNLOADING: AtomicBool = const { AtomicBool::new(false) };
 
 pub fn main() -> OxidusResult {
     init_overlay()?;
@@ -66,11 +64,6 @@ unsafe extern "C" fn load() {
 #[no_mangle]
 extern "C" fn oxidus_cleanup() {
     thread::spawn(|| {
-        if UNLOADING.load(std::sync::atomic::Ordering::SeqCst) {
-            return;
-        }
-
-        UNLOADING.store(true, std::sync::atomic::Ordering::SeqCst);
         info!("Unloading");
         info!("Cleanup started");
         if let Err(e) = cleanup() {

@@ -1,6 +1,6 @@
 use imgui::WindowFlags;
 
-use crate::util::consts::info_string;
+use crate::{overlay::TEXTURES, util::consts::info_string};
 
 pub fn show(ui: &mut imgui::Ui) {
     ui.show_demo_window(&mut false);
@@ -34,5 +34,11 @@ pub fn show_watermark(ui: &mut imgui::Ui) {
         .no_nav()
         .build(|| {
             ui.text(info_string());
+            let textures = TEXTURES.read().unwrap();
+            let logo = &textures.as_ref().unwrap().logo;
+            //let image = imgui::Image::new();
+            ui.same_line();
+            ui.image_button("test", logo.id, [20f32, 20f32])
+            //imgui::sys::igima
         });
 }

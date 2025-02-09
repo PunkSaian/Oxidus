@@ -1,18 +1,40 @@
 extern crate imgui;
 extern crate sdl2_sys;
 
+use image::ImageReader;
 use imgui::{Context, DrawCmd};
 
 use std::io::Cursor;
 
+use crate::util::consts::OXIDE_LOGO_PNG;
+
+use super::OxidusResult;
+
+pub struct Texture {
+    pub id: imgui::TextureId,
+    pub dimensions: (u32, u32),
+}
+
+pub struct Textures {
+    pub logo: Texture,
+}
+
+impl Textures {
+    pub fn new(renderer: &mut SdlRenderer) -> OxidusResult<Self> {
+        let logo = renderer.create_texture_from_bytes(OXIDE_LOGO_PNG)?;
+
+        Ok(Self { logo })
+    }
+}
+
 #[derive(Debug)]
 #[allow(clippy::struct_field_names)]
-pub struct Renderer {
+pub struct SdlRenderer {
     pub sdl_renderer: *mut sdl2_sys::SDL_Renderer,
     managed_textures: Vec<*mut sdl2_sys::SDL_Texture>,
 }
 
-impl Renderer {
+impl SdlRenderer {
     pub fn new(sdl_renderer: *mut sdl2_sys::SDL_Renderer, imgui: &mut Context) -> Self {
         unsafe {
             let atlas = imgui.fonts();
@@ -45,6 +67,7 @@ impl Renderer {
                 font_texture,
                 sdl2_sys::SDL_ScaleMode::SDL_ScaleModeLinear,
             );
+
             Self {
                 sdl_renderer,
                 managed_textures: vec![font_texture],
@@ -125,17 +148,11 @@ impl Renderer {
         }
     }
 
-    pub fn create_texture_from_bytes(
-        &mut self,
-        bytes: &[u8],
-    ) -> Result<(imgui::TextureId, (u32, u32)), String> {
+    pub fn create_texture_from_bytes(&mut self, bytes: &[u8]) -> OxidusResult<Texture> {
         unsafe {
-            use image::io::Reader as ImageReader;
             let img = ImageReader::new(Cursor::new(bytes))
-                .with_guessed_format()
-                .map_err(|e| e.to_string())?
-                .decode()
-                .map_err(|e| e.to_string())?
+                .with_guessed_format()?
+                .decode()?
                 .to_rgba8();
 
             let (width, height) = img.dimensions();
@@ -156,22 +173,26 @@ impl Renderer {
                 (width * 4) as i32,
             );
 
+            self.managed_textures.push(texture);
+
             sdl2_sys::SDL_SetTextureBlendMode(
                 texture,
                 sdl2_sys::SDL_BlendMode::SDL_BLENDMODE_BLEND,
             );
-            self.managed_textures.push(texture);
 
-            Ok((imgui::TextureId::from(texture as usize), (width, height)))
+            Ok(Texture {
+                id: imgui::TextureId::from(texture),
+                dimensions: (width, height),
+            })
         }
     }
 }
 
-impl Drop for Renderer {
+impl Drop for SdlRenderer {
     fn drop(&mut self) {
-        for texture in &self.managed_textures {
+        for &texture in &self.managed_textures {
             unsafe {
-                sdl2_sys::SDL_DestroyTexture(*texture);
+                sdl2_sys::SDL_DestroyTexture(texture);
             }
         }
     }
