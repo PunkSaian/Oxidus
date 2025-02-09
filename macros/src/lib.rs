@@ -68,9 +68,9 @@ pub fn detour_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
     input_fn.block = syn::parse2(quote! {
         {
             #before
-            let res = {
+            let res = (|| #output  {
                 #original_block
-            };
+            })();
             #after
             res
         }

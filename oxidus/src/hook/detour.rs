@@ -46,6 +46,7 @@ impl DetourHook {
         let proxy = Self::create_proxy(&hook, hook_fn)?;
 
         let mut hook_locked = hook.write().unwrap();
+        hook_locked.remove_protection();
         hook_locked.proxy = Some(proxy);
         drop(hook_locked);
 
@@ -100,11 +101,8 @@ impl DetourHook {
         }
     }
 
-    pub fn install(&mut self) -> OxidusResult {
+    pub fn remove_protection(&mut self) -> OxidusResult {
         unsafe {
-            if self.hooked {
-                return OxidusErrorType::Hooking("Hook already installed".to_owned()).into();
-            }
             let page_size = libc::sysconf(libc::_SC_PAGESIZE) as usize;
             let addr = self.target_fn as usize;
             let aligned_addr = addr & !(page_size - 1);
@@ -119,10 +117,18 @@ impl DetourHook {
                 return OxidusErrorType::Hooking("Memory protection failed".to_owned()).into();
             }
 
+            Ok(())
+        }
+    }
+
+    pub fn install(&mut self) -> OxidusResult {
+        unsafe {
+            if self.hooked {
+                return OxidusErrorType::Hooking("Hook already installed".to_owned()).into();
+            }
+
             let patch = Self::create_patch(self.proxy.unwrap());
             ptr::copy_nonoverlapping(patch.as_ptr(), self.target_fn.cast::<u8>(), PATCH_SIZE);
-
-            mprotect(aligned_addr as *mut _, protect_size, PROT_READ | PROT_EXEC);
 
             self.hooked = true;
             Ok(())
@@ -148,25 +154,12 @@ impl DetourHook {
             return OxidusErrorType::Hooking("Hook not installed".to_owned()).into();
         }
         unsafe {
-            #[allow(clippy::cast_sign_loss)]
-            let page_size = libc::sysconf(libc::_SC_PAGESIZE) as usize;
-            let addr = self.target_fn as usize;
-            let aligned_addr = addr & !(page_size - 1);
-            let protect_size = (addr - aligned_addr) + PATCH_SIZE;
-
-            mprotect(
-                aligned_addr as *mut _,
-                protect_size,
-                PROT_READ | PROT_WRITE | PROT_EXEC,
-            );
-
             ptr::copy_nonoverlapping(
                 self.original_bytes.as_ptr(),
                 self.target_fn.cast::<u8>(),
                 PATCH_SIZE,
             );
 
-            mprotect(aligned_addr as *mut _, protect_size, PROT_READ | PROT_EXEC);
             self.hooked = false;
         }
         Ok(())
