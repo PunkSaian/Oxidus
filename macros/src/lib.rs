@@ -47,18 +47,21 @@ pub fn detour_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
             res as *const std::sync::RwLock<crate::hook::detour::DetourHook>
         };
         let hook_lock = unsafe { &*hook_ptr };
-        let mut hook = hook_lock.write().unwrap();
+        let mut hook = std::mem::ManuallyDrop::new(hook_lock.write().unwrap());
 
         let original_function = std::mem::transmute::<_, #gateway_type>(hook.target_fn);
 
         if let Err(e) = hook.restore() {
-            error!("Failed to restore hook: {:?}", e);
             return original_function(#(#param_vals),*);
         }
     };
 
     let after = quote! {
+
         (*hook).install().unwrap();
+        if !crate::UNLOADING.load(std::sync::atomic::Ordering::SeqCst) {
+            std::mem::ManuallyDrop::drop(&mut hook);
+        }
     };
 
     let original_block = &input_fn.block;

@@ -105,7 +105,6 @@ impl DetourHook {
             if self.hooked {
                 return OxidusErrorType::Hooking("Hook already installed".to_owned()).into();
             }
-            #[allow(clippy::cast_sign_loss)]
             let page_size = libc::sysconf(libc::_SC_PAGESIZE) as usize;
             let addr = self.target_fn as usize;
             let aligned_addr = addr & !(page_size - 1);

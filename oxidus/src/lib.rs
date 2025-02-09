@@ -5,11 +5,13 @@
     clippy::cast_precision_loss,
     clippy::module_name_repetitions,
     clippy::cast_possible_wrap,
-    clippy::cargo_common_metadata
+    clippy::cargo_common_metadata,
+    clippy::cast_sign_loss
 )]
 
 extern crate thiserror;
 
+use std::sync::atomic::AtomicBool;
 use std::{sync::Mutex, thread};
 
 use hook::detour::WrappedDetourHook;
@@ -29,6 +31,7 @@ mod util;
 
 #[allow(clippy::type_complexity)]
 static HOOKS: Mutex<Vec<WrappedDetourHook>> = const { Mutex::new(Vec::new()) };
+static UNLOADING: AtomicBool = const { AtomicBool::new(false) };
 
 pub fn main() -> OxidusResult {
     init_overlay()?;
@@ -63,11 +66,17 @@ unsafe extern "C" fn load() {
 #[no_mangle]
 extern "C" fn oxidus_cleanup() {
     thread::spawn(|| {
+        if UNLOADING.load(std::sync::atomic::Ordering::SeqCst) {
+            return;
+        }
+
+        UNLOADING.store(true, std::sync::atomic::Ordering::SeqCst);
         info!("Unloading");
+        info!("Cleanup started");
         if let Err(e) = cleanup() {
-            error!("Failed to unload\n{e}");
+            error!("Failed to cleanup\n{e}");
         } else {
-            info!("Unloaded");
+            info!("Cleanup finished");
         }
     });
 }
@@ -77,7 +86,7 @@ extern "C" fn oxidus_cleanup() {
 static LOAD: unsafe extern "C" fn() = { load };
 
 extern "C" fn unload() {
-    info!("fini");
+    info!("Unloaded");
 }
 
 #[link_section = ".fini_array"]

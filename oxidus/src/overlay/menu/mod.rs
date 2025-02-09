@@ -1,5 +1,7 @@
 use imgui::WindowFlags;
 
+use crate::util::consts::info_string;
+
 pub fn show(ui: &mut imgui::Ui) {
     ui.show_demo_window(&mut true);
 
@@ -29,10 +31,6 @@ pub fn show_oxidus_overlay(ui: &mut imgui::Ui) {
         .no_decoration()
         .no_nav()
         .build(|| {
-            ui.menu_item(format!(
-                "Oxidus {} by {}",
-                env!("CARGO_PKG_VERSION"),
-                env!("CARGO_PKG_AUTHORS")
-            ));
+            ui.menu_item(info_string());
         });
 }
