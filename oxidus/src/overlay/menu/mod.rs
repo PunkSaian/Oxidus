@@ -3,15 +3,16 @@ use imgui::WindowFlags;
 use crate::util::consts::info_string;
 
 pub fn show(ui: &mut imgui::Ui) {
-    ui.show_demo_window(&mut true);
+    //ui.show_demo_window(&mut false);
 
-    show_oxidus_overlay(ui);
+    show_watermark(ui);
 }
 
-pub fn show_oxidus_overlay(ui: &mut imgui::Ui) {
+pub fn show_watermark(ui: &mut imgui::Ui) {
     const PAD: f32 = 10.0;
-    let window_pos = ui.window_pos();
-    let window_size = ui.window_size();
+    let viewport = unsafe { imgui::sys::igGetMainViewport().read() };
+    let window_pos = [viewport.Pos.x, viewport.Pos.y];
+    let window_size = [viewport.Size.x, viewport.Size.y];
     ui.window("Oxidus")
         .position(
             [
@@ -31,6 +32,6 @@ pub fn show_oxidus_overlay(ui: &mut imgui::Ui) {
         .no_decoration()
         .no_nav()
         .build(|| {
-            ui.menu_item(info_string());
+            ui.text(info_string());
         });
 }

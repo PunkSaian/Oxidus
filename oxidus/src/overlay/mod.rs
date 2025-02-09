@@ -128,7 +128,7 @@ impl Overlay {
             #[allow(non_snake_case)]
             match std::mem::transmute::<u32, sdl2_sys::SDL_EventType>(event.type_) {
                 SDL_EventType::SDL_MOUSEMOTION => {
-                    io.add_mouse_pos_event([event.motion.x as f32, event.motion.y as f32])
+                    io.add_mouse_pos_event([event.motion.x as f32, event.motion.y as f32]);
                 }
                 SDL_EventType::SDL_MOUSEBUTTONDOWN => io.add_mouse_button_event(
                     match u32::from(event.button.button) {

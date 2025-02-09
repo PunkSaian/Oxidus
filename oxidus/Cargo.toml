@@ -2,7 +2,7 @@
 name = "oxidus"
 edition = "2021"
 version = "0.1.0"
-authors = ["Kane Bezadas <kane.bezadas@gmail.com>"]
+authors = ["Divine Oxy"]
 description = "An internal tf2 cheat"
 license = "MIT+"
 repository = "https://github.com/PunkSaian/Oxidus"
