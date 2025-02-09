@@ -10,7 +10,7 @@ use scan_code_map::sdl_scancode_to_imgui_key;
 use sdl2_sys::{
     SDL_Event, SDL_EventType, SDL_GL_CreateContext, SDL_GL_GetCurrentContext, SDL_GetWindowSize,
     SDL_GetWindowTitle, SDL_SetWindowTitle, SDL_Window, SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE,
-    SDL_BUTTON_RIGHT, SDL_PRESSED,
+    SDL_BUTTON_RIGHT, SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_PRESSED,
 };
 use sdl_renderer::Renderer;
 
@@ -111,6 +111,8 @@ impl Overlay {
         self.context.io_mut().display_size = [window_width as f32, window_height as f32];
         self.context.io_mut().update_delta_time(delta);
 
+        self.last_frame = Instant::now();
+
         menu::show(self.context.new_frame());
 
         self.renderer.render(&mut self.context);
@@ -126,27 +128,40 @@ impl Overlay {
             #[allow(non_snake_case)]
             match std::mem::transmute::<u32, sdl2_sys::SDL_EventType>(event.type_) {
                 SDL_EventType::SDL_MOUSEMOTION => {
-                    io.mouse_pos = [event.motion.x as f32, event.motion.y as f32];
+                    io.add_mouse_pos_event([event.motion.x as f32, event.motion.y as f32])
                 }
-                SDL_EventType::SDL_MOUSEBUTTONDOWN => match u32::from(event.button.button) {
-                    SDL_BUTTON_LEFT => io.mouse_down[MouseButton::Left as usize] = true,
-                    SDL_BUTTON_RIGHT => io.mouse_down[MouseButton::Right as usize] = true,
-                    SDL_BUTTON_MIDDLE => io.mouse_down[MouseButton::Middle as usize] = true,
-                    _ => {}
-                },
-                SDL_EventType::SDL_MOUSEBUTTONUP => match u32::from(event.button.button) {
-                    SDL_BUTTON_LEFT => io.mouse_down[MouseButton::Left as usize] = false,
-                    SDL_BUTTON_RIGHT => io.mouse_down[MouseButton::Right as usize] = false,
-                    SDL_BUTTON_MIDDLE => io.mouse_down[MouseButton::Middle as usize] = false,
-                    _ => {}
-                },
+                SDL_EventType::SDL_MOUSEBUTTONDOWN => io.add_mouse_button_event(
+                    match u32::from(event.button.button) {
+                        SDL_BUTTON_LEFT => MouseButton::Left,
+                        SDL_BUTTON_RIGHT => MouseButton::Right,
+                        SDL_BUTTON_MIDDLE => MouseButton::Middle,
+                        SDL_BUTTON_X1 => MouseButton::Extra1,
+                        SDL_BUTTON_X2 => MouseButton::Extra2,
+                        _ => unreachable!(),
+                    },
+                    true,
+                ),
+                SDL_EventType::SDL_MOUSEBUTTONUP => io.add_mouse_button_event(
+                    match u32::from(event.button.button) {
+                        SDL_BUTTON_LEFT => MouseButton::Left,
+                        SDL_BUTTON_RIGHT => MouseButton::Right,
+                        SDL_BUTTON_MIDDLE => MouseButton::Middle,
+                        SDL_BUTTON_X1 => MouseButton::Extra1,
+                        SDL_BUTTON_X2 => MouseButton::Extra2,
+                        _ => unreachable!(),
+                    },
+                    false,
+                ),
                 SDL_EventType::SDL_MOUSEWHEEL => {
-                    io.mouse_wheel = event.wheel.y as f32;
+                    io.add_mouse_wheel_event([event.wheel.x as f32, event.wheel.y as f32]);
                 }
                 SDL_EventType::SDL_KEYDOWN | SDL_EventType::SDL_KEYUP => {
+                    //TODO: i think the modifiers arent handled propperly
+                    //let modifiers = sdl2_sys::SDL_GetModState(void);
                     let pressed = u32::from(event.key.state) == SDL_PRESSED;
+
                     if let Some(key) = sdl_scancode_to_imgui_key(event.key.keysym.scancode) {
-                        io.keys_down[key as usize] = pressed;
+                        io.add_key_event(key, pressed);
                     }
                 }
                 SDL_EventType::SDL_TEXTINPUT => {
