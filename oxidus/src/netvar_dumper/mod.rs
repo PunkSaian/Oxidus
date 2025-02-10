@@ -274,7 +274,7 @@ pub fn dump_netvars(base_client: *const BaseClient) -> OxidusResult {
 
     writeln!(
         &mut file,
-        "use libc::c_void;\npub type Vector2 = [f32;2];\npub type Vector3 = [f32;3];\npub type Unknown = [u8;0];\npub type Unknown2 = [u8;0];"
+        "use libc::c_void;\npub type Vector2 = [f32;2];\npub type Vector3 = [f32;3];\npub type Unknown = [u8;0];"
     )?;
 
     writeln!(&mut file)?;
