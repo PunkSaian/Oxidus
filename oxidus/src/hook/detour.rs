@@ -83,7 +83,7 @@ impl DetourHook {
             mov_instr[..2].copy_from_slice(&MOVABS_R10);
 
             let hook_lock = &*hook; // Dereference the raw pointer to access the Pin<Box<RwLock<...>>>
-            let rwlock_ptr = &**hook_lock as *const RwLock<DetourHook>;
+            let rwlock_ptr = &raw const **hook_lock;
             let hook_lock_ptr = rwlock_ptr as usize;
 
             mov_instr[2..].copy_from_slice(&hook_lock_ptr.to_ne_bytes());
@@ -170,7 +170,7 @@ impl Drop for DetourHook {
     fn drop(&mut self) {
         if let Err(e) = self.restore() {
             warn!("Hook already restored when dropping: {e}");
-        };
+        }
 
         if let Some(proxy_ptr) = self.proxy {
             let proxy_size = MOVABS_R10_SIZE + JMP_SIZE;

@@ -79,7 +79,6 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                         name: name.clone(),
                     };
                     fields.push((name.clone(), netvar));
-                    continue;
                 }
                 SendPropType::Datatable => {
                     let datatable_struct = parse_table(&*prop.data_table);
@@ -127,8 +126,31 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                 SendPropType::Array => {
                     arrays.push((name.clone(), prop));
                 }
-            };
+            }
         }
+    }
+
+    for (name, (prop, len)) in inlined_arrays {
+        let r#type = match prop.recv_type {
+            SendPropType::Int => NetvarType::Int,
+            SendPropType::Float => NetvarType::Float,
+            SendPropType::Vector => NetvarType::Vector2,
+            SendPropType::Vector2D => NetvarType::Vector3,
+            SendPropType::String => NetvarType::String {
+                buffer_size: prop.string_buffer_size as usize,
+            },
+
+            _ => NetvarType::Unknown,
+        };
+        let netvar = Netvar {
+            r#type: NetvarType::Array {
+                r#type: Box::new(r#type),
+                length: len,
+            },
+            offset: prop.offset as usize,
+            name: name.clone(),
+        };
+        fields.push((name.clone(), netvar));
     }
 
     for (name, prop) in arrays {
@@ -160,32 +182,6 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
         };
 
         fields.retain(|(field_name, _)| field_name != &element_name);
-        fields.push((name.clone(), netvar));
-    }
-
-    for (name, (prop, len)) in inlined_arrays {
-        let r#type = match prop.recv_type {
-            SendPropType::Int => NetvarType::Int,
-            SendPropType::Float => NetvarType::Float,
-            SendPropType::Vector => NetvarType::Vector2,
-            SendPropType::Vector2D => NetvarType::Vector3,
-            SendPropType::String => NetvarType::String {
-                buffer_size: prop.string_buffer_size as usize,
-            },
-
-            _ => {
-                dbg!(&prop);
-                NetvarType::Unknown
-            }
-        };
-        let netvar = Netvar {
-            r#type: NetvarType::Array {
-                r#type: Box::new(r#type),
-                length: len,
-            },
-            offset: prop.offset as usize,
-            name: name.clone(),
-        };
         fields.push((name.clone(), netvar));
     }
 
@@ -278,7 +274,7 @@ pub fn dump_netvars(base_client: *const BaseClient) -> OxidusResult {
 
     writeln!(
         &mut file,
-        "use libc::c_void;\npub type Vector2 = [f32;2];\npub type Vector3 = [f32;3];\npub type Unknown = [u8;0];"
+        "use libc::c_void;\npub type Vector2 = [f32;2];\npub type Vector3 = [f32;3];\npub type Unknown = [u8;0];\npub type Unknown2 = [u8;0];"
     )?;
 
     writeln!(&mut file)?;
@@ -332,7 +328,7 @@ pub fn dump_netvars(base_client: *const BaseClient) -> OxidusResult {
             for (name, netvar) in &netvar_struct.custom {
                 writeln!(
                     &mut file,
-                    "    pub type {}: {};",
+                    "    pub type {} = {};",
                     name,
                     netvar.r#type.to_rust_type()
                 )?;

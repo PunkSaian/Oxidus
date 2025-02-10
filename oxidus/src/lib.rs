@@ -7,7 +7,8 @@
     clippy::cast_possible_wrap,
     clippy::cargo_common_metadata,
     clippy::cast_sign_loss,
-    clippy::missing_panics_doc
+    clippy::missing_panics_doc,
+    incomplete_features
 )]
 #![feature(inherent_associated_types)]
 

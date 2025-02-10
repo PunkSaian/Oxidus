@@ -2,6 +2,7 @@ use libc::c_void;
 pub type Vector2 = [f32;2];
 pub type Vector3 = [f32;3];
 pub type Unknown = [u8;0];
+pub type Unknown2 = [u8;0];
 
 //#[tf2_struct(baseclass = WeaponIFMBaseCamera)]
 pub struct WeaponIFMSteadyCam;
@@ -266,8 +267,8 @@ pub struct TFWeaponBase {
 }
 
 impl TFWeaponBase {
-    pub type LocalActiveTFWeaponData: LocalTFWeaponData;
-    pub type NonLocalTFWeaponData: TFWeaponDataNonLocal;
+    pub type LocalActiveTFWeaponData = LocalTFWeaponData;
+    pub type NonLocalTFWeaponData = TFWeaponDataNonLocal;
 }
 
 //#[tf2_struct(baseclass = TFWearable)]
@@ -321,7 +322,7 @@ pub struct TFSniperRifleDecap;
 //#[tf2_struct(baseclass = TFWeaponBaseGun)]
 pub struct TFSniperRifle;
 impl TFSniperRifle {
-    pub type SniperRifleLocalData: SniperRifleLocalData;
+    pub type SniperRifleLocalData = SniperRifleLocalData;
 }
 
 //#[tf2_struct(baseclass = TFSMG)]
@@ -397,7 +398,7 @@ pub struct WeaponPistol;
 //#[tf2_struct(baseclass = TFWeaponBaseGun)]
 pub struct WeaponPipebombLauncher;
 impl WeaponPipebombLauncher {
-    pub type PipebombLauncherLocalData: PipebombLauncherLocalData;
+    pub type PipebombLauncherLocalData = PipebombLauncherLocalData;
 }
 
 //#[tf2_struct(baseclass = TFWeaponPDA)]
@@ -455,8 +456,8 @@ pub struct WeaponMedigun {
 }
 
 impl WeaponMedigun {
-    pub type LocalTFWeaponMedigunData: LocalTFWeaponMedigunData;
-    pub type NonLocalTFWeaponMedigunData: TFWeaponMedigunDataNonLocal;
+    pub type LocalTFWeaponMedigunData = LocalTFWeaponMedigunData;
+    pub type NonLocalTFWeaponMedigunData = TFWeaponMedigunDataNonLocal;
 }
 
 //#[tf2_struct(baseclass = WeaponLunchBox)]
@@ -548,7 +549,7 @@ pub struct WeaponFlameThrower {
 }
 
 impl WeaponFlameThrower {
-    pub type LocalFlameThrowerData: LocalFlameThrower;
+    pub type LocalFlameThrowerData = LocalFlameThrower;
 }
 
 //#[tf2_struct(baseclass = TFWeaponBaseMelee)]
@@ -628,7 +629,7 @@ pub struct TFWeaponBuilder {
 }
 
 impl TFWeaponBuilder {
-    pub type BuilderLocalData: BuilderLocalData;
+    pub type BuilderLocalData = BuilderLocalData;
 }
 
 //#[tf2_struct(baseclass = TFBaseRocket)]
@@ -876,13 +877,13 @@ pub struct BonusRoundLogic {
 }
 
 impl BonusRoundLogic {
-    pub type m_aBonusPlayerRoll: _ST_m_aBonusPlayerRoll_101;
+    pub type m_aBonusPlayerRoll = _ST_m_aBonusPlayerRoll_101;
 }
 
 //#[tf2_struct(baseclass = TeamplayRoundBasedRulesProxy)]
 pub struct TFGameRulesProxy;
 impl TFGameRulesProxy {
-    pub type tf_gamerules_data: TFGameRules;
+    pub type tf_gamerules_data = TFGameRules;
 }
 
 //#[tf2_struct(baseclass = BaseTempEntity)]
@@ -1190,9 +1191,9 @@ pub struct TFPlayer {
 }
 
 impl TFPlayer {
-    pub type tfnonlocaldata: TFNonLocalPlayerExclusive;
-    pub type TFSendHealersDataTable: TFSendHealersDataTable;
-    pub type tflocaldata: TFLocalPlayerExclusive;
+    pub type tfnonlocaldata = TFNonLocalPlayerExclusive;
+    pub type TFSendHealersDataTable = TFSendHealersDataTable;
+    pub type tflocaldata = TFLocalPlayerExclusive;
 }
 
 //#[tf2_struct(baseclass = None)]
@@ -1244,7 +1245,7 @@ pub struct TFRagdoll {
 }
 
 impl TFRagdoll {
-    pub type m_hRagWearables: _ST_m_hRagWearables_8;
+    pub type m_hRagWearables = _ST_m_hRagWearables_8;
 }
 
 //#[tf2_struct(baseclass = None)]
@@ -1259,12 +1260,6 @@ pub struct TEPlayerAnimEvent {
 
 //#[tf2_struct(baseclass = BaseTeamObjectiveResource)]
 pub struct TFObjectiveResource {
-    //probably invalid
-    //#[offset(0)]
-    pub m_iszMannVsMachineWaveClassNames: [*const Unknown; 12],
-    //probably invalid
-    //#[offset(0)]
-    pub m_iszMannVsMachineWaveClassNames2: [*const Unknown; 12],
     //#[offset(7296)]
     pub m_nMannVsMachineMaxWaveCount: i32,
     //#[offset(7300)]
@@ -1290,9 +1285,9 @@ pub struct TFObjectiveResource {
     //#[offset(7384)]
     pub m_nMannVsMachineWaveClassCounts2: [i32; 12],
     //#[offset(7432)]
-    pub m_iszMannVsMachineWaveClassNames: [[i8; 64]; 1],
+    pub m_iszMannVsMachineWaveClassNames: [[[i8; 64]; 1]; 12],
     //#[offset(8200)]
-    pub m_iszMannVsMachineWaveClassNames2: [[i8; 64]; 1],
+    pub m_iszMannVsMachineWaveClassNames2: [[[i8; 64]; 1]; 12],
     //#[offset(8968)]
     pub m_iChallengeIndex: i32,
     //#[offset(8972)]
@@ -1374,7 +1369,7 @@ pub struct ObjectSentrygun {
 }
 
 impl ObjectSentrygun {
-    pub type SentrygunLocalData: SentrygunLocalData;
+    pub type SentrygunLocalData = SentrygunLocalData;
 }
 
 //#[tf2_struct(baseclass = TFProjectile_Rocket)]
@@ -1484,15 +1479,12 @@ pub struct TFGlow {
 
 //#[tf2_struct(baseclass = BaseEntity)]
 pub struct TFPasstimeLogic {
-    //probably invalid
-    //#[offset(0)]
-    pub m_trackPoints: [*const Unknown; 16],
     //#[offset(2832)]
     pub m_bPlayerIsPackMember: [i32; 102],
     //#[offset(2936)]
     pub m_hBall: i32,
     //#[offset(2940)]
-    pub m_trackPoints: [Vector2; 1],
+    pub m_trackPoints: [[Vector2; 1]; 16],
     //#[offset(3132)]
     pub m_iNumSections: i32,
     //#[offset(3136)]
@@ -1595,12 +1587,6 @@ pub struct TeamTrainWatcher {
 
 //#[tf2_struct(baseclass = None)]
 pub struct BaseTeamObjectiveResource {
-    //probably invalid
-    //#[offset(0)]
-    pub m_vCPPositions: [*const Unknown; 8],
-    //probably invalid
-    //#[offset(0)]
-    pub m_iszWarnSound: [*const Unknown; 8],
     //#[offset(1968)]
     pub m_iTimerToShowInHUD: i32,
     //#[offset(1972)]
@@ -1614,7 +1600,7 @@ pub struct BaseTeamObjectiveResource {
     //#[offset(1988)]
     pub m_iUpdateCapHudParity: i32,
     //#[offset(1996)]
-    pub m_vCPPositions: [Vector2; 1],
+    pub m_vCPPositions: [[Vector2; 1]; 8],
     //#[offset(2092)]
     pub m_bCPIsVisible: [i32; 8],
     //#[offset(2100)]
@@ -1640,7 +1626,7 @@ pub struct BaseTeamObjectiveResource {
     //#[offset(4284)]
     pub m_iWarnOnCap: [i32; 8],
     //#[offset(4316)]
-    pub m_iszWarnSound: [[i8; 255]; 1],
+    pub m_iszWarnSound: [[[i8; 255]; 1]; 8],
     //#[offset(6356)]
     pub m_flPathDistance: [f32; 8],
     //#[offset(6388)]
@@ -2109,11 +2095,8 @@ pub struct TEBloodSprite {
 
 //#[tf2_struct(baseclass = None)]
 pub struct TEBeamSpline {
-    //probably invalid
-    //#[offset(0)]
-    pub m_vecPoints: [*const Unknown; 16],
     //#[offset(32)]
-    pub m_vecPoints: [Vector2; 1],
+    pub m_vecPoints: [[Vector2; 1]; 16],
     //#[offset(224)]
     pub m_nPoints: i32,
 }
@@ -2557,7 +2540,7 @@ pub struct HandleTest {
 //#[tf2_struct(baseclass = GameRulesProxy)]
 pub struct TeamplayRoundBasedRulesProxy;
 impl TeamplayRoundBasedRulesProxy {
-    pub type teamplayroundbased_gamerules_data: TeamplayRoundBasedRules;
+    pub type teamplayroundbased_gamerules_data = TeamplayRoundBasedRules;
 }
 
 //#[tf2_struct(baseclass = Sprite)]
@@ -2622,16 +2605,10 @@ pub struct Ragdoll_Attached {
 
 //#[tf2_struct(baseclass = BaseAnimating)]
 pub struct Ragdoll {
-    //probably invalid
-    //#[offset(0)]
-    pub m_ragAngles: [*const Unknown; 24],
-    //probably invalid
-    //#[offset(0)]
-    pub m_ragPos: [*const Unknown; 24],
     //#[offset(3084)]
-    pub m_ragPos: [Vector2; 1],
+    pub m_ragPos: [[Vector2; 1]; 24],
     //#[offset(3372)]
-    pub m_ragAngles: [Vector2; 1],
+    pub m_ragAngles: [[Vector2; 1]; 24],
     //#[offset(3924)]
     pub m_hUnragdoll: i32,
     //#[offset(3928)]
@@ -2783,7 +2760,7 @@ pub struct PropVehicleChoreoGeneric {
 //#[tf2_struct(baseclass = BaseEntity)]
 pub struct ProxyToggle;
 impl ProxyToggle {
-    pub type blah: ProxyToggle_ProxiedData;
+    pub type blah = ProxyToggle_ProxiedData;
 }
 
 //#[tf2_struct(baseclass = BaseEntity)]
@@ -2895,7 +2872,7 @@ pub struct SceneEntity {
 }
 
 impl SceneEntity {
-    pub type m_hActorList: _ST_m_hActorList_16;
+    pub type m_hActorList = _ST_m_hActorList_16;
 }
 
 //#[tf2_struct(baseclass = None)]
@@ -3385,16 +3362,10 @@ pub struct EnvScreenEffect {
 
 //#[tf2_struct(baseclass = BaseEntity)]
 pub struct EnvScreenOverlay {
-    //probably invalid
-    //#[offset(0)]
-    pub m_iszOverlayNames: [*const Unknown; 10],
-    //probably invalid
-    //#[offset(0)]
-    pub m_flOverlayTimes: [*const Unknown; 10],
     //#[offset(1965)]
-    pub m_iszOverlayNames: [[i8; 255]; 1],
+    pub m_iszOverlayNames: [[[i8; 255]; 1]; 10],
     //#[offset(4516)]
-    pub m_flOverlayTimes: [f32; 1],
+    pub m_flOverlayTimes: [[f32; 1]; 10],
     //#[offset(4556)]
     pub m_flStartTime: f32,
     //#[offset(4560)]
@@ -3555,9 +3526,6 @@ pub struct ColorCorrection {
 pub struct BreakableProp;
 //#[tf2_struct(baseclass = BaseCombatCharacter)]
 pub struct BasePlayer {
-    //probably invalid
-    //#[offset(0)]
-    pub m_hViewModel: [*const Unknown; 2],
     //#[offset(209)]
     pub m_lifeState: i32,
     //#[offset(212)]
@@ -3593,14 +3561,14 @@ pub struct BasePlayer {
     //#[offset(5768)]
     pub m_iBonusChallenge: i32,
     //#[offset(5976)]
-    pub m_hViewModel: [i32; 1],
+    pub m_hViewModel: [[i32; 1]; 2],
     //#[offset(6320)]
     pub m_szLastPlaceName: [i8; 18],
 }
 
 impl BasePlayer {
-    pub type m_hMyWearables: _ST_m_hMyWearables_8;
-    pub type localdata: LocalPlayerExclusive;
+    pub type m_hMyWearables = _ST_m_hMyWearables_8;
+    pub type localdata = LocalPlayerExclusive;
 }
 
 //#[tf2_struct(baseclass = BaseAnimatingOverlay)]
@@ -3670,8 +3638,8 @@ pub struct BaseEntity {
 }
 
 impl BaseEntity {
-    pub type predictable_id: PredictableId;
-    pub type AnimTimeMustBeFirst: AnimTimeMustBeFirst;
+    pub type predictable_id = PredictableId;
+    pub type AnimTimeMustBeFirst = AnimTimeMustBeFirst;
 }
 
 //#[tf2_struct(baseclass = BaseEntity)]
@@ -3691,13 +3659,13 @@ pub struct BaseCombatCharacter {
 }
 
 impl BaseCombatCharacter {
-    pub type bcc_localdata: BCCLocalPlayerExclusive;
+    pub type bcc_localdata = BCCLocalPlayerExclusive;
 }
 
 //#[tf2_struct(baseclass = BaseAnimating)]
 pub struct BaseAnimatingOverlay;
 impl BaseAnimatingOverlay {
-    pub type overlay_vars: OverlayVars;
+    pub type overlay_vars = OverlayVars;
 }
 
 //#[tf2_struct(baseclass = BaseEntity)]
@@ -3755,7 +3723,7 @@ pub struct BaseAnimating {
 }
 
 impl BaseAnimating {
-    pub type serveranimdata: ServerAnimationData;
+    pub type serveranimdata = ServerAnimationData;
 }
 
 //#[tf2_struct(baseclass = BaseEntity)]
@@ -3843,14 +3811,11 @@ pub struct Beam {
 }
 
 impl Beam {
-    pub type beampredictable_id: BeamPredictableId;
+    pub type beampredictable_id = BeamPredictableId;
 }
 
 //#[tf2_struct(baseclass = None)]
 pub struct BaseViewModel {
-    //probably invalid
-    //#[offset(0)]
-    pub m_flPoseParameter: [*const Unknown; 24],
     //#[offset(168)]
     pub m_fEffects: i32,
     //#[offset(188)]
@@ -3862,7 +3827,7 @@ pub struct BaseViewModel {
     //#[offset(2044)]
     pub m_flPlaybackRate: f32,
     //#[offset(2328)]
-    pub m_flPoseParameter: [f32; 1],
+    pub m_flPoseParameter: [[f32; 1]; 24],
     //#[offset(2772)]
     pub m_nNewSequenceParity: i32,
     //#[offset(2776)]
@@ -3918,8 +3883,8 @@ pub struct BaseCombatWeapon {
 }
 
 impl BaseCombatWeapon {
-    pub type LocalWeaponData: LocalWeaponData;
-    pub type LocalActiveWeaponData: LocalActiveWeaponData;
+    pub type LocalWeaponData = LocalWeaponData;
+    pub type LocalActiveWeaponData = LocalActiveWeaponData;
 }
 
 //#[tf2_struct(baseclass = BaseEntity)]
@@ -4021,33 +3986,33 @@ pub struct ScriptCreatedItem {
 //#[tf2_struct(baseclass = None)]
 pub struct AttributeList;
 impl AttributeList {
-    pub type m_Attributes: _ST_m_Attributes_20;
+    pub type m_Attributes = _ST_m_Attributes_20;
 }
 
 //#[tf2_struct(baseclass = None)]
 pub struct _ST_m_Attributes_20;
 impl _ST_m_Attributes_20 {
-    pub type i003: ScriptCreatedAttribute;
-    pub type i005: ScriptCreatedAttribute;
-    pub type i008: ScriptCreatedAttribute;
-    pub type i006: ScriptCreatedAttribute;
-    pub type i010: ScriptCreatedAttribute;
-    pub type i001: ScriptCreatedAttribute;
-    pub type i002: ScriptCreatedAttribute;
-    pub type i013: ScriptCreatedAttribute;
-    pub type i015: ScriptCreatedAttribute;
-    pub type i007: ScriptCreatedAttribute;
-    pub type lengthproxy: _LPT_m_Attributes_20;
-    pub type i000: ScriptCreatedAttribute;
-    pub type i004: ScriptCreatedAttribute;
-    pub type i009: ScriptCreatedAttribute;
-    pub type i011: ScriptCreatedAttribute;
-    pub type i014: ScriptCreatedAttribute;
-    pub type i012: ScriptCreatedAttribute;
-    pub type i016: ScriptCreatedAttribute;
-    pub type i017: ScriptCreatedAttribute;
-    pub type i018: ScriptCreatedAttribute;
-    pub type i019: ScriptCreatedAttribute;
+    pub type i017 = ScriptCreatedAttribute;
+    pub type i009 = ScriptCreatedAttribute;
+    pub type i011 = ScriptCreatedAttribute;
+    pub type i010 = ScriptCreatedAttribute;
+    pub type i000 = ScriptCreatedAttribute;
+    pub type i004 = ScriptCreatedAttribute;
+    pub type i008 = ScriptCreatedAttribute;
+    pub type i005 = ScriptCreatedAttribute;
+    pub type i012 = ScriptCreatedAttribute;
+    pub type i001 = ScriptCreatedAttribute;
+    pub type i006 = ScriptCreatedAttribute;
+    pub type i007 = ScriptCreatedAttribute;
+    pub type i003 = ScriptCreatedAttribute;
+    pub type i013 = ScriptCreatedAttribute;
+    pub type i014 = ScriptCreatedAttribute;
+    pub type i015 = ScriptCreatedAttribute;
+    pub type lengthproxy = _LPT_m_Attributes_20;
+    pub type i002 = ScriptCreatedAttribute;
+    pub type i016 = ScriptCreatedAttribute;
+    pub type i018 = ScriptCreatedAttribute;
+    pub type i019 = ScriptCreatedAttribute;
 }
 
 //#[tf2_struct(baseclass = None)]
@@ -4387,7 +4352,7 @@ pub struct _ST_m_aBonusPlayerRoll_101 {
 }
 
 impl _ST_m_aBonusPlayerRoll_101 {
-    pub type lengthproxy: _LPT_m_aBonusPlayerRoll_101;
+    pub type lengthproxy = _LPT_m_aBonusPlayerRoll_101;
 }
 
 //#[tf2_struct(baseclass = None)]
@@ -4678,164 +4643,14 @@ pub struct TFPlayerShared {
 }
 
 impl TFPlayerShared {
-    pub type m_ConditionData: _ST_m_ConditionData_131;
-    pub type tfsharedlocaldata: TFPlayerSharedLocal;
+    pub type tfsharedlocaldata = TFPlayerSharedLocal;
+    pub type m_ConditionData = _ST_m_ConditionData_131;
 }
 
 //#[tf2_struct(baseclass = None)]
 pub struct TFPlayerConditionListExclusive {
     //#[offset(40)]
     pub _condition_bits: i32,
-}
-
-//#[tf2_struct(baseclass = None)]
-pub struct _ST_m_ConditionData_131;
-impl _ST_m_ConditionData_131 {
-    pub type i028: TFPlayerConditionSource;
-    pub type i081: TFPlayerConditionSource;
-    pub type i046: TFPlayerConditionSource;
-    pub type i111: TFPlayerConditionSource;
-    pub type i059: TFPlayerConditionSource;
-    pub type i123: TFPlayerConditionSource;
-    pub type i091: TFPlayerConditionSource;
-    pub type i104: TFPlayerConditionSource;
-    pub type i109: TFPlayerConditionSource;
-    pub type i129: TFPlayerConditionSource;
-    pub type i065: TFPlayerConditionSource;
-    pub type i012: TFPlayerConditionSource;
-    pub type i037: TFPlayerConditionSource;
-    pub type i031: TFPlayerConditionSource;
-    pub type i066: TFPlayerConditionSource;
-    pub type i088: TFPlayerConditionSource;
-    pub type i110: TFPlayerConditionSource;
-    pub type i130: TFPlayerConditionSource;
-    pub type i006: TFPlayerConditionSource;
-    pub type i021: TFPlayerConditionSource;
-    pub type i118: TFPlayerConditionSource;
-    pub type i026: TFPlayerConditionSource;
-    pub type i113: TFPlayerConditionSource;
-    pub type i114: TFPlayerConditionSource;
-    pub type i007: TFPlayerConditionSource;
-    pub type i107: TFPlayerConditionSource;
-    pub type i105: TFPlayerConditionSource;
-    pub type i112: TFPlayerConditionSource;
-    pub type i103: TFPlayerConditionSource;
-    pub type i127: TFPlayerConditionSource;
-    pub type i013: TFPlayerConditionSource;
-    pub type i027: TFPlayerConditionSource;
-    pub type i070: TFPlayerConditionSource;
-    pub type lengthproxy: _LPT_m_ConditionData_131;
-    pub type i036: TFPlayerConditionSource;
-    pub type i042: TFPlayerConditionSource;
-    pub type i099: TFPlayerConditionSource;
-    pub type i121: TFPlayerConditionSource;
-    pub type i077: TFPlayerConditionSource;
-    pub type i014: TFPlayerConditionSource;
-    pub type i055: TFPlayerConditionSource;
-    pub type i025: TFPlayerConditionSource;
-    pub type i023: TFPlayerConditionSource;
-    pub type i074: TFPlayerConditionSource;
-    pub type i089: TFPlayerConditionSource;
-    pub type i057: TFPlayerConditionSource;
-    pub type i029: TFPlayerConditionSource;
-    pub type i060: TFPlayerConditionSource;
-    pub type i003: TFPlayerConditionSource;
-    pub type i097: TFPlayerConditionSource;
-    pub type i010: TFPlayerConditionSource;
-    pub type i106: TFPlayerConditionSource;
-    pub type i086: TFPlayerConditionSource;
-    pub type i071: TFPlayerConditionSource;
-    pub type i102: TFPlayerConditionSource;
-    pub type i068: TFPlayerConditionSource;
-    pub type i078: TFPlayerConditionSource;
-    pub type i101: TFPlayerConditionSource;
-    pub type i093: TFPlayerConditionSource;
-    pub type i096: TFPlayerConditionSource;
-    pub type i125: TFPlayerConditionSource;
-    pub type i067: TFPlayerConditionSource;
-    pub type i100: TFPlayerConditionSource;
-    pub type i082: TFPlayerConditionSource;
-    pub type i072: TFPlayerConditionSource;
-    pub type i052: TFPlayerConditionSource;
-    pub type i051: TFPlayerConditionSource;
-    pub type i011: TFPlayerConditionSource;
-    pub type i016: TFPlayerConditionSource;
-    pub type i015: TFPlayerConditionSource;
-    pub type i122: TFPlayerConditionSource;
-    pub type i022: TFPlayerConditionSource;
-    pub type i098: TFPlayerConditionSource;
-    pub type i048: TFPlayerConditionSource;
-    pub type i117: TFPlayerConditionSource;
-    pub type i053: TFPlayerConditionSource;
-    pub type i063: TFPlayerConditionSource;
-    pub type i009: TFPlayerConditionSource;
-    pub type i040: TFPlayerConditionSource;
-    pub type i004: TFPlayerConditionSource;
-    pub type i069: TFPlayerConditionSource;
-    pub type i085: TFPlayerConditionSource;
-    pub type i090: TFPlayerConditionSource;
-    pub type i041: TFPlayerConditionSource;
-    pub type i017: TFPlayerConditionSource;
-    pub type i033: TFPlayerConditionSource;
-    pub type i005: TFPlayerConditionSource;
-    pub type i061: TFPlayerConditionSource;
-    pub type i008: TFPlayerConditionSource;
-    pub type i039: TFPlayerConditionSource;
-    pub type i075: TFPlayerConditionSource;
-    pub type i038: TFPlayerConditionSource;
-    pub type i045: TFPlayerConditionSource;
-    pub type i043: TFPlayerConditionSource;
-    pub type i084: TFPlayerConditionSource;
-    pub type i002: TFPlayerConditionSource;
-    pub type i018: TFPlayerConditionSource;
-    pub type i062: TFPlayerConditionSource;
-    pub type i024: TFPlayerConditionSource;
-    pub type i076: TFPlayerConditionSource;
-    pub type i054: TFPlayerConditionSource;
-    pub type i116: TFPlayerConditionSource;
-    pub type i126: TFPlayerConditionSource;
-    pub type i094: TFPlayerConditionSource;
-    pub type i108: TFPlayerConditionSource;
-    pub type i032: TFPlayerConditionSource;
-    pub type i120: TFPlayerConditionSource;
-    pub type i124: TFPlayerConditionSource;
-    pub type i128: TFPlayerConditionSource;
-    pub type i095: TFPlayerConditionSource;
-    pub type i119: TFPlayerConditionSource;
-    pub type i047: TFPlayerConditionSource;
-    pub type i035: TFPlayerConditionSource;
-    pub type i073: TFPlayerConditionSource;
-    pub type i030: TFPlayerConditionSource;
-    pub type i044: TFPlayerConditionSource;
-    pub type i064: TFPlayerConditionSource;
-    pub type i056: TFPlayerConditionSource;
-    pub type i087: TFPlayerConditionSource;
-    pub type i034: TFPlayerConditionSource;
-    pub type i000: TFPlayerConditionSource;
-    pub type i050: TFPlayerConditionSource;
-    pub type i080: TFPlayerConditionSource;
-    pub type i092: TFPlayerConditionSource;
-    pub type i058: TFPlayerConditionSource;
-    pub type i083: TFPlayerConditionSource;
-    pub type i020: TFPlayerConditionSource;
-    pub type i049: TFPlayerConditionSource;
-    pub type i019: TFPlayerConditionSource;
-    pub type i079: TFPlayerConditionSource;
-    pub type i001: TFPlayerConditionSource;
-    pub type i115: TFPlayerConditionSource;
-}
-
-//#[tf2_struct(baseclass = None)]
-pub struct TFPlayerConditionSource {
-    //#[offset(16)]
-    pub m_pProvider: i32,
-}
-
-//#[tf2_struct(baseclass = None)]
-pub struct _LPT_m_ConditionData_131 {
-    //probably invalid
-    //#[offset(0)]
-    pub lengthprop131: i32,
 }
 
 //#[tf2_struct(baseclass = None)]
@@ -4915,6 +4730,156 @@ pub struct TFPlayerScoringDataExclusive {
 }
 
 //#[tf2_struct(baseclass = None)]
+pub struct _ST_m_ConditionData_131;
+impl _ST_m_ConditionData_131 {
+    pub type i093 = TFPlayerConditionSource;
+    pub type i125 = TFPlayerConditionSource;
+    pub type i036 = TFPlayerConditionSource;
+    pub type i111 = TFPlayerConditionSource;
+    pub type i103 = TFPlayerConditionSource;
+    pub type i106 = TFPlayerConditionSource;
+    pub type i044 = TFPlayerConditionSource;
+    pub type i117 = TFPlayerConditionSource;
+    pub type i074 = TFPlayerConditionSource;
+    pub type i116 = TFPlayerConditionSource;
+    pub type i088 = TFPlayerConditionSource;
+    pub type i012 = TFPlayerConditionSource;
+    pub type i065 = TFPlayerConditionSource;
+    pub type i043 = TFPlayerConditionSource;
+    pub type i082 = TFPlayerConditionSource;
+    pub type i037 = TFPlayerConditionSource;
+    pub type i013 = TFPlayerConditionSource;
+    pub type i035 = TFPlayerConditionSource;
+    pub type i126 = TFPlayerConditionSource;
+    pub type i115 = TFPlayerConditionSource;
+    pub type i127 = TFPlayerConditionSource;
+    pub type i011 = TFPlayerConditionSource;
+    pub type i067 = TFPlayerConditionSource;
+    pub type i023 = TFPlayerConditionSource;
+    pub type i122 = TFPlayerConditionSource;
+    pub type i051 = TFPlayerConditionSource;
+    pub type i004 = TFPlayerConditionSource;
+    pub type i114 = TFPlayerConditionSource;
+    pub type i045 = TFPlayerConditionSource;
+    pub type i069 = TFPlayerConditionSource;
+    pub type i085 = TFPlayerConditionSource;
+    pub type i005 = TFPlayerConditionSource;
+    pub type i092 = TFPlayerConditionSource;
+    pub type i000 = TFPlayerConditionSource;
+    pub type i059 = TFPlayerConditionSource;
+    pub type i061 = TFPlayerConditionSource;
+    pub type i056 = TFPlayerConditionSource;
+    pub type i083 = TFPlayerConditionSource;
+    pub type i019 = TFPlayerConditionSource;
+    pub type i039 = TFPlayerConditionSource;
+    pub type i068 = TFPlayerConditionSource;
+    pub type i084 = TFPlayerConditionSource;
+    pub type i073 = TFPlayerConditionSource;
+    pub type i063 = TFPlayerConditionSource;
+    pub type i112 = TFPlayerConditionSource;
+    pub type i008 = TFPlayerConditionSource;
+    pub type i041 = TFPlayerConditionSource;
+    pub type i048 = TFPlayerConditionSource;
+    pub type i076 = TFPlayerConditionSource;
+    pub type i075 = TFPlayerConditionSource;
+    pub type i095 = TFPlayerConditionSource;
+    pub type i105 = TFPlayerConditionSource;
+    pub type i072 = TFPlayerConditionSource;
+    pub type i118 = TFPlayerConditionSource;
+    pub type i123 = TFPlayerConditionSource;
+    pub type i053 = TFPlayerConditionSource;
+    pub type i025 = TFPlayerConditionSource;
+    pub type i042 = TFPlayerConditionSource;
+    pub type i102 = TFPlayerConditionSource;
+    pub type i100 = TFPlayerConditionSource;
+    pub type i031 = TFPlayerConditionSource;
+    pub type i120 = TFPlayerConditionSource;
+    pub type i050 = TFPlayerConditionSource;
+    pub type i040 = TFPlayerConditionSource;
+    pub type i099 = TFPlayerConditionSource;
+    pub type i129 = TFPlayerConditionSource;
+    pub type i080 = TFPlayerConditionSource;
+    pub type i094 = TFPlayerConditionSource;
+    pub type i086 = TFPlayerConditionSource;
+    pub type i124 = TFPlayerConditionSource;
+    pub type i010 = TFPlayerConditionSource;
+    pub type i113 = TFPlayerConditionSource;
+    pub type i007 = TFPlayerConditionSource;
+    pub type i121 = TFPlayerConditionSource;
+    pub type i033 = TFPlayerConditionSource;
+    pub type i054 = TFPlayerConditionSource;
+    pub type i022 = TFPlayerConditionSource;
+    pub type i027 = TFPlayerConditionSource;
+    pub type i038 = TFPlayerConditionSource;
+    pub type i049 = TFPlayerConditionSource;
+    pub type i062 = TFPlayerConditionSource;
+    pub type i017 = TFPlayerConditionSource;
+    pub type i066 = TFPlayerConditionSource;
+    pub type i015 = TFPlayerConditionSource;
+    pub type i071 = TFPlayerConditionSource;
+    pub type i018 = TFPlayerConditionSource;
+    pub type i034 = TFPlayerConditionSource;
+    pub type i002 = TFPlayerConditionSource;
+    pub type i016 = TFPlayerConditionSource;
+    pub type i070 = TFPlayerConditionSource;
+    pub type i087 = TFPlayerConditionSource;
+    pub type i130 = TFPlayerConditionSource;
+    pub type i090 = TFPlayerConditionSource;
+    pub type i098 = TFPlayerConditionSource;
+    pub type i064 = TFPlayerConditionSource;
+    pub type i101 = TFPlayerConditionSource;
+    pub type i108 = TFPlayerConditionSource;
+    pub type i079 = TFPlayerConditionSource;
+    pub type i057 = TFPlayerConditionSource;
+    pub type i109 = TFPlayerConditionSource;
+    pub type i046 = TFPlayerConditionSource;
+    pub type i119 = TFPlayerConditionSource;
+    pub type i128 = TFPlayerConditionSource;
+    pub type i026 = TFPlayerConditionSource;
+    pub type i077 = TFPlayerConditionSource;
+    pub type i081 = TFPlayerConditionSource;
+    pub type i009 = TFPlayerConditionSource;
+    pub type i055 = TFPlayerConditionSource;
+    pub type i104 = TFPlayerConditionSource;
+    pub type i028 = TFPlayerConditionSource;
+    pub type i032 = TFPlayerConditionSource;
+    pub type i096 = TFPlayerConditionSource;
+    pub type i029 = TFPlayerConditionSource;
+    pub type i107 = TFPlayerConditionSource;
+    pub type i024 = TFPlayerConditionSource;
+    pub type i030 = TFPlayerConditionSource;
+    pub type i021 = TFPlayerConditionSource;
+    pub type i091 = TFPlayerConditionSource;
+    pub type i052 = TFPlayerConditionSource;
+    pub type i047 = TFPlayerConditionSource;
+    pub type i003 = TFPlayerConditionSource;
+    pub type i001 = TFPlayerConditionSource;
+    pub type i006 = TFPlayerConditionSource;
+    pub type i058 = TFPlayerConditionSource;
+    pub type i097 = TFPlayerConditionSource;
+    pub type i060 = TFPlayerConditionSource;
+    pub type i089 = TFPlayerConditionSource;
+    pub type i014 = TFPlayerConditionSource;
+    pub type lengthproxy = _LPT_m_ConditionData_131;
+    pub type i020 = TFPlayerConditionSource;
+    pub type i110 = TFPlayerConditionSource;
+    pub type i078 = TFPlayerConditionSource;
+}
+
+//#[tf2_struct(baseclass = None)]
+pub struct TFPlayerConditionSource {
+    //#[offset(16)]
+    pub m_pProvider: i32,
+}
+
+//#[tf2_struct(baseclass = None)]
+pub struct _LPT_m_ConditionData_131 {
+    //probably invalid
+    //#[offset(0)]
+    pub lengthprop131: i32,
+}
+
+//#[tf2_struct(baseclass = None)]
 pub struct TFNonLocalPlayerExclusive {
     //#[offset(1096)]
     pub m_vecOrigin: Vector3,
@@ -4982,7 +4947,7 @@ pub struct _ST_m_hRagWearables_8 {
 }
 
 impl _ST_m_hRagWearables_8 {
-    pub type lengthproxy: _LPT_m_hRagWearables_8;
+    pub type lengthproxy = _LPT_m_hRagWearables_8;
 }
 
 //#[tf2_struct(baseclass = None)]
@@ -5191,7 +5156,7 @@ pub struct _ST_m_hActorList_16 {
 }
 
 impl _ST_m_hActorList_16 {
-    pub type lengthproxy: _LPT_m_hActorList_16;
+    pub type lengthproxy = _LPT_m_hActorList_16;
 }
 
 //#[tf2_struct(baseclass = None)]
@@ -5276,7 +5241,7 @@ pub struct _ST_m_hMyWearables_8 {
 }
 
 impl _ST_m_hMyWearables_8 {
-    pub type lengthproxy: _LPT_m_hMyWearables_8;
+    pub type lengthproxy = _LPT_m_hMyWearables_8;
 }
 
 //#[tf2_struct(baseclass = None)]
@@ -5427,28 +5392,28 @@ pub struct BCCLocalPlayerExclusive {
 //#[tf2_struct(baseclass = None)]
 pub struct OverlayVars;
 impl OverlayVars {
-    pub type m_AnimOverlay: _ST_m_AnimOverlay_15;
+    pub type m_AnimOverlay = _ST_m_AnimOverlay_15;
 }
 
 //#[tf2_struct(baseclass = None)]
 pub struct _ST_m_AnimOverlay_15;
 impl _ST_m_AnimOverlay_15 {
-    pub type i004: Animationlayer;
-    pub type i009: Animationlayer;
-    pub type i001: Animationlayer;
-    pub type i008: Animationlayer;
-    pub type i003: Animationlayer;
-    pub type i006: Animationlayer;
-    pub type i013: Animationlayer;
-    pub type lengthproxy: _LPT_m_AnimOverlay_15;
-    pub type i012: Animationlayer;
-    pub type i000: Animationlayer;
-    pub type i005: Animationlayer;
-    pub type i010: Animationlayer;
-    pub type i007: Animationlayer;
-    pub type i011: Animationlayer;
-    pub type i014: Animationlayer;
-    pub type i002: Animationlayer;
+    pub type i003 = Animationlayer;
+    pub type i005 = Animationlayer;
+    pub type i004 = Animationlayer;
+    pub type i006 = Animationlayer;
+    pub type i013 = Animationlayer;
+    pub type lengthproxy = _LPT_m_AnimOverlay_15;
+    pub type i008 = Animationlayer;
+    pub type i002 = Animationlayer;
+    pub type i014 = Animationlayer;
+    pub type i012 = Animationlayer;
+    pub type i000 = Animationlayer;
+    pub type i007 = Animationlayer;
+    pub type i010 = Animationlayer;
+    pub type i001 = Animationlayer;
+    pub type i011 = Animationlayer;
+    pub type i009 = Animationlayer;
 }
 
 //#[tf2_struct(baseclass = None)]
