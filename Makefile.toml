@@ -36,6 +36,40 @@ if [ $? -ne 0 ]; then
 fi
 '''
 
+[tasks.dump-netvars]
+workspace = false
+script = '''
+#!/bin/bash
+pid=$(pidof tf_linux64)
+if [ -z "$pid" ]; then
+    echo "tf2 not running"
+    exit 1
+fi
+
+echo $pid
+lib_path=$(cargo build --features dump-netvars --message-format=json | jq -r 'select(.profile.test == false) | select(.target.name == "oxidus" ) | .filenames[0]')
+if [ ! -f "$lib_path" ]; then
+    echo "liboxidus.so not found"
+    exit 1
+fi
+
+cp "$lib_path" /tmp/liboxidus.so
+
+sudo rust-gdb -n -q -batch \
+    -ex "attach $pid" \
+    -ex "set \$dlopen = (void* (*)(char*, int))dlopen" \
+    -ex "set \$dlerror = (char* (*)(void))dlerror" \
+    -ex "call \$dlopen(\"/tmp/liboxidus.so\", 2)" \
+    -ex "call \$dlerror()" \
+    -ex "detach" \
+    -ex "quit"
+
+if [ $? -ne 0 ]; then
+    echo "failed to inject"
+    exit 1
+fi
+'''
+
 
 [tasks.inject-gdb]
 workspace = false
@@ -69,6 +103,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 '''
+
 
 [tasks.unload]
 workspace = false
@@ -114,10 +149,7 @@ export RUST_BACKTRACE=FULL;
 export LD_LIBRARY_PATH='bin/linux64';
 #export LD_DEBUG=all;
 #export LD_DEBUG=libs;
-export DXVK_HUD=1
 ./tf_linux64 -game tf -steam -novid -nojoy -nosteamcontroller -nohltv -particles 1 -precachefontchars -noquicktime -nobreakpad -gl
-#ltrace -f -o ~/ltrace.log ./tf_linux64 -game tf -steam -novid -nojoy -nosteamcontroller -nohltv -particles 1 -precachefontchars -noquicktime -nobreakpad
-#strace -f -o ~/strace.log ./tf_linux64 -game tf -steam -novid -nojoy -nosteamcontroller -nohltv -particles 1 -precachefontchars -noquicktime -nobreakpad
 '''
 
 [tasks.attach-gdb]

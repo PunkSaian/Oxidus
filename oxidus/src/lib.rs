@@ -6,33 +6,75 @@
     clippy::module_name_repetitions,
     clippy::cast_possible_wrap,
     clippy::cargo_common_metadata,
-    clippy::cast_sign_loss
+    clippy::cast_sign_loss,
+    clippy::missing_panics_doc
 )]
+#![feature(inherent_associated_types)]
 
 extern crate thiserror;
 
+use std::ffi::CString;
 use std::{sync::Mutex, thread};
 
 use hook::detour::WrappedDetourHook;
+use libc::{dlopen, RTLD_NOLOAD, RTLD_NOW};
 use log::{error, info};
+use netvar_dumper::dump_netvars;
 use overlay::init as init_overlay;
 use overlay::unload as unload_overlay;
 use prelude::*;
+use sdk::interface::base_client::BaseClient;
+use sdk::module_names;
 
 #[macro_use]
 extern crate log;
 
 mod hook;
+mod netvar_dumper;
 mod overlay;
 mod prelude;
+#[allow(unused)]
 mod sdk;
 mod util;
 
 #[allow(clippy::type_complexity)]
 static HOOKS: Mutex<Vec<WrappedDetourHook>> = const { Mutex::new(Vec::new()) };
 
+pub fn wait_for_client() {
+    let mut logged = false;
+    loop {
+        let module = CString::new(module_names::CLIENT).unwrap();
+        let handle = unsafe { dlopen(module.as_ptr(), RTLD_NOLOAD | RTLD_NOW) };
+        if !handle.is_null() {
+            break;
+        }
+        if !logged {
+            info!("Waiting for tf2 to load");
+            logged = true;
+        }
+        thread::sleep(std::time::Duration::from_secs(1));
+    }
+    if logged {
+        info!("tf2 loaded");
+    }
+}
+
 pub fn main() -> OxidusResult {
+    if cfg!(feature = "dump-netvars") {
+        wait_for_client();
+        info!("Dumping netvars");
+        let create_interface: extern "C" fn(*const i8, *const isize) -> *const () = unsafe {
+            std::mem::transmute(util::resolve_fn(module_names::CLIENT, "CreateInterface").unwrap())
+        };
+        let base_client: *mut BaseClient =
+            create_interface(c"VClient017".as_ptr(), std::ptr::null()) as *mut BaseClient;
+        dump_netvars(base_client)?;
+        return Ok(());
+    }
+
+    wait_for_client();
     init_overlay()?;
+
     Ok(())
 }
 

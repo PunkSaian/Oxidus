@@ -11,6 +11,9 @@ readme = "README.md"
 [lib]
 crate-type = ["cdylib"]
 
+[features]
+dump-netvars = []
+
 [dependencies]
 macros = { path = "../macros" }
 
