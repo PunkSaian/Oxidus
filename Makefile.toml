@@ -11,6 +11,7 @@ if [ -z "$pid" ]; then
     exit 1
 fi
 
+
 echo $pid
 lib_path=$(cargo build --message-format=json | jq -r 'select(.profile.test == false) | select(.target.name == "oxidus" ) | .filenames[0]')
 #lib_path=./target/debug/liboxidus.so
@@ -19,13 +20,15 @@ if [ ! -f "$lib_path" ]; then
     exit 1
 fi
 
-cp "$lib_path" /tmp/liboxidus.so
+tmp_lib_path="/tmp/liboxidus_$(date +%Y%m%d%H%M%S).so"
+cp "$lib_path" "$tmp_lib_path"
+
 
 sudo rust-gdb -n -q -batch \
     -ex "attach $pid" \
     -ex "set \$dlopen = (void* (*)(char*, int))dlopen" \
     -ex "set \$dlerror = (char* (*)(void))dlerror" \
-    -ex "call \$dlopen(\"/tmp/liboxidus.so\", 2)" \
+    -ex "call \$dlopen(\"$tmp_lib_path\", 2)" \
     -ex "call \$dlerror()" \
     -ex "detach" \
     -ex "quit"
@@ -115,13 +118,15 @@ if [ -z "$pid" ]; then
     exit 1
 fi
 
+libpath=$(ls -t /tmp/liboxidus_*.so 2>/dev/null | head -n 1)
+
 sudo rust-gdb -n -q -batch \
     -ex "set solib-search-path ~/.local/share/Steam/steamapps/common/Team Fortress 2/bin/linux64:/usr/lib:/lib:/lib64" \
     -ex "attach $pid" \
     -ex "set \$dlopen = (void* (*)(char*, int))dlopen" \
     -ex "set \$dlclose = (int (*)(void*))dlclose" \
     -ex "set \$dlerror = (char* (*)(void))dlerror" \
-    -ex "set \$self = \$dlopen(\"/tmp/liboxidus.so\", 6)" \
+    -ex "set \$self = \$dlopen(\"$libpath\", 6)" \
     -ex "call \$dlerror()" \
     -ex "call oxidus_cleanup()" \
     -ex "call \$dlclose(\$self)" \
