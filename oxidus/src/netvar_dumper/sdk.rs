@@ -8,7 +8,7 @@ use super::NetvarStruct;
 #[repr(i32)]
 #[derive(Debug, Clone, Copy)]
 pub enum SendPropType {
-    Int = 0,
+    Int,
     Float,
     Vector,
     Vector2D,
@@ -34,7 +34,7 @@ pub struct RecvProp {
     pub offset: i32,
     pub element_tride: i32,
     pub elements: i32,
-    pub parent_array_prop_name: *const char,
+    pub parent_array_prop_name: *const i8,
 }
 
 #[repr(C)]
@@ -68,6 +68,7 @@ pub struct Netvar {
 #[derive(Debug, Clone)]
 pub enum NetvarType {
     Int,
+    Bool,
     Float,
     Vector3,
     Vector2,
@@ -86,6 +87,7 @@ impl NetvarType {
     pub fn to_rust_type(&self) -> String {
         match self {
             Self::Int => "i32".to_owned(),
+            Self::Bool => "bool".to_owned(),
             Self::Float => "f32".to_owned(),
             Self::Vector3 => "Vector3".to_owned(),
             Self::Vector2 => "Vector2".to_owned(),

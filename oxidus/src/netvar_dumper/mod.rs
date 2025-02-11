@@ -16,6 +16,8 @@ pub struct NetvarStruct {
     custom: HashMap<String, Netvar>,
 }
 
+const IGNORE_FIELDS: [&str; 2] = ["m_flMvMLastDamageTime", "team_object_array"];
+
 #[allow(clippy::too_many_lines)]
 pub fn parse_table(table: &RecvTable) -> NetvarStruct {
     let struct_name = unsafe {
@@ -36,6 +38,10 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
         props.sort_by_key(|prop| prop.offset);
         for prop in props {
             let mut name = CStr::from_ptr(prop.var_name).to_str().unwrap().to_string();
+            if IGNORE_FIELDS.contains(&name.as_str()) {
+                warn!("Ignoring field: {}", name);
+                continue;
+            }
 
             if name.contains('.') {
                 name = name.replace('.', "_");
@@ -67,6 +73,7 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                 | SendPropType::Vector
                 | SendPropType::Vector2D => {
                     let r#type = match prop.recv_type {
+                        SendPropType::Int if name.starts_with("m_b") => NetvarType::Bool,
                         SendPropType::Int => NetvarType::Int,
                         SendPropType::Float => NetvarType::Float,
                         SendPropType::Vector => NetvarType::Vector2,
@@ -83,12 +90,18 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                 SendPropType::Datatable => {
                     let datatable_struct = parse_table(&*prop.data_table);
                     if datatable_struct.name.starts_with('m') {
+                        let mut length = datatable_struct.fields.len();
+                        if name.to_lowercase().contains("bits") {
+                            length = (length as f32 / 32f32).ceil() as usize;
+                        }
+                        let mut r#type = datatable_struct.fields.first().unwrap().1.r#type.clone();
+                        if name.starts_with("m_b") {
+                            r#type = NetvarType::Bool;
+                        }
                         let netvar = Netvar {
                             r#type: NetvarType::Array {
-                                r#type: Box::new(
-                                    datatable_struct.fields.first().unwrap().1.r#type.clone(),
-                                ),
-                                length: datatable_struct.fields.len(),
+                                r#type: Box::new(r#type),
+                                length,
                             },
                             offset: prop.offset as usize,
                             name: name.clone(),
@@ -97,6 +110,23 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                         fields.push((name.clone(), netvar));
                         continue;
                     }
+
+                    if let Some(field) = datatable_struct.fields.first() {
+                        if field.1.name == "000" {
+                            dbg!(&struct_name);
+                            let netvar = Netvar {
+                                r#type: NetvarType::Array {
+                                    r#type: Box::new(field.1.r#type.clone()),
+                                    length: datatable_struct.fields.len(),
+                                },
+                                offset: prop.offset as usize,
+                                name: name.clone(),
+                            };
+                            fields.push((name.clone(), netvar));
+                            continue;
+                        }
+                    }
+
                     if name == "baseclass" {
                         baseclass = Some(datatable_struct.name);
                         continue;
@@ -130,8 +160,9 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
         }
     }
 
-    for (name, (prop, len)) in inlined_arrays {
+    for (name, (prop, mut length)) in inlined_arrays {
         let r#type = match prop.recv_type {
+            SendPropType::Int if name.starts_with("m_b") => NetvarType::Bool,
             SendPropType::Int => NetvarType::Int,
             SendPropType::Float => NetvarType::Float,
             SendPropType::Vector => NetvarType::Vector2,
@@ -142,14 +173,16 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
 
             _ => NetvarType::Unknown,
         };
+
         let netvar = Netvar {
             r#type: NetvarType::Array {
                 r#type: Box::new(r#type),
-                length: len,
+                length,
             },
             offset: prop.offset as usize,
             name: name.clone(),
         };
+
         fields.push((name.clone(), netvar));
     }
 
@@ -160,6 +193,7 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
             element_name += "_element";
             element_field = fields.iter().find(|x| x.0 == element_name);
         }
+
         let Some(element_field) = element_field else {
             let netvar = Netvar {
                 r#type: NetvarType::Array {
@@ -274,7 +308,7 @@ pub fn dump_netvars(base_client: *const BaseClient) -> OxidusResult {
 
     writeln!(
         &mut file,
-        "use libc::c_void;\npub type Vector2 = [f32;2];\npub type Vector3 = [f32;3];\npub type Unknown = [u8;0];"
+        "use libc::c_void;\npub type Vector2 = [f32;2];\npub type Vector3 = [f32;3];\npub type Unknown = [u8;0];\nuse macros::tf2_struct;"
     )?;
 
     writeln!(&mut file)?;
@@ -282,22 +316,22 @@ pub fn dump_netvars(base_client: *const BaseClient) -> OxidusResult {
     for netvar_struct in &unique_classes {
         writeln!(
             &mut file,
-            "//#[tf2_struct(baseclass = {})]",
+            "#[tf2_struct({})]",
             netvar_struct
                 .baseclass
                 .clone()
-                .unwrap_or_else(|| { "None".to_owned() }),
+                .unwrap_or_else(|| { String::new() }),
         )?;
         write!(&mut file, "pub struct {}", netvar_struct.name)?;
         if netvar_struct.fields.is_empty() {
-            writeln!(&mut file, ";")?;
+            writeln!(&mut file, ";\n")?;
         } else {
             writeln!(&mut file, " {{")?;
             for (name, netvar) in &netvar_struct.fields {
                 if netvar.offset == 0 {
                     writeln!(file, "    //probably invalid")?;
                 }
-                writeln!(file, "    //#[offset({})]", netvar.offset)?;
+                writeln!(file, "    #[offset({})]", netvar.offset)?;
                 match &netvar.r#type {
                     NetvarType::Datatable(NetvarStruct {
                         name: struct_name, ..
