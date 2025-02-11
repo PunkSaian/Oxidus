@@ -293,8 +293,8 @@ pub struct TFWeaponBase {
 }
 
 impl TFWeaponBase {
-    pub type NonLocalTFWeaponData = TFWeaponDataNonLocal;
     pub type LocalActiveTFWeaponData = LocalTFWeaponData;
+    pub type NonLocalTFWeaponData = TFWeaponDataNonLocal;
 }
 
 #[tf2_struct(TFWearable)]
@@ -524,8 +524,8 @@ pub struct WeaponMedigun {
 }
 
 impl WeaponMedigun {
-    pub type NonLocalTFWeaponMedigunData = TFWeaponMedigunDataNonLocal;
     pub type LocalTFWeaponMedigunData = LocalTFWeaponMedigunData;
+    pub type NonLocalTFWeaponMedigunData = TFWeaponMedigunDataNonLocal;
 }
 
 #[tf2_struct(WeaponLunchBox)]
@@ -982,14 +982,13 @@ pub struct CBonusPack;
 
 #[tf2_struct()]
 pub struct BonusRoundLogic {
+    //probably invalid
+    #[offset(0)]
+    pub m_aBonusPlayerRoll: [i32; 101],
     #[offset(2048)]
     pub m_hBonusWinner: i32,
     #[offset(2064)]
     pub m_Item: ScriptCreatedItem,
-}
-
-impl BonusRoundLogic {
-    pub type m_aBonusPlayerRoll = _ST_m_aBonusPlayerRoll_101;
 }
 
 #[tf2_struct(TeamplayRoundBasedRulesProxy)]
@@ -1001,9 +1000,6 @@ impl TFGameRulesProxy {
 
 #[tf2_struct(BaseTempEntity)]
 pub struct TETFParticleEffect {
-    //probably invalid
-    #[offset(0)]
-    pub entindex: i32,
     #[offset(32)]
     pub m_vecOrigin: [f32; 3],
     #[offset(44)]
@@ -1034,9 +1030,6 @@ pub struct TETFParticleEffect {
 
 #[tf2_struct(BaseTempEntity)]
 pub struct TETFExplosion {
-    //probably invalid
-    #[offset(0)]
-    pub entindex: i32,
     #[offset(32)]
     pub m_vecOrigin: [f32; 3],
     #[offset(44)]
@@ -1053,9 +1046,6 @@ pub struct TETFExplosion {
 
 #[tf2_struct(BaseTempEntity)]
 pub struct TETFBlood {
-    //probably invalid
-    #[offset(0)]
-    pub entindex: i32,
     #[offset(32)]
     pub m_vecOrigin: [f32; 3],
     #[offset(44)]
@@ -1145,15 +1135,16 @@ pub struct CaptureFlag {
 
 #[tf2_struct(Team)]
 pub struct TFTeam {
-    //probably invalid
-    #[offset(0)]
-    pub team_object_array: [i32; 606],
     #[offset(2088)]
     pub m_nFlagCaptures: i32,
     #[offset(2092)]
     pub m_iRole: i32,
     #[offset(2096)]
     pub m_hLeader: i32,
+}
+
+impl TFTeam {
+    pub type team_object_array = [i32; 606];
 }
 
 #[tf2_struct(PlayerResource)]
@@ -1310,6 +1301,9 @@ impl TFPlayer {
 
 #[tf2_struct()]
 pub struct TFRagdoll {
+    //probably invalid
+    #[offset(0)]
+    pub m_hRagWearables: [i32; 8],
     #[offset(2064)]
     pub m_vecForce: Vector2,
     #[offset(2076)]
@@ -1354,10 +1348,6 @@ pub struct TFRagdoll {
     pub m_flTorsoScale: f32,
     #[offset(4408)]
     pub m_flHandScale: f32,
-}
-
-impl TFRagdoll {
-    pub type m_hRagWearables = _ST_m_hRagWearables_8;
 }
 
 #[tf2_struct()]
@@ -1473,8 +1463,6 @@ pub struct ObjectSentrygun {
     pub m_bPlayerControlled: bool,
     #[offset(5148)]
     pub m_nShieldLevel: i32,
-    #[offset(5148)]
-    pub m_bShielded: bool,
     #[offset(5256)]
     pub m_hEnemy: i32,
     #[offset(5260)]
@@ -1496,15 +1484,16 @@ pub struct ObjectCartDispenser;
 
 #[tf2_struct(BaseObject)]
 pub struct ObjectDispenser {
-    //probably invalid
-    #[offset(0)]
-    pub healing_array: [i32; 101],
     #[offset(5148)]
     pub m_iState: i32,
     #[offset(5152)]
     pub m_iAmmoMetal: i32,
     #[offset(5156)]
     pub m_iMiniBombCounter: i32,
+}
+
+impl ObjectDispenser {
+    pub type healing_array = [i32; 101];
 }
 
 #[tf2_struct(BaseEntity)]
@@ -1997,10 +1986,6 @@ pub struct TEShatterSurface {
     pub m_flShardSize: f32,
     #[offset(104)]
     pub m_nSurfaceType: i32,
-    #[offset(108)]
-    pub m_uchFrontColor: [i32; 3],
-    #[offset(111)]
-    pub m_uchBackColor: [i32; 3],
 }
 
 #[tf2_struct(BaseTempEntity)]
@@ -2746,10 +2731,6 @@ pub struct Ragdoll {
 
 #[tf2_struct(BaseEntity)]
 pub struct PoseController {
-    #[offset(1968)]
-    pub m_hProps: [i32; 4],
-    #[offset(1984)]
-    pub m_chPoseIndex: [i32; 4],
     #[offset(1988)]
     pub m_bPoseValueParity: bool,
     #[offset(1992)]
@@ -2904,9 +2885,6 @@ pub struct Tesla {
 
 #[tf2_struct()]
 pub struct Team {
-    //probably invalid
-    #[offset(0)]
-    pub player_array: [i32; 101],
     #[offset(2000)]
     pub m_szTeamname: [i8; 32],
     #[offset(2032)]
@@ -2917,11 +2895,12 @@ pub struct Team {
     pub m_iTeamNum: i32,
 }
 
+impl Team {
+    pub type player_array = [i32; 101];
+}
+
 #[tf2_struct()]
 pub struct Sun {
-    //probably invalid
-    #[offset(0)]
-    pub HDRColorScale: f32,
     #[offset(128)]
     pub m_clrRender: i32,
     #[offset(2384)]
@@ -2938,6 +2917,10 @@ pub struct Sun {
     pub m_nMaterial: i32,
     #[offset(2416)]
     pub m_nOverlayMaterial: i32,
+}
+
+impl Sun {
+    pub type HDRColorScale = f32;
 }
 
 #[tf2_struct(BaseEntity)]
@@ -2964,8 +2947,6 @@ pub struct SlideshowDisplay {
     pub m_szDisplayText: [i8; 128],
     #[offset(2094)]
     pub m_szSlideshowDirectory: [i8; 128],
-    #[offset(2256)]
-    pub m_chCurrentSlideLists: [i32; 16],
     #[offset(2280)]
     pub m_fMinSlideTime: f32,
     #[offset(2284)]
@@ -2990,6 +2971,9 @@ pub struct ShadowControl {
 
 #[tf2_struct(BaseEntity)]
 pub struct SceneEntity {
+    //probably invalid
+    #[offset(0)]
+    pub m_hActorList: [i32; 16],
     #[offset(1976)]
     pub m_bIsPlayingBack: bool,
     #[offset(1977)]
@@ -3000,10 +2984,6 @@ pub struct SceneEntity {
     pub m_flForceClientTime: f32,
     #[offset(1988)]
     pub m_nSceneStringIndex: i32,
-}
-
-impl SceneEntity {
-    pub type m_hActorList = _ST_m_hActorList_16;
 }
 
 #[tf2_struct()]
@@ -3026,10 +3006,6 @@ pub struct RopeKeyframe {
     pub m_hStartPoint: i32,
     #[offset(2784)]
     pub m_hEndPoint: i32,
-    #[offset(2788)]
-    pub m_iStartAttachment: i32,
-    #[offset(2790)]
-    pub m_iEndAttachment: i32,
     #[offset(2792)]
     pub m_Subdiv: i32,
     #[offset(2796)]
@@ -3220,8 +3196,6 @@ pub struct ParticleSystem {
     pub m_flStartTime: f32,
     #[offset(1980)]
     pub m_hControlPointEnts: [i32; 63],
-    #[offset(2232)]
-    pub m_iControlPointParents: [i32; 63],
     #[offset(2295)]
     pub m_bWeatherEffect: bool,
 }
@@ -3258,9 +3232,6 @@ pub struct MaterialModifyControl {
 
 #[tf2_struct()]
 pub struct LightGlow {
-    //probably invalid
-    #[offset(0)]
-    pub HDRColorScale: f32,
     #[offset(128)]
     pub m_clrRender: i32,
     #[offset(556)]
@@ -3283,6 +3254,10 @@ pub struct LightGlow {
     pub m_spawnflags: i32,
     #[offset(2240)]
     pub m_flGlowProxySize: f32,
+}
+
+impl LightGlow {
+    pub type HDRColorScale = f32;
 }
 
 #[tf2_struct()]
@@ -3432,7 +3407,7 @@ pub struct CFish {
     #[offset(188)]
     pub m_nModelIndex: i32,
     #[offset(209)]
-    pub m_lifeState: i32,
+    pub m_lifeState: bool,
     #[offset(3160)]
     pub m_x: f32,
     #[offset(3164)]
@@ -3576,9 +3551,9 @@ pub struct FogController {
     #[offset(2032)]
     pub m_fog_duration: f32,
     #[offset(2036)]
-    pub m_fog_enable: i32,
+    pub m_fog_enable: bool,
     #[offset(2037)]
-    pub m_fog_blend: i32,
+    pub m_fog_blend: bool,
 }
 
 #[tf2_struct(BaseParticleEntity)]
@@ -3618,9 +3593,7 @@ pub struct EntityDissolve {
 #[tf2_struct(BaseEntity)]
 pub struct DynamicLight {
     #[offset(1965)]
-    pub m_Flags: i32,
-    #[offset(1966)]
-    pub m_LightStyle: i32,
+    pub m_Flags: bool,
     #[offset(1968)]
     pub m_Radius: f32,
     #[offset(1972)]
@@ -3662,8 +3635,11 @@ pub struct BreakableProp;
 
 #[tf2_struct(BaseCombatCharacter)]
 pub struct BasePlayer {
+    //probably invalid
+    #[offset(0)]
+    pub m_hMyWearables: [i32; 8],
     #[offset(209)]
-    pub m_lifeState: i32,
+    pub m_lifeState: bool,
     #[offset(212)]
     pub m_iHealth: i32,
     #[offset(1120)]
@@ -3703,7 +3679,6 @@ pub struct BasePlayer {
 }
 
 impl BasePlayer {
-    pub type m_hMyWearables = _ST_m_hMyWearables_8;
     pub type localdata = LocalPlayerExclusive;
 }
 
@@ -3719,12 +3694,6 @@ pub struct BaseFlex {
 
 #[tf2_struct()]
 pub struct BaseEntity {
-    //probably invalid
-    #[offset(0)]
-    pub movetype: i32,
-    //probably invalid
-    #[offset(0)]
-    pub movecollide: i32,
     #[offset(124)]
     pub m_nRenderFX: i32,
     #[offset(128)]
@@ -3774,8 +3743,10 @@ pub struct BaseEntity {
 }
 
 impl BaseEntity {
-    pub type AnimTimeMustBeFirst = AnimTimeMustBeFirst;
     pub type predictable_id = PredictableId;
+    pub type movecollide = i32;
+    pub type AnimTimeMustBeFirst = AnimTimeMustBeFirst;
+    pub type movetype = i32;
 }
 
 #[tf2_struct(BaseEntity)]
@@ -3837,8 +3808,6 @@ pub struct BaseAnimating {
     pub m_flFadeScale: f32,
     #[offset(2324)]
     pub m_flModelScale: f32,
-    #[offset(2324)]
-    pub m_flModelWidthScale: f32,
     #[offset(2328)]
     pub m_flPoseParameter: [f32; 24],
     #[offset(2656)]
@@ -3872,7 +3841,7 @@ pub struct InfoLightingRelative {
 #[tf2_struct(BaseCombatCharacter)]
 pub struct AI_BaseNPC {
     #[offset(209)]
-    pub m_lifeState: i32,
+    pub m_lifeState: bool,
     #[offset(4576)]
     pub m_flTimePingEffect: f32,
     #[offset(4580)]
@@ -4021,8 +3990,8 @@ pub struct BaseCombatWeapon {
 }
 
 impl BaseCombatWeapon {
-    pub type LocalActiveWeaponData = LocalActiveWeaponData;
     pub type LocalWeaponData = LocalWeaponData;
+    pub type LocalActiveWeaponData = LocalActiveWeaponData;
 }
 
 #[tf2_struct(BaseEntity)]
@@ -4043,9 +4012,6 @@ pub struct CMannVsMachineWaveStats {
 }
 
 #[tf2_struct()]
-pub struct TFWeaponDataNonLocal;
-
-#[tf2_struct()]
 pub struct LocalTFWeaponData {
     #[offset(3948)]
     pub m_flEffectBarRegenTime: f32,
@@ -4058,6 +4024,9 @@ pub struct LocalTFWeaponData {
     #[offset(4208)]
     pub m_flObservedCritChance: f32,
 }
+
+#[tf2_struct()]
+pub struct TFWeaponDataNonLocal;
 
 #[tf2_struct()]
 pub struct SniperRifleLocalData {
@@ -4074,13 +4043,13 @@ pub struct PipebombLauncherLocalData {
 }
 
 #[tf2_struct()]
-pub struct TFWeaponMedigunDataNonLocal {
+pub struct LocalTFWeaponMedigunData {
     #[offset(4284)]
     pub m_flChargeLevel: f32,
 }
 
 #[tf2_struct()]
-pub struct LocalTFWeaponMedigunData {
+pub struct TFWeaponMedigunDataNonLocal {
     #[offset(4284)]
     pub m_flChargeLevel: f32,
 }
@@ -4134,35 +4103,33 @@ impl AttributeList {
 pub struct _ST_m_Attributes_20;
 
 impl _ST_m_Attributes_20 {
-    pub type i014 = ScriptCreatedAttribute;
-    pub type i018 = ScriptCreatedAttribute;
-    pub type i013 = ScriptCreatedAttribute;
-    pub type i011 = ScriptCreatedAttribute;
+    pub type i000 = ScriptCreatedAttribute;
     pub type i003 = ScriptCreatedAttribute;
-    pub type i001 = ScriptCreatedAttribute;
-    pub type i010 = ScriptCreatedAttribute;
-    pub type i006 = ScriptCreatedAttribute;
-    pub type i015 = ScriptCreatedAttribute;
     pub type i012 = ScriptCreatedAttribute;
     pub type i004 = ScriptCreatedAttribute;
-    pub type i016 = ScriptCreatedAttribute;
-    pub type lengthproxy = _LPT_m_Attributes_20;
-    pub type i005 = ScriptCreatedAttribute;
-    pub type i019 = ScriptCreatedAttribute;
-    pub type i000 = ScriptCreatedAttribute;
-    pub type i008 = ScriptCreatedAttribute;
-    pub type i009 = ScriptCreatedAttribute;
-    pub type i017 = ScriptCreatedAttribute;
-    pub type i002 = ScriptCreatedAttribute;
     pub type i007 = ScriptCreatedAttribute;
+    pub type i019 = ScriptCreatedAttribute;
+    pub type i016 = ScriptCreatedAttribute;
+    pub type i018 = ScriptCreatedAttribute;
+    pub type i011 = ScriptCreatedAttribute;
+    pub type i002 = ScriptCreatedAttribute;
+    pub type i009 = ScriptCreatedAttribute;
+    pub type i010 = ScriptCreatedAttribute;
+    pub type lengthproxy = _LPT_m_Attributes_20;
+    pub type i017 = ScriptCreatedAttribute;
+    pub type i005 = ScriptCreatedAttribute;
+    pub type i008 = ScriptCreatedAttribute;
+    pub type i001 = ScriptCreatedAttribute;
+    pub type i006 = ScriptCreatedAttribute;
+    pub type i015 = ScriptCreatedAttribute;
+    pub type i013 = ScriptCreatedAttribute;
+    pub type i014 = ScriptCreatedAttribute;
 }
 
 #[tf2_struct()]
 pub struct ScriptCreatedAttribute {
     #[offset(8)]
     pub m_iAttributeDefinitionIndex: i32,
-    #[offset(12)]
-    pub m_iRawValue32: i32,
     #[offset(12)]
     pub m_flValue: f32,
     #[offset(16)]
@@ -4184,324 +4151,6 @@ pub struct BuilderLocalData {
     pub m_hObjectBeingBuilt: i32,
     #[offset(4300)]
     pub m_aBuildableObjectTypes: [i32; 4],
-}
-
-#[tf2_struct()]
-pub struct _ST_m_aBonusPlayerRoll_101 {
-    //probably invalid
-    #[offset(0)]
-    pub i000: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i001: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i002: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i003: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i004: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i005: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i006: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i007: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i008: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i009: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i010: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i011: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i012: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i013: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i014: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i015: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i016: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i017: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i018: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i019: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i020: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i021: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i022: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i023: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i024: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i025: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i026: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i027: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i028: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i029: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i030: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i031: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i032: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i033: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i034: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i035: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i036: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i037: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i038: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i039: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i040: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i041: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i042: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i043: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i044: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i045: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i046: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i047: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i048: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i049: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i050: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i051: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i052: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i053: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i054: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i055: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i056: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i057: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i058: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i059: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i060: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i061: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i062: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i063: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i064: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i065: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i066: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i067: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i068: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i069: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i070: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i071: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i072: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i073: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i074: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i075: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i076: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i077: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i078: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i079: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i080: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i081: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i082: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i083: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i084: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i085: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i086: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i087: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i088: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i089: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i090: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i091: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i092: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i093: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i094: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i095: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i096: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i097: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i098: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i099: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i100: i32,
-}
-
-impl _ST_m_aBonusPlayerRoll_101 {
-    pub type lengthproxy = _LPT_m_aBonusPlayerRoll_101;
-}
-
-#[tf2_struct()]
-pub struct _LPT_m_aBonusPlayerRoll_101 {
-    //probably invalid
-    #[offset(0)]
-    pub lengthprop101: i32,
 }
 
 #[tf2_struct()]
@@ -4572,12 +4221,8 @@ pub struct TFGameRules {
     pub m_hBlueKothTimer: i32,
     #[offset(1204)]
     pub m_nMapHolidayType: i32,
-    #[offset(1208)]
-    pub m_pszCustomUpgradesFile: [i8; 260],
     #[offset(1468)]
     pub m_bShowMatchSummary: bool,
-    #[offset(1468)]
-    pub m_bShowCompetitiveMatchSummary: bool,
     #[offset(1469)]
     pub m_bMapHasMatchSummaryStage: bool,
     #[offset(1470)]
@@ -4785,165 +4430,14 @@ pub struct TFPlayerShared {
 }
 
 impl TFPlayerShared {
-    pub type m_ConditionData = _ST_m_ConditionData_131;
     pub type tfsharedlocaldata = TFPlayerSharedLocal;
+    pub type m_ConditionData = _ST_m_ConditionData_131;
 }
 
 #[tf2_struct()]
 pub struct TFPlayerConditionListExclusive {
     #[offset(40)]
     pub _condition_bits: i32,
-}
-
-#[tf2_struct()]
-pub struct _ST_m_ConditionData_131;
-
-impl _ST_m_ConditionData_131 {
-    pub type i105 = TFPlayerConditionSource;
-    pub type i121 = TFPlayerConditionSource;
-    pub type i088 = TFPlayerConditionSource;
-    pub type i117 = TFPlayerConditionSource;
-    pub type i107 = TFPlayerConditionSource;
-    pub type i099 = TFPlayerConditionSource;
-    pub type i078 = TFPlayerConditionSource;
-    pub type i125 = TFPlayerConditionSource;
-    pub type i127 = TFPlayerConditionSource;
-    pub type i021 = TFPlayerConditionSource;
-    pub type i123 = TFPlayerConditionSource;
-    pub type i083 = TFPlayerConditionSource;
-    pub type i044 = TFPlayerConditionSource;
-    pub type i030 = TFPlayerConditionSource;
-    pub type i082 = TFPlayerConditionSource;
-    pub type i126 = TFPlayerConditionSource;
-    pub type i013 = TFPlayerConditionSource;
-    pub type i029 = TFPlayerConditionSource;
-    pub type i071 = TFPlayerConditionSource;
-    pub type i019 = TFPlayerConditionSource;
-    pub type i067 = TFPlayerConditionSource;
-    pub type i128 = TFPlayerConditionSource;
-    pub type i047 = TFPlayerConditionSource;
-    pub type i073 = TFPlayerConditionSource;
-    pub type i095 = TFPlayerConditionSource;
-    pub type i115 = TFPlayerConditionSource;
-    pub type i077 = TFPlayerConditionSource;
-    pub type i024 = TFPlayerConditionSource;
-    pub type i108 = TFPlayerConditionSource;
-    pub type i130 = TFPlayerConditionSource;
-    pub type i022 = TFPlayerConditionSource;
-    pub type i072 = TFPlayerConditionSource;
-    pub type i052 = TFPlayerConditionSource;
-    pub type i005 = TFPlayerConditionSource;
-    pub type i039 = TFPlayerConditionSource;
-    pub type i070 = TFPlayerConditionSource;
-    pub type i043 = TFPlayerConditionSource;
-    pub type i051 = TFPlayerConditionSource;
-    pub type i129 = TFPlayerConditionSource;
-    pub type i110 = TFPlayerConditionSource;
-    pub type i075 = TFPlayerConditionSource;
-    pub type i091 = TFPlayerConditionSource;
-    pub type i106 = TFPlayerConditionSource;
-    pub type i056 = TFPlayerConditionSource;
-    pub type i000 = TFPlayerConditionSource;
-    pub type i026 = TFPlayerConditionSource;
-    pub type i066 = TFPlayerConditionSource;
-    pub type i010 = TFPlayerConditionSource;
-    pub type i100 = TFPlayerConditionSource;
-    pub type i046 = TFPlayerConditionSource;
-    pub type i036 = TFPlayerConditionSource;
-    pub type i042 = TFPlayerConditionSource;
-    pub type i041 = TFPlayerConditionSource;
-    pub type i012 = TFPlayerConditionSource;
-    pub type i023 = TFPlayerConditionSource;
-    pub type i007 = TFPlayerConditionSource;
-    pub type i068 = TFPlayerConditionSource;
-    pub type i076 = TFPlayerConditionSource;
-    pub type i103 = TFPlayerConditionSource;
-    pub type i040 = TFPlayerConditionSource;
-    pub type i101 = TFPlayerConditionSource;
-    pub type i055 = TFPlayerConditionSource;
-    pub type i049 = TFPlayerConditionSource;
-    pub type i050 = TFPlayerConditionSource;
-    pub type i015 = TFPlayerConditionSource;
-    pub type i018 = TFPlayerConditionSource;
-    pub type i028 = TFPlayerConditionSource;
-    pub type i054 = TFPlayerConditionSource;
-    pub type i057 = TFPlayerConditionSource;
-    pub type i060 = TFPlayerConditionSource;
-    pub type i062 = TFPlayerConditionSource;
-    pub type i063 = TFPlayerConditionSource;
-    pub type i111 = TFPlayerConditionSource;
-    pub type i098 = TFPlayerConditionSource;
-    pub type i084 = TFPlayerConditionSource;
-    pub type i112 = TFPlayerConditionSource;
-    pub type i118 = TFPlayerConditionSource;
-    pub type i109 = TFPlayerConditionSource;
-    pub type i081 = TFPlayerConditionSource;
-    pub type lengthproxy = _LPT_m_ConditionData_131;
-    pub type i087 = TFPlayerConditionSource;
-    pub type i114 = TFPlayerConditionSource;
-    pub type i074 = TFPlayerConditionSource;
-    pub type i031 = TFPlayerConditionSource;
-    pub type i094 = TFPlayerConditionSource;
-    pub type i020 = TFPlayerConditionSource;
-    pub type i122 = TFPlayerConditionSource;
-    pub type i096 = TFPlayerConditionSource;
-    pub type i085 = TFPlayerConditionSource;
-    pub type i059 = TFPlayerConditionSource;
-    pub type i006 = TFPlayerConditionSource;
-    pub type i035 = TFPlayerConditionSource;
-    pub type i009 = TFPlayerConditionSource;
-    pub type i102 = TFPlayerConditionSource;
-    pub type i113 = TFPlayerConditionSource;
-    pub type i027 = TFPlayerConditionSource;
-    pub type i033 = TFPlayerConditionSource;
-    pub type i064 = TFPlayerConditionSource;
-    pub type i079 = TFPlayerConditionSource;
-    pub type i093 = TFPlayerConditionSource;
-    pub type i038 = TFPlayerConditionSource;
-    pub type i124 = TFPlayerConditionSource;
-    pub type i008 = TFPlayerConditionSource;
-    pub type i090 = TFPlayerConditionSource;
-    pub type i119 = TFPlayerConditionSource;
-    pub type i016 = TFPlayerConditionSource;
-    pub type i032 = TFPlayerConditionSource;
-    pub type i048 = TFPlayerConditionSource;
-    pub type i086 = TFPlayerConditionSource;
-    pub type i061 = TFPlayerConditionSource;
-    pub type i089 = TFPlayerConditionSource;
-    pub type i002 = TFPlayerConditionSource;
-    pub type i034 = TFPlayerConditionSource;
-    pub type i097 = TFPlayerConditionSource;
-    pub type i104 = TFPlayerConditionSource;
-    pub type i004 = TFPlayerConditionSource;
-    pub type i120 = TFPlayerConditionSource;
-    pub type i001 = TFPlayerConditionSource;
-    pub type i116 = TFPlayerConditionSource;
-    pub type i011 = TFPlayerConditionSource;
-    pub type i037 = TFPlayerConditionSource;
-    pub type i017 = TFPlayerConditionSource;
-    pub type i003 = TFPlayerConditionSource;
-    pub type i025 = TFPlayerConditionSource;
-    pub type i045 = TFPlayerConditionSource;
-    pub type i092 = TFPlayerConditionSource;
-    pub type i058 = TFPlayerConditionSource;
-    pub type i080 = TFPlayerConditionSource;
-    pub type i065 = TFPlayerConditionSource;
-    pub type i069 = TFPlayerConditionSource;
-    pub type i053 = TFPlayerConditionSource;
-    pub type i014 = TFPlayerConditionSource;
-}
-
-#[tf2_struct()]
-pub struct TFPlayerConditionSource {
-    #[offset(16)]
-    pub m_pProvider: i32,
-}
-
-#[tf2_struct()]
-pub struct _LPT_m_ConditionData_131 {
-    //probably invalid
-    #[offset(0)]
-    pub lengthprop131: i32,
 }
 
 #[tf2_struct()]
@@ -5023,6 +4517,157 @@ pub struct TFPlayerScoringDataExclusive {
 }
 
 #[tf2_struct()]
+pub struct _ST_m_ConditionData_131;
+
+impl _ST_m_ConditionData_131 {
+    pub type i005 = TFPlayerConditionSource;
+    pub type i040 = TFPlayerConditionSource;
+    pub type i045 = TFPlayerConditionSource;
+    pub type i017 = TFPlayerConditionSource;
+    pub type i048 = TFPlayerConditionSource;
+    pub type lengthproxy = _LPT_m_ConditionData_131;
+    pub type i036 = TFPlayerConditionSource;
+    pub type i033 = TFPlayerConditionSource;
+    pub type i043 = TFPlayerConditionSource;
+    pub type i122 = TFPlayerConditionSource;
+    pub type i129 = TFPlayerConditionSource;
+    pub type i061 = TFPlayerConditionSource;
+    pub type i009 = TFPlayerConditionSource;
+    pub type i023 = TFPlayerConditionSource;
+    pub type i046 = TFPlayerConditionSource;
+    pub type i074 = TFPlayerConditionSource;
+    pub type i120 = TFPlayerConditionSource;
+    pub type i071 = TFPlayerConditionSource;
+    pub type i091 = TFPlayerConditionSource;
+    pub type i101 = TFPlayerConditionSource;
+    pub type i067 = TFPlayerConditionSource;
+    pub type i014 = TFPlayerConditionSource;
+    pub type i114 = TFPlayerConditionSource;
+    pub type i024 = TFPlayerConditionSource;
+    pub type i034 = TFPlayerConditionSource;
+    pub type i025 = TFPlayerConditionSource;
+    pub type i053 = TFPlayerConditionSource;
+    pub type i089 = TFPlayerConditionSource;
+    pub type i106 = TFPlayerConditionSource;
+    pub type i125 = TFPlayerConditionSource;
+    pub type i075 = TFPlayerConditionSource;
+    pub type i126 = TFPlayerConditionSource;
+    pub type i083 = TFPlayerConditionSource;
+    pub type i116 = TFPlayerConditionSource;
+    pub type i044 = TFPlayerConditionSource;
+    pub type i070 = TFPlayerConditionSource;
+    pub type i029 = TFPlayerConditionSource;
+    pub type i038 = TFPlayerConditionSource;
+    pub type i092 = TFPlayerConditionSource;
+    pub type i088 = TFPlayerConditionSource;
+    pub type i127 = TFPlayerConditionSource;
+    pub type i035 = TFPlayerConditionSource;
+    pub type i099 = TFPlayerConditionSource;
+    pub type i084 = TFPlayerConditionSource;
+    pub type i105 = TFPlayerConditionSource;
+    pub type i041 = TFPlayerConditionSource;
+    pub type i060 = TFPlayerConditionSource;
+    pub type i068 = TFPlayerConditionSource;
+    pub type i031 = TFPlayerConditionSource;
+    pub type i079 = TFPlayerConditionSource;
+    pub type i022 = TFPlayerConditionSource;
+    pub type i104 = TFPlayerConditionSource;
+    pub type i065 = TFPlayerConditionSource;
+    pub type i093 = TFPlayerConditionSource;
+    pub type i096 = TFPlayerConditionSource;
+    pub type i081 = TFPlayerConditionSource;
+    pub type i118 = TFPlayerConditionSource;
+    pub type i082 = TFPlayerConditionSource;
+    pub type i085 = TFPlayerConditionSource;
+    pub type i032 = TFPlayerConditionSource;
+    pub type i007 = TFPlayerConditionSource;
+    pub type i049 = TFPlayerConditionSource;
+    pub type i037 = TFPlayerConditionSource;
+    pub type i076 = TFPlayerConditionSource;
+    pub type i077 = TFPlayerConditionSource;
+    pub type i090 = TFPlayerConditionSource;
+    pub type i100 = TFPlayerConditionSource;
+    pub type i042 = TFPlayerConditionSource;
+    pub type i130 = TFPlayerConditionSource;
+    pub type i073 = TFPlayerConditionSource;
+    pub type i013 = TFPlayerConditionSource;
+    pub type i110 = TFPlayerConditionSource;
+    pub type i001 = TFPlayerConditionSource;
+    pub type i011 = TFPlayerConditionSource;
+    pub type i052 = TFPlayerConditionSource;
+    pub type i113 = TFPlayerConditionSource;
+    pub type i063 = TFPlayerConditionSource;
+    pub type i123 = TFPlayerConditionSource;
+    pub type i047 = TFPlayerConditionSource;
+    pub type i059 = TFPlayerConditionSource;
+    pub type i062 = TFPlayerConditionSource;
+    pub type i111 = TFPlayerConditionSource;
+    pub type i000 = TFPlayerConditionSource;
+    pub type i055 = TFPlayerConditionSource;
+    pub type i010 = TFPlayerConditionSource;
+    pub type i027 = TFPlayerConditionSource;
+    pub type i058 = TFPlayerConditionSource;
+    pub type i128 = TFPlayerConditionSource;
+    pub type i109 = TFPlayerConditionSource;
+    pub type i072 = TFPlayerConditionSource;
+    pub type i080 = TFPlayerConditionSource;
+    pub type i018 = TFPlayerConditionSource;
+    pub type i030 = TFPlayerConditionSource;
+    pub type i026 = TFPlayerConditionSource;
+    pub type i002 = TFPlayerConditionSource;
+    pub type i028 = TFPlayerConditionSource;
+    pub type i103 = TFPlayerConditionSource;
+    pub type i115 = TFPlayerConditionSource;
+    pub type i021 = TFPlayerConditionSource;
+    pub type i078 = TFPlayerConditionSource;
+    pub type i004 = TFPlayerConditionSource;
+    pub type i064 = TFPlayerConditionSource;
+    pub type i098 = TFPlayerConditionSource;
+    pub type i108 = TFPlayerConditionSource;
+    pub type i094 = TFPlayerConditionSource;
+    pub type i095 = TFPlayerConditionSource;
+    pub type i019 = TFPlayerConditionSource;
+    pub type i087 = TFPlayerConditionSource;
+    pub type i066 = TFPlayerConditionSource;
+    pub type i003 = TFPlayerConditionSource;
+    pub type i117 = TFPlayerConditionSource;
+    pub type i015 = TFPlayerConditionSource;
+    pub type i086 = TFPlayerConditionSource;
+    pub type i124 = TFPlayerConditionSource;
+    pub type i016 = TFPlayerConditionSource;
+    pub type i107 = TFPlayerConditionSource;
+    pub type i056 = TFPlayerConditionSource;
+    pub type i097 = TFPlayerConditionSource;
+    pub type i006 = TFPlayerConditionSource;
+    pub type i020 = TFPlayerConditionSource;
+    pub type i008 = TFPlayerConditionSource;
+    pub type i054 = TFPlayerConditionSource;
+    pub type i051 = TFPlayerConditionSource;
+    pub type i102 = TFPlayerConditionSource;
+    pub type i112 = TFPlayerConditionSource;
+    pub type i119 = TFPlayerConditionSource;
+    pub type i050 = TFPlayerConditionSource;
+    pub type i069 = TFPlayerConditionSource;
+    pub type i039 = TFPlayerConditionSource;
+    pub type i012 = TFPlayerConditionSource;
+    pub type i057 = TFPlayerConditionSource;
+    pub type i121 = TFPlayerConditionSource;
+}
+
+#[tf2_struct()]
+pub struct TFPlayerConditionSource {
+    #[offset(16)]
+    pub m_pProvider: i32,
+}
+
+#[tf2_struct()]
+pub struct _LPT_m_ConditionData_131 {
+    //probably invalid
+    #[offset(0)]
+    pub lengthprop131: i32,
+}
+
+#[tf2_struct()]
 pub struct TFLocalPlayerExclusive {
     //probably invalid
     #[offset(0)]
@@ -5062,45 +4707,6 @@ pub struct TFSendHealersDataTable {
 }
 
 #[tf2_struct()]
-pub struct _ST_m_hRagWearables_8 {
-    //probably invalid
-    #[offset(0)]
-    pub i000: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i001: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i002: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i003: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i004: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i005: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i006: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i007: i32,
-}
-
-impl _ST_m_hRagWearables_8 {
-    pub type lengthproxy = _LPT_m_hRagWearables_8;
-}
-
-#[tf2_struct()]
-pub struct _LPT_m_hRagWearables_8 {
-    //probably invalid
-    #[offset(0)]
-    pub lengthprop8: i32,
-}
-
-#[tf2_struct()]
 pub struct SentrygunLocalData {
     #[offset(5124)]
     pub m_iKills: i32,
@@ -5122,9 +4728,6 @@ pub struct AttributeContainer {
 
 #[tf2_struct()]
 pub struct EffectData {
-    //probably invalid
-    #[offset(0)]
-    pub entindex: i32,
     //probably invalid
     #[offset(0)]
     pub m_vOrigin: [f32; 3],
@@ -5153,7 +4756,7 @@ pub struct EffectData {
     #[offset(84)]
     pub m_nHitBox: i32,
     #[offset(88)]
-    pub m_nColor: i32,
+    pub m_nColor: bool,
     #[offset(89)]
     pub m_bCustomColors: bool,
     #[offset(92)]
@@ -5247,69 +4850,6 @@ pub struct ProxyToggle_ProxiedData {
 }
 
 #[tf2_struct()]
-pub struct _ST_m_hActorList_16 {
-    //probably invalid
-    #[offset(0)]
-    pub i000: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i001: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i002: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i003: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i004: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i005: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i006: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i007: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i008: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i009: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i010: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i011: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i012: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i013: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i014: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i015: i32,
-}
-
-impl _ST_m_hActorList_16 {
-    pub type lengthproxy = _LPT_m_hActorList_16;
-}
-
-#[tf2_struct()]
-pub struct _LPT_m_hActorList_16 {
-    //probably invalid
-    #[offset(0)]
-    pub lengthprop16: i32,
-}
-
-#[tf2_struct()]
 pub struct CollisionProperty {
     #[offset(16)]
     pub m_vecMinsPreScaled: Vector2,
@@ -5322,11 +4862,11 @@ pub struct CollisionProperty {
     #[offset(68)]
     pub m_usSolidFlags: i32,
     #[offset(72)]
-    pub m_nSurroundType: i32,
+    pub m_nSurroundType: bool,
     #[offset(73)]
-    pub m_nSolidType: i32,
+    pub m_nSolidType: bool,
     #[offset(74)]
-    pub m_triggerBloat: i32,
+    pub m_triggerBloat: bool,
     #[offset(75)]
     pub m_bUniformTriggerBloat: bool,
     #[offset(76)]
@@ -5353,45 +4893,6 @@ pub struct EntityParticleTrailInfo {
 pub struct PlayerState {
     #[offset(8)]
     pub deadflag: i32,
-}
-
-#[tf2_struct()]
-pub struct _ST_m_hMyWearables_8 {
-    //probably invalid
-    #[offset(0)]
-    pub i000: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i001: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i002: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i003: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i004: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i005: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i006: i32,
-    //probably invalid
-    #[offset(0)]
-    pub i007: i32,
-}
-
-impl _ST_m_hMyWearables_8 {
-    pub type lengthproxy = _LPT_m_hMyWearables_8;
-}
-
-#[tf2_struct()]
-pub struct _LPT_m_hMyWearables_8 {
-    //probably invalid
-    #[offset(0)]
-    pub lengthprop8: i32,
 }
 
 #[tf2_struct()]
@@ -5495,9 +4996,9 @@ pub struct Local {
     #[offset(400)]
     pub m_skybox3d_fog_maxdensity: f32,
     #[offset(420)]
-    pub m_skybox3d_fog_enable: i32,
+    pub m_skybox3d_fog_enable: bool,
     #[offset(421)]
-    pub m_skybox3d_fog_blend: i32,
+    pub m_skybox3d_fog_blend: bool,
     #[offset(432)]
     pub m_PlayerFog_m_hCtrl: i32,
     #[offset(472)]
@@ -5513,17 +5014,17 @@ pub struct Local {
 }
 
 #[tf2_struct()]
-pub struct AnimTimeMustBeFirst {
-    #[offset(144)]
-    pub m_flAnimTime: i32,
-}
-
-#[tf2_struct()]
 pub struct PredictableId {
     #[offset(224)]
     pub m_PredictableID: i32,
     #[offset(1860)]
     pub m_bIsPlayerSimulated: bool,
+}
+
+#[tf2_struct()]
+pub struct AnimTimeMustBeFirst {
+    #[offset(144)]
+    pub m_flAnimTime: i32,
 }
 
 #[tf2_struct()]
@@ -5543,29 +5044,22 @@ impl OverlayVars {
 pub struct _ST_m_AnimOverlay_15;
 
 impl _ST_m_AnimOverlay_15 {
-    pub type lengthproxy = _LPT_m_AnimOverlay_15;
     pub type i000 = Animationlayer;
-    pub type i011 = Animationlayer;
-    pub type i003 = Animationlayer;
-    pub type i008 = Animationlayer;
-    pub type i002 = Animationlayer;
-    pub type i010 = Animationlayer;
-    pub type i001 = Animationlayer;
-    pub type i007 = Animationlayer;
-    pub type i012 = Animationlayer;
-    pub type i005 = Animationlayer;
-    pub type i014 = Animationlayer;
-    pub type i009 = Animationlayer;
-    pub type i006 = Animationlayer;
     pub type i004 = Animationlayer;
+    pub type i006 = Animationlayer;
+    pub type i014 = Animationlayer;
+    pub type i005 = Animationlayer;
+    pub type i010 = Animationlayer;
+    pub type lengthproxy = _LPT_m_AnimOverlay_15;
+    pub type i008 = Animationlayer;
+    pub type i012 = Animationlayer;
+    pub type i002 = Animationlayer;
+    pub type i001 = Animationlayer;
+    pub type i011 = Animationlayer;
+    pub type i007 = Animationlayer;
     pub type i013 = Animationlayer;
-}
-
-#[tf2_struct()]
-pub struct _LPT_m_AnimOverlay_15 {
-    //probably invalid
-    #[offset(0)]
-    pub lengthprop15: i32,
+    pub type i009 = Animationlayer;
+    pub type i003 = Animationlayer;
 }
 
 #[tf2_struct()]
@@ -5584,6 +5078,13 @@ pub struct Animationlayer {
 }
 
 #[tf2_struct()]
+pub struct _LPT_m_AnimOverlay_15 {
+    //probably invalid
+    #[offset(0)]
+    pub lengthprop15: i32,
+}
+
+#[tf2_struct()]
 pub struct ServerAnimationData {
     #[offset(2824)]
     pub m_flCycle: f32,
@@ -5595,18 +5096,6 @@ pub struct BeamPredictableId {
     pub m_PredictableID: i32,
     #[offset(1860)]
     pub m_bIsPlayerSimulated: bool,
-}
-
-#[tf2_struct()]
-pub struct LocalActiveWeaponData {
-    #[offset(180)]
-    pub m_nNextThinkTick: i32,
-    #[offset(3732)]
-    pub m_flNextPrimaryAttack: f32,
-    #[offset(3736)]
-    pub m_flNextSecondaryAttack: f32,
-    #[offset(3740)]
-    pub m_flTimeWeaponIdle: f32,
 }
 
 #[tf2_struct()]
@@ -5625,5 +5114,17 @@ pub struct LocalWeaponData {
     pub m_bFlipViewModel: bool,
     #[offset(3892)]
     pub m_nCustomViewmodelModelIndex: i32,
+}
+
+#[tf2_struct()]
+pub struct LocalActiveWeaponData {
+    #[offset(180)]
+    pub m_nNextThinkTick: i32,
+    #[offset(3732)]
+    pub m_flNextPrimaryAttack: f32,
+    #[offset(3736)]
+    pub m_flNextSecondaryAttack: f32,
+    #[offset(3740)]
+    pub m_flTimeWeaponIdle: f32,
 }
 

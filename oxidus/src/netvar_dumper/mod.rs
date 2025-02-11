@@ -16,7 +16,44 @@ pub struct NetvarStruct {
     custom: HashMap<String, Netvar>,
 }
 
-const IGNORE_FIELDS: [&str; 2] = ["m_flMvMLastDamageTime", "team_object_array"];
+const IGNORE: &[&str] = &[
+    "m_flMvMLastDamageTime",
+    "entindex",
+    "m_pszCustomUpgradesFile",
+    "m_bShowCompetitiveMatchSummary",
+    "m_iRawValue32",
+    "m_flModelWidthScale",
+    "m_iStartAttachment",
+    "m_iEndAttachment",
+    "m_chCurrentSlideLists",
+    "m_hProps",
+    "m_bShielded",
+    "m_uchFrontColor",
+    "m_uchBackColor",
+    "m_chPoseIndex",
+    "m_iControlPointParents",
+    "m_LightStyle",
+];
+const CUSTOM_OVERRIDE: &[&str] = &[
+    "team_object_array",
+    "healing_array",
+    "player_array",
+    "HDRColorScale",
+    "movetype",
+    "movecollide",
+];
+const BOOL_TYPE_OVERRIDES: &[&str] = &[
+    "m_skybox3d_fog_enable",
+    "m_skybox3d_fog_blend",
+    "m_triggerBloat",
+    "m_nSurroundType",
+    "m_nSolidType",
+    "m_nColor",
+    "m_fog_enable",
+    "m_fog_blend",
+    "m_lifeState",
+    "m_Flags",
+];
 
 #[allow(clippy::too_many_lines)]
 pub fn parse_table(table: &RecvTable) -> NetvarStruct {
@@ -28,7 +65,7 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
             .replace("DT_", "")
     };
     let mut fields = Vec::new();
-    let mut dataclasses = HashMap::new();
+    let mut custom = HashMap::new();
     let mut baseclass = None;
 
     let mut arrays = Vec::new();
@@ -38,18 +75,17 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
         props.sort_by_key(|prop| prop.offset);
         for prop in props {
             let mut name = CStr::from_ptr(prop.var_name).to_str().unwrap().to_string();
-            if IGNORE_FIELDS.contains(&name.as_str()) {
-                warn!("Ignoring field: {}", name);
-                continue;
-            }
-
-            if name.contains('.') {
-                name = name.replace('.', "_");
-            }
             if name.parse::<i64>().is_ok() {
                 name = format!("i{name}");
             }
+            if name.contains('.') {
+                name = name.replace('.', "_");
+            }
             let name = name.trim_matches('"').to_owned();
+            if IGNORE.contains(&name.as_str()) {
+                warn!("Ignoring field: {}", name);
+                continue;
+            }
 
             if name.ends_with("[0]") {
                 let name = name.split('[').next().unwrap().to_owned();
@@ -73,7 +109,12 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                 | SendPropType::Vector
                 | SendPropType::Vector2D => {
                     let r#type = match prop.recv_type {
-                        SendPropType::Int if name.starts_with("m_b") => NetvarType::Bool,
+                        SendPropType::Int
+                            if name.starts_with("m_b")
+                                | BOOL_TYPE_OVERRIDES.contains(&name.as_str()) =>
+                        {
+                            NetvarType::Bool
+                        }
                         SendPropType::Int => NetvarType::Int,
                         SendPropType::Float => NetvarType::Float,
                         SendPropType::Vector => NetvarType::Vector2,
@@ -85,6 +126,11 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                         offset: prop.offset as usize,
                         name: name.clone(),
                     };
+
+                    if CUSTOM_OVERRIDE.contains(&name.as_str()) {
+                        custom.insert(name.clone(), netvar);
+                        continue;
+                    }
                     fields.push((name.clone(), netvar));
                 }
                 SendPropType::Datatable => {
@@ -98,6 +144,11 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                         if name.starts_with("m_b") {
                             r#type = NetvarType::Bool;
                         }
+
+                        if IGNORE.contains(&name.as_str()) {
+                            warn!("Ignoring field: {}", name);
+                            continue;
+                        }
                         let netvar = Netvar {
                             r#type: NetvarType::Array {
                                 r#type: Box::new(r#type),
@@ -107,13 +158,20 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                             name: name.clone(),
                         };
 
+                        if CUSTOM_OVERRIDE.contains(&name.as_str()) {
+                            custom.insert(name.clone(), netvar);
+                            continue;
+                        }
                         fields.push((name.clone(), netvar));
                         continue;
                     }
 
                     if let Some(field) = datatable_struct.fields.first() {
-                        if field.1.name == "000" {
-                            dbg!(&struct_name);
+                        if field.1.name == "i000" {
+                            if IGNORE.contains(&name.as_str()) {
+                                warn!("Ignoring field: {}", name);
+                                continue;
+                            }
                             let netvar = Netvar {
                                 r#type: NetvarType::Array {
                                     r#type: Box::new(field.1.r#type.clone()),
@@ -122,6 +180,10 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                                 offset: prop.offset as usize,
                                 name: name.clone(),
                             };
+                            if CUSTOM_OVERRIDE.contains(&name.as_str()) {
+                                custom.insert(name.clone(), netvar);
+                                continue;
+                            }
                             fields.push((name.clone(), netvar));
                             continue;
                         }
@@ -137,7 +199,7 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                         name: name.clone(),
                     };
                     if prop.offset == 0 {
-                        dataclasses.insert(name.clone(), netvar);
+                        custom.insert(name.clone(), netvar);
                         continue;
                     }
                     fields.push((name.clone(), netvar));
@@ -150,10 +212,18 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                         offset: prop.offset as usize,
                         name: name.clone(),
                     };
+                    if CUSTOM_OVERRIDE.contains(&name.as_str()) {
+                        custom.insert(name.clone(), netvar);
+                        continue;
+                    }
                     fields.push((name.clone(), netvar));
                 }
 
                 SendPropType::Array => {
+                    if IGNORE.contains(&name.as_str()) {
+                        warn!("Ignoring field: {}", name);
+                        continue;
+                    }
                     arrays.push((name.clone(), prop));
                 }
             }
@@ -174,6 +244,10 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
             _ => NetvarType::Unknown,
         };
 
+        if IGNORE.contains(&name.as_str()) {
+            warn!("Ignoring field: {}", name);
+            continue;
+        }
         let netvar = Netvar {
             r#type: NetvarType::Array {
                 r#type: Box::new(r#type),
@@ -183,6 +257,10 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
             name: name.clone(),
         };
 
+        if CUSTOM_OVERRIDE.contains(&name.as_str()) {
+            custom.insert(name.clone(), netvar);
+            continue;
+        }
         fields.push((name.clone(), netvar));
     }
 
@@ -195,6 +273,10 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
         }
 
         let Some(element_field) = element_field else {
+            if IGNORE.contains(&name.as_str()) {
+                warn!("Ignoring field: {}", name);
+                continue;
+            }
             let netvar = Netvar {
                 r#type: NetvarType::Array {
                     r#type: Box::new(NetvarType::Unknown),
@@ -203,9 +285,17 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                 offset: prop.offset as usize,
                 name: name.clone(),
             };
+            if CUSTOM_OVERRIDE.contains(&name.as_str()) {
+                custom.insert(name.clone(), netvar);
+                continue;
+            }
             fields.push((name.clone(), netvar));
             continue;
         };
+        if IGNORE.contains(&name.as_str()) {
+            warn!("Ignoring field: {}", name);
+            continue;
+        }
         let netvar = Netvar {
             r#type: NetvarType::Array {
                 r#type: Box::new(element_field.1.r#type.clone()),
@@ -216,6 +306,10 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
         };
 
         fields.retain(|(field_name, _)| field_name != &element_name);
+        if CUSTOM_OVERRIDE.contains(&name.as_str()) {
+            custom.insert(name.clone(), netvar);
+            continue;
+        }
         fields.push((name.clone(), netvar));
     }
 
@@ -225,7 +319,7 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
         name: struct_name,
         fields,
         baseclass,
-        custom: dataclasses,
+        custom,
     }
 }
 
