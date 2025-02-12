@@ -6,8 +6,7 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
 use syn::{
-    parse::{Parse, ParseStream},
-    parse_macro_input, Data, DeriveInput, FnArg, Ident, ItemFn, LitStr, Meta, Type,
+    parse::{Parse, ParseStream}, parse_macro_input, parse_quote, visit_mut::{self, VisitMut}, Data, DeriveInput, FnArg, Ident, ItemFn, LitStr, Meta, Type
 };
 
 struct SignatureInput {
@@ -273,8 +272,6 @@ pub fn tf2_struct(attr: TokenStream, item: TokenStream) -> TokenStream {
     output.into()
 }
 
-/// # Panics
-/// `self` argument is not allowed
 #[proc_macro_attribute]
 pub fn detour_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut input_fn = parse_macro_input!(item as ItemFn);
@@ -342,6 +339,62 @@ pub fn detour_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     })
     .expect("Failed to parse modified block");
+
+    TokenStream::from(quote! { #input_fn })
+}
+
+struct OriginalReplacer;
+
+impl VisitMut for OriginalReplacer {
+    fn visit_ident_mut(&mut self, node: &mut Ident) {
+        if node == "original" {
+            *node = Ident::new("__original", node.span());
+        }
+        visit_mut::visit_ident_mut(self, node);
+    }
+}
+
+#[proc_macro_attribute]
+pub fn vmt_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let mut input_fn = parse_macro_input!(item as ItemFn);
+    let fn_name = &input_fn.sig.ident;
+
+    // Extract function signature components
+    let sig = &input_fn.sig;
+    let unsafety = sig.unsafety;
+    let abi = sig.abi.clone();
+    let params: Vec<Type> = sig
+        .inputs
+        .iter()
+        .map(|arg| match arg {
+            syn::FnArg::Receiver(_) => panic!("Receiver not allowed in VMT hook function"),
+            syn::FnArg::Typed(pat_type) => *pat_type.ty.clone(),
+        })
+        .collect();
+    let return_type = &sig.output;
+
+    // Generate original retrieval code
+    let original_code = quote! {
+        let __original = {
+            let hook_fn = #fn_name as *mut ();
+            let registry = ::oxidius::hook::vmt::HOOK_REGISTRY
+                .read()
+                .expect("Failed to acquire registry lock");
+            let original_ptr = registry.get(&hook_fn)
+                .expect("Original function not found for hook");
+            unsafe { std::mem::transmute::<_, #unsafety #abi fn(#(#params),*) #return_type>(*original_ptr) }
+        };
+    };
+
+    // Insert original retrieval code at start of function
+    input_fn
+        .block
+        .stmts
+        .insert(0, parse_quote! { #original_code });
+
+    // Replace all 'original' identifiers with '__original'
+    let mut replacer = OriginalReplacer;
+    replacer.visit_block_mut(&mut input_fn.block);
 
     TokenStream::from(quote! { #input_fn })
 }

@@ -8,7 +8,8 @@
     clippy::cargo_common_metadata,
     clippy::cast_sign_loss,
     clippy::missing_panics_doc,
-    incomplete_features
+    incomplete_features,
+    dead_code
 )]
 #![feature(inherent_associated_types,generic_const_exprs)]
 
@@ -20,6 +21,7 @@ use std::{sync::Mutex, thread};
 use hook::detour::WrappedDetourHook;
 use libc::{dlopen, RTLD_NOLOAD, RTLD_NOW};
 use log::{error, info};
+use modules::init_modules;
 use netvar_dumper::dump_netvars;
 use overlay::init as init_overlay;
 use overlay::unload as unload_overlay;
@@ -34,9 +36,9 @@ mod hook;
 mod netvar_dumper;
 mod overlay;
 mod prelude;
-#[allow(unused)]
 mod sdk;
 mod util;
+mod modules;
 
 #[allow(clippy::type_complexity)]
 static HOOKS: Mutex<Vec<WrappedDetourHook>> = const { Mutex::new(Vec::new()) };
@@ -75,6 +77,7 @@ pub fn main() -> OxidusResult {
 
     wait_for_client();
     init_overlay()?;
+    init_modules();
 
     Ok(())
 }

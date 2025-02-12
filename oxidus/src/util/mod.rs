@@ -41,16 +41,12 @@ impl Signature {
         Self { pattern, mask }
     }
 
-    pub fn find_module(&self, name: &str) -> Option<ModuleInfo> {
-        find_module(name)
-    }
-
     pub fn scan(&self, memory: &[u8]) -> Option<usize> {
         sig_scan(memory, &self.pattern, &self.mask)
     }
 
     pub fn scan_module(&self, module_name: &str) -> Option<*const u8> {
-        self.find_module(module_name).and_then(|module| {
+        find_module(module_name).and_then(|module| {
             let memory = unsafe { std::slice::from_raw_parts(module.base, module.size) };
             self.scan(memory)
                 .map(|offset| unsafe { module.base.add(offset) })
@@ -114,7 +110,7 @@ fn find_module(name: &str) -> Option<ModuleInfo> {
     };
 
     unsafe {
-        libc::dl_iterate_phdr(Some(callback), &mut search_data as *mut _ as *mut _);
+        libc::dl_iterate_phdr(Some(callback), (&raw mut search_data).cast());
     }
 
     search_data.result

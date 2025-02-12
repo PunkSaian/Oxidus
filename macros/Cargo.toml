@@ -10,4 +10,4 @@ proc-macro = true
 proc-macro2 = "1.0.92"
 quote = "1.0.37"
 serde_plain = "1.0.2"
-syn = { version = "2.0.90", features = ["full"] }
+syn = { version = "2.0.90", features = ["extra-traits", "full", "visit-mut"] }
