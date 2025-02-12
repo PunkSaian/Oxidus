@@ -150,8 +150,6 @@ workspace = false
 script = '''
 pkill -9 tf_linux64 || true
 
-cd ~/.local/share/Steam/steamapps/common/Team\ Fortress\ 2
-export RUST_BACKTRACE=FULL;
 export LD_LIBRARY_PATH='bin/linux64';
 #export LD_DEBUG=all;
 #export LD_DEBUG=libs;
@@ -186,6 +184,15 @@ if [ -z "$pid" ]; then
     exit 1
 fi
 nvim /proc/$pid/maps
+'''
+
+[tasks.expand]
+workspace = false
+script = '''
+#!/bin/bash
+
+cd oxidus
+cargo expand --lib > ../expand.rs 
 '''
 
 [tasks.reload]

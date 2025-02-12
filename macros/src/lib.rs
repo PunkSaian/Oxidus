@@ -65,24 +65,37 @@ pub fn vmt(attr: TokenStream, item: TokenStream) -> TokenStream {
             .inputs
             .clone()
             .into_iter()
-            .map(|arg| arg.name.unwrap().1);
+            .map(|arg| arg.name.unwrap().0)
+            .collect::<Vec<_>>();
         let ret = func.output.clone();
-
-        generated_funcs.push(quote! {
-            pub fn #ident(&self, #args_with_types) -> #ret {
-                unsafe {
-                    let vtable = self as *const Self as *const *const extern "C" fn();
-                    let func = *vtable.offset(#offset as isize);
-                    func(#(#args),*)
+        let function = if args_with_types.is_empty() {
+            quote! {
+                fn #ident(&self) #ret {
+                    unsafe {
+                        let vtable = self as *const Self as *const *const extern "C" fn();
+                        let func = *vtable.offset(#offset as isize);
+                        func(#(#args),*)
+                    }
                 }
             }
-        });
+        } else {
+            quote! {
+                fn #ident(&self, #args_with_types) #ret {
+                    unsafe {
+                        let vtable = self as *const Self as *const *const extern "C" fn();
+                        let func = *vtable.offset(#offset as isize);
+                        func(#(#args),*)
+                    }
+                }
+            }
+        };
+
+        generated_funcs.push(function);
     }
 
     let trait_name = Ident::new(format!("VMT{struct_name}").as_str(), Span::call_site());
 
     let generated_trait = quote! {
-        #[repr(C)]
         pub trait #trait_name {
             #(#generated_funcs)*
         }
@@ -115,7 +128,6 @@ pub fn tf2_struct(attr: TokenStream, item: TokenStream) -> TokenStream {
         }
         None
     });
-
 
     let Data::Struct(data) = input.data else {
         panic!("tf2_struct can only be used on structs");
