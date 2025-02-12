@@ -10,7 +10,7 @@
     clippy::missing_panics_doc,
     incomplete_features
 )]
-#![feature(inherent_associated_types)]
+#![feature(inherent_associated_types,generic_const_exprs)]
 
 extern crate thiserror;
 

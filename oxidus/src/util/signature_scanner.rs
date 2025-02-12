@@ -1,29 +1,6 @@
-#[allow(deprecated)]
 use std::ffi::{CStr, CString};
 
-use libc::{dl_phdr_info, dlclose, dlopen, dlsym, RTLD_NOLOAD, RTLD_NOW};
-
-pub mod consts;
-pub mod error;
-pub mod signature_scanner;
-
-#[allow(unused)]
-pub fn resolve_fn(module: &str, name: &str) -> Option<*mut ()> {
-    unsafe {
-        let module = CString::new(module).unwrap();
-        let handle = dlopen(module.as_ptr(), RTLD_NOLOAD | RTLD_NOW);
-        if handle.is_null() {
-            return None;
-        }
-        let name = CString::new(name).unwrap();
-        let res = dlsym(handle, name.as_ptr()).cast::<()>();
-        dlclose(handle);
-        if res.is_null() {
-            return None;
-        }
-        Some(res)
-    }
-}
+use libc::dl_phdr_info;
 
 #[derive(Debug, Clone)]
 pub struct Signature {
@@ -99,15 +76,13 @@ unsafe extern "C" fn callback(
             size: (max_addr - info.dlpi_addr) as usize,
             name: module_name.to_string(),
         });
-        1 // Stop iteration
+        1
     } else {
-        0 // Continue
+        0
     }
 }
 
 fn find_module(name: &str) -> Option<ModuleInfo> {
-    // Create a struct to hold both the name and result
-
     let mut search_data = SearchData {
         cname: CString::new(name).ok()?,
         result: None,
@@ -120,7 +95,6 @@ fn find_module(name: &str) -> Option<ModuleInfo> {
     search_data.result
 }
 
-// Scanner implementation
 fn sig_scan(memory: &[u8], pattern: &[u8], mask: &[u8]) -> Option<usize> {
     let pattern_len = pattern.len();
     if memory.len() < pattern_len || pattern_len != mask.len() {

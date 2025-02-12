@@ -232,7 +232,7 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
         }
     }
 
-    for (name, (prop, mut length)) in inlined_arrays {
+    for (name, (prop, length)) in inlined_arrays {
         let r#type = match prop.recv_type {
             SendPropType::Int if name.starts_with("m_b") => NetvarType::Bool,
             SendPropType::Int => NetvarType::Int,

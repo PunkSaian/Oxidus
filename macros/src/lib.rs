@@ -1,14 +1,63 @@
 #![feature(log_syntax)]
-#![allow(clippy::cargo_common_metadata)]
+#![allow(clippy::cargo_common_metadata, clippy::missing_panics_doc)]
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, FnArg, Ident, ItemFn, Meta, Type};
+use syn::{
+    parse::{Parse, ParseStream},
+    parse_macro_input, Data, DeriveInput, FnArg, Ident, ItemFn, LitStr, Meta, Type,
+};
+
+struct SignatureInput {
+    pattern: LitStr,
+}
+
+impl Parse for SignatureInput {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {
+            pattern: input.parse()?,
+        })
+    }
+}
+
+#[proc_macro]
+pub fn sig(input: TokenStream) -> TokenStream {
+    let sig_input = syn::parse_macro_input!(input as SignatureInput);
+    let pattern_str = sig_input.pattern.value();
+
+    let mut pattern = Vec::new();
+    let mut mask = Vec::new();
+
+    for part in pattern_str.split_whitespace() {
+        match part {
+            "?" | "??" => {
+                pattern.push(0x0);
+                mask.push(b'?');
+            }
+            _ => {
+                let byte = u8::from_str_radix(part, 16)
+                    .unwrap_or_else(|_| panic!("Invalid hex byte: {part}"));
+                pattern.push(byte);
+                mask.push(b'x');
+            }
+        }
+    }
+
+    TokenStream::from(quote! {
+        {
+            use ::your_crate_name::Signature;
+            Signature::new(
+                vec![#(#pattern),*],
+                vec![#(#mask),*]
+            )
+        }
+    })
+}
 
 #[proc_macro_attribute]
-pub fn vmt(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn vmt(_: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as DeriveInput);
     let struct_name = &input.ident;
 
