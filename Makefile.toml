@@ -1,132 +1,96 @@
 [env]
 CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+TF2_DIR = "${HOME}/.local/share/Steam/steamapps/common/Team Fortress 2"
+TF2_BIN_PATH = "${TF2_DIR}/bin/linux64"
+TMP_DIR = "/tmp/oxidus"
+
+COMMON_HELPERS = '''
+get_pid() {
+    pid=$(pidof tf_linux64) || { echo "TF2 not running" >&2; exit 1; }
+    echo "$pid"
+}
+
+build_lib() {
+    local features="$1"
+    local cargo_args=()
+    [[ -n "$features" ]] && cargo_args+=(--features "$features")
+    
+    lib_path=$(cargo build "${cargo_args[@]}" --message-format=json | \
+        jq -r 'select(.profile.test == false) | select(.target.name == "oxidus") | .filenames[0]')
+    
+    [[ -f "$lib_path" ]] || { echo "liboxidus.so not found" >&2; exit 1; }
+    echo "$lib_path"
+}
+
+copy_to_temp() {
+    mkdir -p "${TMP_DIR}"
+    local tmp_lib_path="${TMP_DIR}/liboxidus_$(date +%Y%m%d%H%M%S).so"
+    cp "$1" "$tmp_lib_path"
+    echo "$tmp_lib_path"
+}
+
+run_inject_gdb() {
+    local pid="$1"
+    local lib_path="$2"
+    local mode="$3"
+    local continue_exec="${4:-false}"
+    
+    local gdb_cmds=(
+        -ex "attach $pid"
+        -ex "set \$dlopen = (void* (*)(char*, int))dlopen"
+        -ex "set \$dlerror = (char* (*)(void))dlerror"
+        -ex "call \$dlopen(\"$lib_path\", $mode)"
+        -ex "call \$dlerror()"
+    )
+    
+    if $continue_exec; then
+        sudo rust-gdb -q "${gdb_cmds[@]}" -ex "continue"
+    else
+        sudo rust-gdb -n -q -batch "${gdb_cmds[@]}" -ex "detach" -ex "quit"
+    fi
+}
+'''
 
 [tasks.inject]
 workspace = false
 script = '''
-#!/bin/bash
-pid=$(pidof tf_linux64)
-if [ -z "$pid" ]; then
-    echo "tf2 not running"
-    exit 1
-fi
-
-
-echo $pid
-lib_path=$(cargo build --message-format=json | jq -r 'select(.profile.test == false) | select(.target.name == "oxidus" ) | .filenames[0]')
-#lib_path=./target/debug/liboxidus.so
-if [ ! -f "$lib_path" ]; then
-    echo "liboxidus.so not found"
-    exit 1
-fi
-
-mkdir -p /tmp/oxidus
-tmp_lib_path="/tmp/oxidus/liboxidus_$(date +%Y%m%d%H%M%S).so"
-cp "$lib_path" "$tmp_lib_path"
-
-
-sudo rust-gdb -n -q -batch \
-    -ex "attach $pid" \
-    -ex "set \$dlopen = (void* (*)(char*, int))dlopen" \
-    -ex "set \$dlerror = (char* (*)(void))dlerror" \
-    -ex "call \$dlopen(\"$tmp_lib_path\", 10)" \
-    -ex "call \$dlerror()" \
-    -ex "detach" \
-    -ex "quit"
-
-if [ $? -ne 0 ]; then
-    echo "failed to inject"
-    exit 1
-fi
+eval "${COMMON_HELPERS}"
+pid=$(get_pid)
+lib_path=$(build_lib "")
+tmp_lib_path=$(copy_to_temp "$lib_path")
+run_inject_gdb "$pid" "$tmp_lib_path" 10 false || exit 1
 '''
 
 [tasks.dump-netvars]
 workspace = false
 script = '''
-#!/bin/bash
-pid=$(pidof tf_linux64)
-if [ -z "$pid" ]; then
-    echo "tf2 not running"
-    exit 1
-fi
-
-echo $pid
-lib_path=$(cargo build --features dump-netvars --message-format=json | jq -r 'select(.profile.test == false) | select(.target.name == "oxidus" ) | .filenames[0]')
-if [ ! -f "$lib_path" ]; then
-    echo "liboxidus.so not found"
-    exit 1
-fi
-
-mkdir -p /tmp/oxidus
-
-tmp_lib_path="/tmp/oxidus/liboxidus_$(date +%Y%m%d%H%M%S).so"
-cp "$lib_path" "$tmp_lib_path"
-
-sudo rust-gdb -n -q -batch \
-    -ex "attach $pid" \
-    -ex "set \$dlopen = (void* (*)(char*, int))dlopen" \
-    -ex "set \$dlerror = (char* (*)(void))dlerror" \
-    -ex "call \$dlopen(\"$tmp_lib_path\", 2)" \
-    -ex "call \$dlerror()" \
-    -ex "detach" \
-    -ex "quit"
-
-if [ $? -ne 0 ]; then
-    echo "failed to inject"
-    exit 1
-fi
+eval "${COMMON_HELPERS}"
+pid=$(get_pid)
+lib_path=$(build_lib "dump-netvars")
+tmp_lib_path=$(copy_to_temp "$lib_path")
+run_inject_gdb "$pid" "$tmp_lib_path" 2 false || exit 1
 '''
-
 
 [tasks.inject-gdb]
 workspace = false
 script = '''
-#!/bin/bash
-pid=$(pidof tf_linux64)
-if [ -z "$pid" ]; then
-    echo "tf2 not running"
-    exit 1
-fi
-
-echo $pid
-lib_path=$(cargo build --message-format=json | jq -r 'select(.profile.test == false) | select(.target.name == "oxidus" ) | .filenames[0]')
-if [ ! -f "$lib_path" ]; then
-    echo "liboxidus.so not found"
-    exit 1
-fi
-
-cp "$lib_path" /tmp/liboxidus.so
-
-sudo rust-gdb -q \
-    -ex "attach $pid" \
-    -ex "set \$dlopen = (void* (*)(char*, int))dlopen" \
-    -ex "set \$dlerror = (char* (*)(void))dlerror" \
-    -ex "call \$dlopen(\"/tmp/liboxidus.so\", 2)" \
-    -ex "call \$dlerror()" \
-    -ex "continue"
-
-if [ $? -ne 0 ]; then
-    echo "failed to inject"
-    exit 1
-fi
+eval "${COMMON_HELPERS}"
+pid=$(get_pid)
+lib_path=$(build_lib "")
+tmp_lib_path=$(copy_to_temp "$lib_path")
+run_inject_gdb "$pid" "$tmp_lib_path" 2 true || exit 1
 '''
-
 
 [tasks.unload]
 workspace = false
 script = '''
-#!/bin/bash
-pid=$(pidof tf_linux64)
-if [ -z "$pid" ]; then
-    echo "tf2 not running"
-    exit 1
-fi
-
-libpath=$(ls -t /tmp/oxidus/oxidus/liboxidus_*.so 2>/dev/null | head -n 1)
-echo $libpath
+eval "${COMMON_HELPERS}"
+pid=$(get_pid)
+libpath=$(ls -t ${TMP_DIR}/liboxidus_*.so 2>/dev/null | head -n1)
+[[ -z "$libpath" ]] && { echo "No libraries found" >&2; exit 1; }
 
 sudo rust-gdb -n -q -batch \
-    -ex "set solib-search-path ~/.local/share/Steam/steamapps/common/Team Fortress 2/bin/linux64:/usr/lib:/lib:/lib64" \
+    -ex "set solib-search-path ${TF2_BIN_PATH}:/usr/lib:/lib:/lib64" \
     -ex "attach $pid" \
     -ex "set \$dlopen = (void* (*)(char*, int))dlopen" \
     -ex "set \$dlclose = (int (*)(void*))dlclose" \
@@ -137,72 +101,52 @@ sudo rust-gdb -n -q -batch \
     -ex "call \$dlclose(\$self)" \
     -ex "call \$dlerror()" \
     -ex "detach" \
-    -ex "quit"
-
-if [ $? -ne 0 ]; then
-    echo "failed to unload"
-    exit 1
-fi
-
-rm -rf libpath 
+    -ex "quit" || { echo "Failed to unload" >&2; exit 1; }
 '''
 
 [tasks.start-tf2]
 workspace = false
 script = '''
 pkill -9 tf_linux64 || true
-
-cd ~/.local/share/Steam/steamapps/common/Team\ Fortress\ 2
-export LD_LIBRARY_PATH='bin/linux64';
-#export LD_DEBUG=all;
-#export LD_DEBUG=libs;
-~/.local/share/Steam/steamapps/common/Team\ Fortress\ 2/tf_linux64
-~/.local/share/Steam/steamapps/common/Team\ Fortress\ 2/tf_linux64 -steam -gl
+cd "${TF2_DIR}"
+export LD_LIBRARY_PATH="${TF2_BIN_PATH}"
+"${TF2_DIR}/tf_linux64" -steam -gl
 '''
 
 [tasks.attach-gdb]
 workspace = false
 script = '''
-#!/bin/bash
-pid=$(pidof tf_linux64)
-if [ -z "$pid" ]; then
-    echo "TF2 not running"
-    exit 1
-fi
-
+eval "${COMMON_HELPERS}"
+pid=$(get_pid)
 sudo rust-gdb -q \
-    -ex "set solib-search-path ~/.local/share/Steam/steamapps/common/Team Fortress 2/bin/linux64" \
+    -ex "set solib-search-path ${TF2_BIN_PATH}" \
     -ex "attach $pid" \
     -ex "set \$dlopen = (void* (*)(char*, int))dlopen" \
     -ex "tui enable" \
-    -ex "continue" 
+    -ex "continue"
 '''
 
 [tasks.maps]
 workspace = false
 script = '''
-#!/bin/bash
-pid=$(pidof tf_linux64)
-if [ -z "$pid" ]; then
-    echo "TF2 not running"
-    exit 1
-fi
-nvim /proc/$pid/maps
+eval "${COMMON_HELPERS}"
+pid=$(get_pid)
+nvim "/proc/$pid/maps"
 '''
 
 [tasks.expand]
 workspace = false
 script = '''
-#!/bin/bash
-
-cd oxidus
-cargo expand --lib > ../expand.rs 
+cd oxidus && cargo expand --lib > ../expand.rs
 nvim ../expand.rs
 '''
 
 [tasks.reload]
-workspace = false
 dependencies = ["build", "unload", "inject"]
+
+[tasks.build]
+command = "cargo"
+args = ["build"]
 
 [tasks.default]
 dependencies = ["build"]

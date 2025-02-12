@@ -7,3 +7,4 @@ pub struct BaseEntity {
     #[offset(3)]
     pub get_origin2: extern "C" fn(test: f32) -> [f32; 3],
 }
+
