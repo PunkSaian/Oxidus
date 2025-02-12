@@ -38,7 +38,7 @@ pub fn vmt(attr: TokenStream, item: TokenStream) -> TokenStream {
                 else {
                     panic!("Invalid offset attribute");
                 };
-                let offset = literal.to_string().parse::<usize>().unwrap();
+                let offset = literal.to_string().parse::<isize>().unwrap();
 
                 fields_with_offsets.push((field.ident.clone(), field.ty.clone(), offset));
             }
@@ -72,9 +72,9 @@ pub fn vmt(attr: TokenStream, item: TokenStream) -> TokenStream {
             quote! {
                 fn #ident(&self) #ret {
                     unsafe {
-                        let vtable = self as *const Self as *const *const extern "C" fn();
-                        let func = *vtable.offset(#offset as isize);
-                        func(#(#args),*)
+                        let vtable = self as *const Self as *const &extern "C" fn() #ret;
+                        let func = *vtable.offset(#offset);
+                        (func)(#(#args),*)
                     }
                 }
             }
@@ -82,9 +82,9 @@ pub fn vmt(attr: TokenStream, item: TokenStream) -> TokenStream {
             quote! {
                 fn #ident(&self, #args_with_types) #ret {
                     unsafe {
-                        let vtable = self as *const Self as *const *const extern "C" fn();
-                        let func = *vtable.offset(#offset as isize);
-                        func(#(#args),*)
+                        let vtable = self as *const Self as *const &extern "C" fn(#args_with_types) #ret;
+                        let func = *vtable.offset(#offset);
+                        (func)(#(#args),*)
                     }
                 }
             }
