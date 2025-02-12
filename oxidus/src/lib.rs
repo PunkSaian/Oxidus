@@ -82,7 +82,14 @@ pub fn main() -> OxidusResult {
 #[allow(clippy::missing_panics_doc)]
 pub fn cleanup() -> OxidusResult {
     let mut hooks = HOOKS.lock().unwrap();
+    for hook in hooks.iter_mut() {
+        let mut hook = hook.write().unwrap();
+        if let Err(e) = hook.restore() {
+            warn!("Failed to restore hook: {:?}", e);
+        }
+    }
     hooks.clear();
+
     unload_overlay();
     Ok(())
 }
@@ -108,11 +115,10 @@ unsafe extern "C" fn load() {
 extern "C" fn oxidus_cleanup() {
     thread::spawn(|| {
         info!("Unloading");
-        info!("Cleanup started");
         if let Err(e) = cleanup() {
-            error!("Failed to cleanup\n{e}");
+            error!("Failed to unload \n{e}");
         } else {
-            info!("Cleanup finished");
+            info!("Unloaded");
         }
     });
 }
@@ -122,7 +128,7 @@ extern "C" fn oxidus_cleanup() {
 static LOAD: unsafe extern "C" fn() = { load };
 
 extern "C" fn unload() {
-    info!("Unloaded");
+    info!("Fini");
 }
 
 #[link_section = ".fini_array"]

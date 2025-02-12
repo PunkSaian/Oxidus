@@ -4,10 +4,10 @@ pub type Vector3 = [f32;3];
 pub type Unknown = [u8;0];
 use macros::tf2_struct;
 
-#[tf2_struct(WeaponIFMBaseCamera)]
+#[tf2_struct(baselcass = WeaponIFMBaseCamera)]
 pub struct WeaponIFMSteadyCam;
 
-#[tf2_struct(WeaponIFMBase)]
+#[tf2_struct(baselcass = WeaponIFMBase)]
 pub struct WeaponIFMBaseCamera {
     #[offset(4312)]
     pub m_flRenderAspectRatio: f32,
@@ -21,10 +21,10 @@ pub struct WeaponIFMBaseCamera {
     pub m_angRenderAngles: Vector2,
 }
 
-#[tf2_struct(TFWeaponBase)]
+#[tf2_struct(baselcass = TFWeaponBase)]
 pub struct WeaponIFMBase;
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct MannVsMachineStats {
     #[offset(1968)]
     pub m_runningTotalWaveStats: CMannVsMachineWaveStats,
@@ -42,37 +42,37 @@ pub struct MannVsMachineStats {
     pub m_nRespecsAwardedInWave: i32,
 }
 
-#[tf2_struct(TFBaseBoss)]
+#[tf2_struct(baselcass = TFBaseBoss)]
 pub struct TFTankBoss;
 
-#[tf2_struct(NextBot)]
+#[tf2_struct(baselcass = NextBot)]
 pub struct TFBaseBoss {
     #[offset(4632)]
     pub m_lastHealthPercentage: f32,
 }
 
-#[tf2_struct(NextBot)]
+#[tf2_struct(baselcass = NextBot)]
 pub struct BossAlpha {
     #[offset(4620)]
     pub m_isNuking: i32,
 }
 
-#[tf2_struct(BaseCombatCharacter)]
+#[tf2_struct(baselcass = BaseCombatCharacter)]
 pub struct NextBot;
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct TFBotHintEngineerNest {
     #[offset(1966)]
     pub m_bHasActiveTeleporter: bool,
 }
 
-#[tf2_struct(NextBot)]
+#[tf2_struct(baselcass = NextBot)]
 pub struct BotNPCMinion {
     #[offset(4620)]
     pub m_stunTarget: i32,
 }
 
-#[tf2_struct(NextBot)]
+#[tf2_struct(baselcass = NextBot)]
 pub struct BotNPC {
     #[offset(4620)]
     pub m_laserTarget: i32,
@@ -80,46 +80,46 @@ pub struct BotNPC {
     pub m_isNuking: i32,
 }
 
-#[tf2_struct(TFProjectile_SpellBats)]
+#[tf2_struct(baselcass = TFProjectile_SpellBats)]
 pub struct TFProjectile_SpellKartBats;
 
-#[tf2_struct(TFProjectile_SpellFireball)]
+#[tf2_struct(baselcass = TFProjectile_SpellFireball)]
 pub struct TFProjectile_SpellKartOrb;
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct TFHellZap;
 
-#[tf2_struct(TFProjectile_SpellFireball)]
+#[tf2_struct(baselcass = TFProjectile_SpellFireball)]
 pub struct TFProjectile_SpellLightningOrb;
 
-#[tf2_struct(TFProjectile_SpellBats)]
+#[tf2_struct(baselcass = TFProjectile_SpellBats)]
 pub struct SpellTransposeTeleport;
 
-#[tf2_struct(TFProjectile_SpellBats)]
+#[tf2_struct(baselcass = TFProjectile_SpellBats)]
 pub struct TFProjectile_SpellMeteorShower;
 
-#[tf2_struct(TFProjectile_SpellBats)]
+#[tf2_struct(baselcass = TFProjectile_SpellBats)]
 pub struct TFProjectile_SpellSpawnBoss;
 
-#[tf2_struct(TFProjectile_SpellBats)]
+#[tf2_struct(baselcass = TFProjectile_SpellBats)]
 pub struct TFProjectile_SpellMirv;
 
-#[tf2_struct(TFProjectile_SpellBats)]
+#[tf2_struct(baselcass = TFProjectile_SpellBats)]
 pub struct TFProjectile_SpellPumpkin;
 
-#[tf2_struct(TFProjectile_SpellBats)]
+#[tf2_struct(baselcass = TFProjectile_SpellBats)]
 pub struct TFProjectile_SpellSpawnHorde;
 
-#[tf2_struct(TFProjectile_SpellBats)]
+#[tf2_struct(baselcass = TFProjectile_SpellBats)]
 pub struct TFProjectile_SpellSpawnZombie;
 
-#[tf2_struct(TFProjectile_Jar)]
+#[tf2_struct(baselcass = TFProjectile_Jar)]
 pub struct TFProjectile_SpellBats;
 
-#[tf2_struct(TFProjectile_Rocket)]
+#[tf2_struct(baselcass = TFProjectile_Rocket)]
 pub struct TFProjectile_SpellFireball;
 
-#[tf2_struct(TFWeaponThrowable)]
+#[tf2_struct(baselcass = TFWeaponThrowable)]
 pub struct TFWeaponSpellBook {
     #[offset(4304)]
     pub m_flTimeNextSpell: f32,
@@ -131,28 +131,28 @@ pub struct TFWeaponSpellBook {
     pub m_bFiredAttack: bool,
 }
 
-#[tf2_struct(TeleportVortex)]
+#[tf2_struct(baselcass = TeleportVortex)]
 pub struct Hightower_TeleportVortex {
     #[offset(3104)]
     pub m_iState: i32,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct TeleportVortex {
     #[offset(3104)]
     pub m_iState: i32,
 }
 
-#[tf2_struct(NextBot)]
+#[tf2_struct(baselcass = NextBot)]
 pub struct Zombie {
     #[offset(4620)]
     pub m_flHeadScale: f32,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct MerasmusDancer;
 
-#[tf2_struct(NextBot)]
+#[tf2_struct(baselcass = NextBot)]
 pub struct Merasmus {
     #[offset(4697)]
     pub m_bRevealed: bool,
@@ -162,7 +162,7 @@ pub struct Merasmus {
     pub m_bStunned: bool,
 }
 
-#[tf2_struct(NextBot)]
+#[tf2_struct(baselcass = NextBot)]
 pub struct EyeballBoss {
     #[offset(4620)]
     pub m_lookAtSpot: Vector2,
@@ -170,10 +170,10 @@ pub struct EyeballBoss {
     pub m_attitude: i32,
 }
 
-#[tf2_struct(NextBot)]
+#[tf2_struct(baselcass = NextBot)]
 pub struct HeadlessHatman;
 
-#[tf2_struct(TFWeaponBaseMelee)]
+#[tf2_struct(baselcass = TFWeaponBaseMelee)]
 pub struct TFWeaponRocketPack {
     #[offset(4264)]
     pub m_flInitLaunchTime: f32,
@@ -185,43 +185,43 @@ pub struct TFWeaponRocketPack {
     pub m_bEnabled: bool,
 }
 
-#[tf2_struct(TFProjectile_Rocket)]
+#[tf2_struct(baselcass = TFProjectile_Rocket)]
 pub struct TFProjectile_MechanicalArmOrb;
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct TFMechanicalArm;
 
-#[tf2_struct(TFWearable)]
+#[tf2_struct(baselcass = TFWearable)]
 pub struct TFWearableCampaignItem {
     #[offset(3792)]
     pub m_nState: i32,
 }
 
-#[tf2_struct(TFWearable)]
+#[tf2_struct(baselcass = TFWearable)]
 pub struct TFWearableLevelableItem {
     #[offset(3792)]
     pub m_unLevel: i32,
 }
 
-#[tf2_struct(TFWearable)]
+#[tf2_struct(baselcass = TFWearable)]
 pub struct TFWearableRazorback;
 
-#[tf2_struct(TFWearable)]
+#[tf2_struct(baselcass = TFWearable)]
 pub struct TFWearableDemoShield;
 
-#[tf2_struct(WeaponFlareGun)]
+#[tf2_struct(baselcass = WeaponFlareGun)]
 pub struct WeaponFlareGun_Revenge {
     #[offset(4276)]
     pub m_fLastExtinguishTime: f32,
 }
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct WeaponFlareGun {
     #[offset(4248)]
     pub m_flChargeBeginTime: f32,
 }
 
-#[tf2_struct(BaseProjectile)]
+#[tf2_struct(baselcass = BaseProjectile)]
 pub struct TFBaseRocket {
     #[offset(1096)]
     pub m_vecOrigin: Vector2,
@@ -235,16 +235,16 @@ pub struct TFBaseRocket {
     pub m_hLauncher: i32,
 }
 
-#[tf2_struct(TFWeaponBase)]
+#[tf2_struct(baselcass = TFWeaponBase)]
 pub struct TFWeaponBaseMelee;
 
-#[tf2_struct(TFWeaponBase)]
+#[tf2_struct(baselcass = TFWeaponBase)]
 pub struct TFWeaponBaseGun;
 
-#[tf2_struct(BaseGrenade)]
+#[tf2_struct(baselcass = BaseGrenade)]
 pub struct TFWeaponBaseMerasmusGrenade;
 
-#[tf2_struct(BaseGrenade)]
+#[tf2_struct(baselcass = BaseGrenade)]
 pub struct TFWeaponBaseGrenadeProj {
     #[offset(1096)]
     pub m_vecOrigin: Vector2,
@@ -260,7 +260,7 @@ pub struct TFWeaponBaseGrenadeProj {
     pub m_bCritical: bool,
 }
 
-#[tf2_struct(BaseCombatWeapon)]
+#[tf2_struct(baselcass = BaseCombatWeapon)]
 pub struct TFWeaponBase {
     #[offset(3956)]
     pub m_iReloadMode: i32,
@@ -297,80 +297,80 @@ impl TFWeaponBase {
     pub type NonLocalTFWeaponData = TFWeaponDataNonLocal;
 }
 
-#[tf2_struct(TFWearable)]
+#[tf2_struct(baselcass = TFWearable)]
 pub struct TFWearableRobotArm;
 
-#[tf2_struct(TFWeaponWrench)]
+#[tf2_struct(baselcass = TFWeaponWrench)]
 pub struct TFWeaponRobotArm {
     #[offset(4264)]
     pub m_hRobotArm: i32,
 }
 
-#[tf2_struct(TFWeaponBaseMelee)]
+#[tf2_struct(baselcass = TFWeaponBaseMelee)]
 pub struct TFWeaponWrench;
 
-#[tf2_struct(TFProjectile_Throwable)]
+#[tf2_struct(baselcass = TFProjectile_Throwable)]
 pub struct TFProjectile_ThrowableBreadMonster;
 
-#[tf2_struct(TFProjectile_Throwable)]
+#[tf2_struct(baselcass = TFProjectile_Throwable)]
 pub struct TFProjectile_ThrowableBrick;
 
-#[tf2_struct(TFProjectile_Throwable)]
+#[tf2_struct(baselcass = TFProjectile_Throwable)]
 pub struct TFProjectile_ThrowableRepel;
 
-#[tf2_struct(TFProjectile_Jar)]
+#[tf2_struct(baselcass = TFProjectile_Jar)]
 pub struct TFProjectile_Throwable;
 
-#[tf2_struct(TFWeaponJar)]
+#[tf2_struct(baselcass = TFWeaponJar)]
 pub struct TFWeaponThrowable {
     #[offset(4264)]
     pub m_flChargeBeginTime: f32,
 }
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct WeaponSyringeGun;
 
-#[tf2_struct(TFWeaponBaseMelee)]
+#[tf2_struct(baselcass = TFWeaponBaseMelee)]
 pub struct TFWeaponKatana {
     #[offset(4268)]
     pub m_bIsBloody: bool,
 }
 
-#[tf2_struct(TFWeaponBaseMelee)]
+#[tf2_struct(baselcass = TFWeaponBaseMelee)]
 pub struct TFWeaponSword;
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct SniperDot {
     #[offset(2016)]
     pub m_flChargeStartTime: f32,
 }
 
-#[tf2_struct(TFSniperRifle)]
+#[tf2_struct(baselcass = TFSniperRifle)]
 pub struct TFSniperRifleClassic {
     #[offset(4276)]
     pub m_bCharging: bool,
 }
 
-#[tf2_struct(TFSniperRifle)]
+#[tf2_struct(baselcass = TFSniperRifle)]
 pub struct TFSniperRifleDecap;
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct TFSniperRifle;
 
 impl TFSniperRifle {
     pub type SniperRifleLocalData = SniperRifleLocalData;
 }
 
-#[tf2_struct(TFSMG)]
+#[tf2_struct(baselcass = TFSMG)]
 pub struct WeaponChargedSMG {
     #[offset(4248)]
     pub m_flMinicritCharge: f32,
 }
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct TFSMG;
 
-#[tf2_struct(TFWeaponBaseMelee)]
+#[tf2_struct(baselcass = TFWeaponBaseMelee)]
 pub struct TFWeaponSlap {
     #[offset(4262)]
     pub m_bFirstHit: bool,
@@ -378,37 +378,37 @@ pub struct TFWeaponSlap {
     pub m_nNumKills: i32,
 }
 
-#[tf2_struct(TFWeaponBaseMelee)]
+#[tf2_struct(baselcass = TFWeaponBaseMelee)]
 pub struct TFWeaponShovel;
 
-#[tf2_struct(TFShotgun)]
+#[tf2_struct(baselcass = TFShotgun)]
 pub struct TFShotgunBuildingRescue;
 
-#[tf2_struct(TFScatterGun)]
+#[tf2_struct(baselcass = TFScatterGun)]
 pub struct TFPEPBrawlerBlaster;
 
-#[tf2_struct(TFScatterGun)]
+#[tf2_struct(baselcass = TFScatterGun)]
 pub struct TFSodaPopper;
 
-#[tf2_struct(TFShotgun)]
+#[tf2_struct(baselcass = TFShotgun)]
 pub struct TFShotgun_Revenge;
 
-#[tf2_struct(TFShotgun)]
+#[tf2_struct(baselcass = TFShotgun)]
 pub struct TFScatterGun;
 
-#[tf2_struct(TFShotgun)]
+#[tf2_struct(baselcass = TFShotgun)]
 pub struct TFShotgun_Pyro;
 
-#[tf2_struct(TFShotgun)]
+#[tf2_struct(baselcass = TFShotgun)]
 pub struct TFShotgun_HWG;
 
-#[tf2_struct(TFShotgun)]
+#[tf2_struct(baselcass = TFShotgun)]
 pub struct TFShotgun_Soldier;
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct TFShotgun;
 
-#[tf2_struct(WeaponRocketLauncher)]
+#[tf2_struct(baselcass = WeaponRocketLauncher)]
 pub struct Crossbow {
     #[offset(4256)]
     pub m_flRegenerateDuration: f32,
@@ -416,68 +416,68 @@ pub struct Crossbow {
     pub m_flLastUsedTimestamp: f32,
 }
 
-#[tf2_struct(WeaponRocketLauncher)]
+#[tf2_struct(baselcass = WeaponRocketLauncher)]
 pub struct WeaponRocketLauncher_Mortar;
 
-#[tf2_struct(WeaponRocketLauncher)]
+#[tf2_struct(baselcass = WeaponRocketLauncher)]
 pub struct WeaponRocketLauncher_AirStrike;
 
-#[tf2_struct(WeaponRocketLauncher)]
+#[tf2_struct(baselcass = WeaponRocketLauncher)]
 pub struct WeaponRocketLauncher_DirectHit;
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct WeaponRocketLauncher;
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct WeaponRevolver;
 
-#[tf2_struct(WeaponRaygun)]
+#[tf2_struct(baselcass = WeaponRaygun)]
 pub struct WeaponDRGPomson;
 
-#[tf2_struct(WeaponRocketLauncher)]
+#[tf2_struct(baselcass = WeaponRocketLauncher)]
 pub struct WeaponRaygun {
     #[offset(4261)]
     pub m_bUseNewProjectileCode: bool,
 }
 
-#[tf2_struct(WeaponPistol_Scout)]
+#[tf2_struct(baselcass = WeaponPistol_Scout)]
 pub struct WeaponPistol_ScoutSecondary;
 
-#[tf2_struct(WeaponPistol_Scout)]
+#[tf2_struct(baselcass = WeaponPistol_Scout)]
 pub struct WeaponPistol_ScoutPrimary;
 
-#[tf2_struct(WeaponPistol)]
+#[tf2_struct(baselcass = WeaponPistol)]
 pub struct WeaponPistol_Scout;
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct WeaponPistol;
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct WeaponPipebombLauncher;
 
 impl WeaponPipebombLauncher {
     pub type PipebombLauncherLocalData = PipebombLauncherLocalData;
 }
 
-#[tf2_struct(TFWeaponPDA)]
+#[tf2_struct(baselcass = TFWeaponPDA)]
 pub struct TFWeaponPDA_Spy;
 
-#[tf2_struct(TFWeaponPDA)]
+#[tf2_struct(baselcass = TFWeaponPDA)]
 pub struct TFWeaponPDA_Engineer_Destroy;
 
-#[tf2_struct(TFWeaponPDA)]
+#[tf2_struct(baselcass = TFWeaponPDA)]
 pub struct TFWeaponPDA_Engineer_Build;
 
-#[tf2_struct(TFWearable)]
+#[tf2_struct(baselcass = TFWearable)]
 pub struct TFWeaponPDAExpansion_Teleporter;
 
-#[tf2_struct(TFWearable)]
+#[tf2_struct(baselcass = TFWearable)]
 pub struct TFWeaponPDAExpansion_Dispenser;
 
-#[tf2_struct(TFWeaponBase)]
+#[tf2_struct(baselcass = TFWeaponBase)]
 pub struct TFWeaponPDA;
 
-#[tf2_struct(WeaponRocketLauncher)]
+#[tf2_struct(baselcass = WeaponRocketLauncher)]
 pub struct ParticleCannon {
     #[offset(4256)]
     pub m_flChargeBeginTime: f32,
@@ -485,16 +485,16 @@ pub struct ParticleCannon {
     pub m_iChargeEffect: i32,
 }
 
-#[tf2_struct(TFParachute)]
+#[tf2_struct(baselcass = TFParachute)]
 pub struct TFParachute_Secondary;
 
-#[tf2_struct(TFParachute)]
+#[tf2_struct(baselcass = TFParachute)]
 pub struct TFParachute_Primary;
 
-#[tf2_struct(TFWeaponBuffItem)]
+#[tf2_struct(baselcass = TFWeaponBuffItem)]
 pub struct TFParachute;
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct WeaponMinigun {
     #[offset(4248)]
     pub m_iWeaponState: i32,
@@ -502,10 +502,10 @@ pub struct WeaponMinigun {
     pub m_bCritShot: bool,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct TFMedigunShield;
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct WeaponMedigun {
     #[offset(4248)]
     pub m_hHealingTarget: i32,
@@ -524,26 +524,26 @@ pub struct WeaponMedigun {
 }
 
 impl WeaponMedigun {
-    pub type LocalTFWeaponMedigunData = LocalTFWeaponMedigunData;
     pub type NonLocalTFWeaponMedigunData = TFWeaponMedigunDataNonLocal;
+    pub type LocalTFWeaponMedigunData = LocalTFWeaponMedigunData;
 }
 
-#[tf2_struct(WeaponLunchBox)]
+#[tf2_struct(baselcass = WeaponLunchBox)]
 pub struct TFLunchBox_Drink;
 
-#[tf2_struct(TFWeaponBase)]
+#[tf2_struct(baselcass = TFWeaponBase)]
 pub struct WeaponLunchBox {
     #[offset(4252)]
     pub m_bBroken: bool,
 }
 
-#[tf2_struct(SniperDot)]
+#[tf2_struct(baselcass = SniperDot)]
 pub struct LaserDot;
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct TFLaserPointer;
 
-#[tf2_struct(TFWeaponBaseMelee)]
+#[tf2_struct(baselcass = TFWeaponBaseMelee)]
 pub struct TFWeaponKnife {
     #[offset(4276)]
     pub m_bReadyToBackstab: bool,
@@ -555,40 +555,40 @@ pub struct TFWeaponKnife {
     pub m_flKnifeMeltTimestamp: f32,
 }
 
-#[tf2_struct(TFPointManager)]
+#[tf2_struct(baselcass = TFPointManager)]
 pub struct TFGasManager;
 
-#[tf2_struct(TFProjectile_Jar)]
+#[tf2_struct(baselcass = TFProjectile_Jar)]
 pub struct TFProjectile_JarGas;
 
-#[tf2_struct(TFWeaponJar)]
+#[tf2_struct(baselcass = TFWeaponJar)]
 pub struct TFWeaponJarGas;
 
-#[tf2_struct(TFProjectile_Jar)]
+#[tf2_struct(baselcass = TFProjectile_Jar)]
 pub struct TFProjectile_Cleaver;
 
-#[tf2_struct(TFProjectile_Jar)]
+#[tf2_struct(baselcass = TFProjectile_Jar)]
 pub struct TFProjectile_JarMilk;
 
-#[tf2_struct(TFProjectile_Pipebomb)]
+#[tf2_struct(baselcass = TFProjectile_Pipebomb)]
 pub struct TFProjectile_Jar;
 
-#[tf2_struct(TFWeaponJar)]
+#[tf2_struct(baselcass = TFWeaponJar)]
 pub struct TFWeaponCleaver;
 
-#[tf2_struct(TFWeaponJar)]
+#[tf2_struct(baselcass = TFWeaponJar)]
 pub struct TFWeaponJarMilk;
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct TFWeaponJar;
 
-#[tf2_struct(TFWeaponBase)]
+#[tf2_struct(baselcass = TFWeaponBase)]
 pub struct TFWeaponInvis;
 
-#[tf2_struct(WeaponGrenadeLauncher)]
+#[tf2_struct(baselcass = WeaponGrenadeLauncher)]
 pub struct TFCannon;
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct WeaponGrenadeLauncher {
     #[offset(4260)]
     pub m_flDetonateTime: f32,
@@ -598,7 +598,7 @@ pub struct WeaponGrenadeLauncher {
     pub m_iGoalTube: i32,
 }
 
-#[tf2_struct(TFWeaponBaseGrenadeProj)]
+#[tf2_struct(baselcass = TFWeaponBaseGrenadeProj)]
 pub struct TFProjectile_Pipebomb {
     #[offset(3140)]
     pub m_hLauncher: i32,
@@ -610,16 +610,16 @@ pub struct TFProjectile_Pipebomb {
     pub m_bDefensiveBomb: bool,
 }
 
-#[tf2_struct(WeaponRocketLauncher)]
+#[tf2_struct(baselcass = WeaponRocketLauncher)]
 pub struct GrapplingHook {
     #[offset(4272)]
     pub m_hProjectile: i32,
 }
 
-#[tf2_struct(TFBaseRocket)]
+#[tf2_struct(baselcass = TFBaseRocket)]
 pub struct TFFlameRocket;
 
-#[tf2_struct(TFWeaponBaseGun)]
+#[tf2_struct(baselcass = TFWeaponBaseGun)]
 pub struct WeaponFlameThrower {
     #[offset(4248)]
     pub m_iWeaponState: i32,
@@ -635,19 +635,19 @@ impl WeaponFlameThrower {
     pub type LocalFlameThrowerData = LocalFlameThrower;
 }
 
-#[tf2_struct(TFWeaponBaseMelee)]
+#[tf2_struct(baselcass = TFWeaponBaseMelee)]
 pub struct TFWeaponFists;
 
-#[tf2_struct(TFWeaponBaseMelee)]
+#[tf2_struct(baselcass = TFWeaponBaseMelee)]
 pub struct TFWeaponFireAxe;
 
-#[tf2_struct(WeaponFlameThrower)]
+#[tf2_struct(baselcass = WeaponFlameThrower)]
 pub struct WeaponFlameBall {
     #[offset(4968)]
     pub m_flRechargeScale: f32,
 }
 
-#[tf2_struct(WeaponPipebombLauncher)]
+#[tf2_struct(baselcass = WeaponPipebombLauncher)]
 pub struct WeaponCompoundBow {
     #[offset(4320)]
     pub m_bNoFire: bool,
@@ -655,52 +655,52 @@ pub struct WeaponCompoundBow {
     pub m_bArrowAlight: bool,
 }
 
-#[tf2_struct(TFWeaponBaseMelee)]
+#[tf2_struct(baselcass = TFWeaponBaseMelee)]
 pub struct TFWeaponClub;
 
-#[tf2_struct(TFWeaponBaseMelee)]
+#[tf2_struct(baselcass = TFWeaponBaseMelee)]
 pub struct TFWeaponBuffItem;
 
-#[tf2_struct(TFWeaponBreakableMelee)]
+#[tf2_struct(baselcass = TFWeaponBreakableMelee)]
 pub struct TFWeaponStickBomb {
     #[offset(4264)]
     pub m_iDetonated: i32,
 }
 
-#[tf2_struct(TFWeaponBreakableMelee)]
+#[tf2_struct(baselcass = TFWeaponBreakableMelee)]
 pub struct TFWeaponBreakableSign;
 
-#[tf2_struct(TFWeaponBreakableMelee)]
+#[tf2_struct(baselcass = TFWeaponBreakableMelee)]
 pub struct TFWeaponBottle;
 
-#[tf2_struct(TFWeaponBaseMelee)]
+#[tf2_struct(baselcass = TFWeaponBaseMelee)]
 pub struct TFWeaponBreakableMelee {
     #[offset(4262)]
     pub m_bBroken: bool,
 }
 
-#[tf2_struct(TFWeaponBaseMelee)]
+#[tf2_struct(baselcass = TFWeaponBaseMelee)]
 pub struct TFWeaponBonesaw;
 
-#[tf2_struct(TFProjectile_StunBall)]
+#[tf2_struct(baselcass = TFProjectile_StunBall)]
 pub struct TFProjectileBall_Ornament;
 
-#[tf2_struct(TFProjectile_Pipebomb)]
+#[tf2_struct(baselcass = TFProjectile_Pipebomb)]
 pub struct TFProjectile_StunBall;
 
-#[tf2_struct(TFWeaponBat_Wood)]
+#[tf2_struct(baselcass = TFWeaponBat_Wood)]
 pub struct TFWeaponBat_Giftwrap;
 
-#[tf2_struct(TFWeaponBat)]
+#[tf2_struct(baselcass = TFWeaponBat)]
 pub struct TFWeaponBat_Wood;
 
-#[tf2_struct(TFWeaponBat)]
+#[tf2_struct(baselcass = TFWeaponBat)]
 pub struct TFWeaponBat_Fish;
 
-#[tf2_struct(TFWeaponBaseMelee)]
+#[tf2_struct(baselcass = TFWeaponBaseMelee)]
 pub struct TFWeaponBat;
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct TFDroppedWeapon {
     #[offset(3096)]
     pub m_Item: ScriptCreatedItem,
@@ -708,13 +708,13 @@ pub struct TFDroppedWeapon {
     pub m_flChargeLevel: f32,
 }
 
-#[tf2_struct(TFWeaponBuilder)]
+#[tf2_struct(baselcass = TFWeaponBuilder)]
 pub struct TFWeaponSapper {
     #[offset(4312)]
     pub m_flChargeBeginTime: f32,
 }
 
-#[tf2_struct(TFWeaponBase)]
+#[tf2_struct(baselcass = TFWeaponBase)]
 pub struct TFWeaponBuilder {
     #[offset(4248)]
     pub m_iBuildState: i32,
@@ -728,22 +728,22 @@ impl TFWeaponBuilder {
     pub type BuilderLocalData = BuilderLocalData;
 }
 
-#[tf2_struct(TFBaseRocket)]
+#[tf2_struct(baselcass = TFBaseRocket)]
 pub struct TFProjectile_Rocket {
     #[offset(3116)]
     pub m_bCritical: bool,
 }
 
-#[tf2_struct(TFBaseRocket)]
+#[tf2_struct(baselcass = TFBaseRocket)]
 pub struct TFProjectile_Flare {
     #[offset(3116)]
     pub m_bCritical: bool,
 }
 
-#[tf2_struct(TFBaseProjectile)]
+#[tf2_struct(baselcass = TFBaseProjectile)]
 pub struct TFProjectile_EnergyRing;
 
-#[tf2_struct(TFBaseRocket)]
+#[tf2_struct(baselcass = TFBaseRocket)]
 pub struct TFProjectile_EnergyBall {
     #[offset(3128)]
     pub m_bChargedShot: bool,
@@ -753,13 +753,13 @@ pub struct TFProjectile_EnergyBall {
     pub m_vColor2: Vector2,
 }
 
-#[tf2_struct(TFProjectile_Arrow)]
+#[tf2_struct(baselcass = TFProjectile_Arrow)]
 pub struct TFProjectile_GrapplingHook;
 
-#[tf2_struct(TFProjectile_Arrow)]
+#[tf2_struct(baselcass = TFProjectile_Arrow)]
 pub struct TFProjectile_HealingBolt;
 
-#[tf2_struct(TFBaseRocket)]
+#[tf2_struct(baselcass = TFBaseRocket)]
 pub struct TFProjectile_Arrow {
     #[offset(3125)]
     pub m_bArrowAlight: bool,
@@ -769,7 +769,7 @@ pub struct TFProjectile_Arrow {
     pub m_iProjectileType: i32,
 }
 
-#[tf2_struct(TFRobotDestructionLogic)]
+#[tf2_struct(baselcass = TFRobotDestructionLogic)]
 pub struct TFPlayerDestructionLogic {
     #[offset(2292)]
     pub m_hRedTeamLeader: i32,
@@ -781,13 +781,13 @@ pub struct TFPlayerDestructionLogic {
     pub m_iszCountdownImage: [i8; 260],
 }
 
-#[tf2_struct(ObjectDispenser)]
+#[tf2_struct(baselcass = ObjectDispenser)]
 pub struct PlayerDestructionDispenser;
 
-#[tf2_struct(ObjectDispenser)]
+#[tf2_struct(baselcass = ObjectDispenser)]
 pub struct RobotDispenser;
 
-#[tf2_struct(BaseCombatCharacter)]
+#[tf2_struct(baselcass = BaseCombatCharacter)]
 pub struct TFRobotDestruction_Robot {
     #[offset(4588)]
     pub m_iHealth: i32,
@@ -854,10 +854,10 @@ pub struct TFMinigameLogic {
     pub m_hActiveMinigame: i32,
 }
 
-#[tf2_struct(TFHalloweenMinigame)]
+#[tf2_struct(baselcass = TFHalloweenMinigame)]
 pub struct TFHalloweenMinigame_FallingPlatforms;
 
-#[tf2_struct(TFMinigame)]
+#[tf2_struct(baselcass = TFMinigame)]
 pub struct TFHalloweenMinigame;
 
 #[tf2_struct()]
@@ -872,16 +872,16 @@ pub struct TFMinigame {
     pub m_eScoringType: i32,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct TFPumpkinBomb;
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct TFGenericBomb;
 
-#[tf2_struct(BaseViewModel)]
+#[tf2_struct(baselcass = BaseViewModel)]
 pub struct TFViewModel;
 
-#[tf2_struct(TFProjectile_Rocket)]
+#[tf2_struct(baselcass = TFProjectile_Rocket)]
 pub struct TFProjectile_BallOfFire {
     #[offset(3152)]
     pub m_vecSpawnOrigin: Vector2,
@@ -889,7 +889,7 @@ pub struct TFProjectile_BallOfFire {
     pub m_vecInitialVelocity: Vector2,
 }
 
-#[tf2_struct(BaseProjectile)]
+#[tf2_struct(baselcass = BaseProjectile)]
 pub struct TFBaseProjectile {
     #[offset(3096)]
     pub m_vInitialVelocity: Vector2,
@@ -897,7 +897,7 @@ pub struct TFBaseProjectile {
     pub m_hLauncher: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct TFPointManager {
     #[offset(2128)]
     pub m_nRandomSeed: i32,
@@ -907,7 +907,7 @@ pub struct TFPointManager {
     pub m_unNextPointIndex: i32,
 }
 
-#[tf2_struct(TFWearable)]
+#[tf2_struct(baselcass = TFWearable)]
 pub struct TFPowerupBottle {
     #[offset(3790)]
     pub m_bActive: bool,
@@ -915,13 +915,13 @@ pub struct TFPowerupBottle {
     pub m_usNumCharges: i32,
 }
 
-#[tf2_struct(BaseObject)]
+#[tf2_struct(baselcass = BaseObject)]
 pub struct BaseObjectUpgrade;
 
-#[tf2_struct(DynamicProp)]
+#[tf2_struct(baselcass = DynamicProp)]
 pub struct TFItem;
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct HalloweenSoulPack {
     #[offset(1968)]
     pub m_hTarget: i32,
@@ -933,7 +933,7 @@ pub struct HalloweenSoulPack {
     pub m_flDuration: f32,
 }
 
-#[tf2_struct(BaseCombatCharacter)]
+#[tf2_struct(baselcass = BaseCombatCharacter)]
 pub struct TFTauntProp;
 
 #[tf2_struct()]
@@ -950,7 +950,7 @@ pub struct MonsterResource {
     pub m_iBossState: i32,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct TFReviveMarker {
     #[offset(3084)]
     pub m_hOwner: i32,
@@ -962,22 +962,22 @@ pub struct TFReviveMarker {
     pub m_iMaxHealth: i32,
 }
 
-#[tf2_struct(CHalloweenPickup)]
+#[tf2_struct(baselcass = CHalloweenPickup)]
 pub struct CHalloweenGiftPickup {
     #[offset(3112)]
     pub m_hTargetPlayer: i32,
 }
 
-#[tf2_struct(CHalloweenPickup)]
+#[tf2_struct(baselcass = CHalloweenPickup)]
 pub struct CBonusDuckPickup {
     #[offset(3128)]
     pub m_bSpecial: bool,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct CHalloweenPickup;
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct CBonusPack;
 
 #[tf2_struct()]
@@ -991,14 +991,14 @@ pub struct BonusRoundLogic {
     pub m_Item: ScriptCreatedItem,
 }
 
-#[tf2_struct(TeamplayRoundBasedRulesProxy)]
+#[tf2_struct(baselcass = TeamplayRoundBasedRulesProxy)]
 pub struct TFGameRulesProxy;
 
 impl TFGameRulesProxy {
     pub type tf_gamerules_data = TFGameRules;
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TETFParticleEffect {
     #[offset(32)]
     pub m_vecOrigin: [f32; 3],
@@ -1028,7 +1028,7 @@ pub struct TETFParticleEffect {
     pub m_ControlPoint1_m_vecOffset: [f32; 3],
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TETFExplosion {
     #[offset(32)]
     pub m_vecOrigin: [f32; 3],
@@ -1044,7 +1044,7 @@ pub struct TETFExplosion {
     pub m_iCustomParticleIndex: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TETFBlood {
     #[offset(32)]
     pub m_vecOrigin: [f32; 3],
@@ -1052,7 +1052,7 @@ pub struct TETFBlood {
     pub m_vecNormal: Vector2,
 }
 
-#[tf2_struct(TFPointManager)]
+#[tf2_struct(baselcass = TFPointManager)]
 pub struct TFFlameManager {
     #[offset(2368)]
     pub m_hWeapon: i32,
@@ -1092,10 +1092,10 @@ pub struct TFFlameManager {
     pub m_bIsFiring: bool,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct CaptureFlagReturnIcon;
 
-#[tf2_struct(TFItem)]
+#[tf2_struct(baselcass = TFItem)]
 pub struct CaptureFlag {
     #[offset(3136)]
     pub m_bDisabled: bool,
@@ -1133,7 +1133,7 @@ pub struct CaptureFlag {
     pub m_flTimeToSetPoisonous: f32,
 }
 
-#[tf2_struct(Team)]
+#[tf2_struct(baselcass = Team)]
 pub struct TFTeam {
     #[offset(2088)]
     pub m_nFlagCaptures: i32,
@@ -1147,7 +1147,7 @@ impl TFTeam {
     pub type team_object_array = [i32; 606];
 }
 
-#[tf2_struct(PlayerResource)]
+#[tf2_struct(baselcass = PlayerResource)]
 pub struct TFPlayerResource {
     #[offset(6096)]
     pub m_iTotalScore: [i32; 102],
@@ -1203,7 +1203,7 @@ pub struct TFPlayerResource {
     pub m_flConnectTime: [f32; 102],
 }
 
-#[tf2_struct(BasePlayer)]
+#[tf2_struct(baselcass = BasePlayer)]
 pub struct TFPlayer {
     #[offset(536)]
     pub m_nWaterLevel: i32,
@@ -1294,8 +1294,8 @@ pub struct TFPlayer {
 }
 
 impl TFPlayer {
-    pub type tflocaldata = TFLocalPlayerExclusive;
     pub type tfnonlocaldata = TFNonLocalPlayerExclusive;
+    pub type tflocaldata = TFLocalPlayerExclusive;
     pub type TFSendHealersDataTable = TFSendHealersDataTable;
 }
 
@@ -1360,7 +1360,7 @@ pub struct TEPlayerAnimEvent {
     pub m_nData: i32,
 }
 
-#[tf2_struct(BaseTeamObjectiveResource)]
+#[tf2_struct(baselcass = BaseTeamObjectiveResource)]
 pub struct TFObjectiveResource {
     #[offset(7296)]
     pub m_nMannVsMachineMaxWaveCount: i32,
@@ -1424,10 +1424,10 @@ pub struct TEFireBullets {
     pub m_bCritical: bool,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct TFBuffBanner;
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct AmmoPack {
     #[offset(1108)]
     pub m_angRotation: [f32; 3],
@@ -1435,7 +1435,7 @@ pub struct AmmoPack {
     pub m_vecInitialVelocity: Vector2,
 }
 
-#[tf2_struct(BaseObject)]
+#[tf2_struct(baselcass = BaseObject)]
 pub struct ObjectTeleporter {
     #[offset(5108)]
     pub m_iState: i32,
@@ -1451,7 +1451,7 @@ pub struct ObjectTeleporter {
     pub m_bMatchBuilding: bool,
 }
 
-#[tf2_struct(BaseObject)]
+#[tf2_struct(baselcass = BaseObject)]
 pub struct ObjectSentrygun {
     #[offset(5108)]
     pub m_iState: i32,
@@ -1473,16 +1473,16 @@ impl ObjectSentrygun {
     pub type SentrygunLocalData = SentrygunLocalData;
 }
 
-#[tf2_struct(TFProjectile_Rocket)]
+#[tf2_struct(baselcass = TFProjectile_Rocket)]
 pub struct TFProjectile_SentryRocket;
 
-#[tf2_struct(BaseObjectUpgrade)]
+#[tf2_struct(baselcass = BaseObjectUpgrade)]
 pub struct ObjectSapper;
 
-#[tf2_struct(ObjectDispenser)]
+#[tf2_struct(baselcass = ObjectDispenser)]
 pub struct ObjectCartDispenser;
 
-#[tf2_struct(BaseObject)]
+#[tf2_struct(baselcass = BaseObject)]
 pub struct ObjectDispenser {
     #[offset(5148)]
     pub m_iState: i32,
@@ -1496,28 +1496,28 @@ impl ObjectDispenser {
     pub type healing_array = [i32; 101];
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct CaptureZone {
     #[offset(1976)]
     pub m_bDisabled: bool,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct FuncRespawnRoomVisualizer;
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct FuncRespawnRoom;
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct FuncForceField;
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct CurrencyPack {
     #[offset(3097)]
     pub m_bDistributed: bool,
 }
 
-#[tf2_struct(BaseCombatCharacter)]
+#[tf2_struct(baselcass = BaseCombatCharacter)]
 pub struct BaseObject {
     #[offset(4916)]
     pub m_iUpgradeLevel: i32,
@@ -1573,7 +1573,7 @@ pub struct BaseObject {
     pub m_bWasMapPlaced: bool,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct TFGlow {
     #[offset(1976)]
     pub m_iMode: i32,
@@ -1585,7 +1585,7 @@ pub struct TFGlow {
     pub m_hTarget: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct TFPasstimeLogic {
     #[offset(2832)]
     pub m_bPlayerIsPackMember: [bool; 102],
@@ -1605,7 +1605,7 @@ pub struct TFPasstimeLogic {
     pub m_flPackSpeed: f32,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct PasstimeBall {
     #[offset(3088)]
     pub m_iCollisionCount: i32,
@@ -1617,7 +1617,7 @@ pub struct PasstimeBall {
     pub m_hPrevCarrier: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct FuncPasstimeGoal {
     #[offset(1976)]
     pub m_bTriggerDisabled: bool,
@@ -1625,7 +1625,7 @@ pub struct FuncPasstimeGoal {
     pub m_iGoalType: i32,
 }
 
-#[tf2_struct(TFWeaponBase)]
+#[tf2_struct(baselcass = TFWeaponBase)]
 pub struct PasstimeGun {
     #[offset(4304)]
     pub m_eThrowState: i32,
@@ -1633,10 +1633,10 @@ pub struct PasstimeGun {
     pub m_fChargeBeginTime: f32,
 }
 
-#[tf2_struct(TFWearable)]
+#[tf2_struct(baselcass = TFWearable)]
 pub struct TFWearableVM;
 
-#[tf2_struct(WearableItem)]
+#[tf2_struct(baselcass = WearableItem)]
 pub struct TFWearable {
     #[offset(3744)]
     pub m_bDisguiseWearable: bool,
@@ -1680,7 +1680,7 @@ pub struct TeamRoundTimer {
     pub m_bStopWatchTimer: bool,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct TeamTrainWatcher {
     #[offset(1968)]
     pub m_flTotalProgress: f32,
@@ -1774,19 +1774,19 @@ pub struct BaseTeamObjectiveResource {
     pub m_bHillIsDownhill: [bool; 20],
 }
 
-#[tf2_struct(WearableItem)]
+#[tf2_struct(baselcass = WearableItem)]
 pub struct TFWearableItem;
 
-#[tf2_struct(EconEntity)]
+#[tf2_struct(baselcass = EconEntity)]
 pub struct WearableItem;
 
-#[tf2_struct(EconEntity)]
+#[tf2_struct(baselcass = EconEntity)]
 pub struct BaseAttributableItem {
     #[offset(3120)]
     pub m_AttributeManager: AttributeContainer,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct EconEntity {
     #[offset(3120)]
     pub m_AttributeManager: AttributeContainer,
@@ -1806,7 +1806,7 @@ pub struct TestTraceline {
     pub m_angRotation: [f32; 3],
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEWorldDecal {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -1814,7 +1814,7 @@ pub struct TEWorldDecal {
     pub m_nIndex: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TESpriteSpray {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -1830,7 +1830,7 @@ pub struct TESpriteSpray {
     pub m_nCount: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TESprite {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -1842,7 +1842,7 @@ pub struct TESprite {
     pub m_nBrightness: i32,
 }
 
-#[tf2_struct(TEParticleSystem)]
+#[tf2_struct(baselcass = TEParticleSystem)]
 pub struct TESparks {
     #[offset(44)]
     pub m_nMagnitude: i32,
@@ -1852,7 +1852,7 @@ pub struct TESparks {
     pub m_vecDir: Vector2,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TESmoke {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -1864,13 +1864,13 @@ pub struct TESmoke {
     pub m_nFrameRate: i32,
 }
 
-#[tf2_struct(TEParticleSystem)]
+#[tf2_struct(baselcass = TEParticleSystem)]
 pub struct TEShowLine {
     #[offset(44)]
     pub m_vecEnd: Vector2,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEProjectedDecal {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -1882,7 +1882,7 @@ pub struct TEProjectedDecal {
     pub m_nIndex: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEPlayerDecal {
     #[offset(32)]
     pub m_nPlayer: i32,
@@ -1892,7 +1892,7 @@ pub struct TEPlayerDecal {
     pub m_nEntity: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEPhysicsProp {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -1910,13 +1910,13 @@ pub struct TEPhysicsProp {
     pub m_nEffects: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEParticleSystem {
     #[offset(32)]
     pub m_vecOrigin: [f32; 3],
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEMuzzleFlash {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -1928,7 +1928,7 @@ pub struct TEMuzzleFlash {
     pub m_nType: i32,
 }
 
-#[tf2_struct(TEParticleSystem)]
+#[tf2_struct(baselcass = TEParticleSystem)]
 pub struct TELargeFunnel {
     #[offset(44)]
     pub m_nModelIndex: i32,
@@ -1936,13 +1936,13 @@ pub struct TELargeFunnel {
     pub m_nReversed: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEKillPlayerAttachments {
     #[offset(32)]
     pub m_nPlayer: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEImpact {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -1954,7 +1954,7 @@ pub struct TEImpact {
     pub m_ucFlags: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEGlowSprite {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -1968,7 +1968,7 @@ pub struct TEGlowSprite {
     pub m_nBrightness: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEShatterSurface {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -1988,7 +1988,7 @@ pub struct TEShatterSurface {
     pub m_nSurfaceType: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEFootprintDecal {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -2002,7 +2002,7 @@ pub struct TEFootprintDecal {
     pub m_chMaterialType: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEFizz {
     #[offset(32)]
     pub m_nEntity: i32,
@@ -2014,7 +2014,7 @@ pub struct TEFizz {
     pub m_nCurrent: i32,
 }
 
-#[tf2_struct(TEParticleSystem)]
+#[tf2_struct(baselcass = TEParticleSystem)]
 pub struct TEExplosion {
     #[offset(44)]
     pub m_nModelIndex: i32,
@@ -2044,13 +2044,13 @@ pub struct TEEnergySplash {
     pub m_bExplosive: bool,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEEffectDispatch {
     #[offset(32)]
     pub m_EffectData: EffectData,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEDynamicLight {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -2070,7 +2070,7 @@ pub struct TEDynamicLight {
     pub m_fDecay: f32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEDecal {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -2084,7 +2084,7 @@ pub struct TEDecal {
     pub m_nIndex: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEClientProjectile {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -2098,7 +2098,7 @@ pub struct TEClientProjectile {
     pub m_hOwner: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEBubbleTrail {
     #[offset(32)]
     pub m_vecMins: Vector2,
@@ -2114,7 +2114,7 @@ pub struct TEBubbleTrail {
     pub m_fSpeed: f32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEBubbles {
     #[offset(32)]
     pub m_vecMins: Vector2,
@@ -2130,7 +2130,7 @@ pub struct TEBubbles {
     pub m_fSpeed: f32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEBSPDecal {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -2140,7 +2140,7 @@ pub struct TEBSPDecal {
     pub m_nIndex: i32,
 }
 
-#[tf2_struct(BaseTempEntity)]
+#[tf2_struct(baselcass = BaseTempEntity)]
 pub struct TEBreakModel {
     #[offset(32)]
     pub m_vecOrigin: Vector2,
@@ -2162,7 +2162,7 @@ pub struct TEBreakModel {
     pub m_nFlags: i32,
 }
 
-#[tf2_struct(TEParticleSystem)]
+#[tf2_struct(baselcass = TEParticleSystem)]
 pub struct TEBloodStream {
     #[offset(44)]
     pub m_vecDirection: Vector2,
@@ -2208,7 +2208,7 @@ pub struct TEBeamSpline {
     pub m_nPoints: i32,
 }
 
-#[tf2_struct(BaseBeam)]
+#[tf2_struct(baselcass = BaseBeam)]
 pub struct TEBeamRingPoint {
     #[offset(92)]
     pub m_vecCenter: Vector2,
@@ -2218,7 +2218,7 @@ pub struct TEBeamRingPoint {
     pub m_flEndRadius: f32,
 }
 
-#[tf2_struct(BaseBeam)]
+#[tf2_struct(baselcass = BaseBeam)]
 pub struct TEBeamRing {
     #[offset(92)]
     pub m_nStartEntity: i32,
@@ -2226,7 +2226,7 @@ pub struct TEBeamRing {
     pub m_nEndEntity: i32,
 }
 
-#[tf2_struct(BaseBeam)]
+#[tf2_struct(baselcass = BaseBeam)]
 pub struct TEBeamPoints {
     #[offset(92)]
     pub m_vecStartPoint: Vector2,
@@ -2234,7 +2234,7 @@ pub struct TEBeamPoints {
     pub m_vecEndPoint: Vector2,
 }
 
-#[tf2_struct(BaseBeam)]
+#[tf2_struct(baselcass = BaseBeam)]
 pub struct TEBeamLaser {
     #[offset(92)]
     pub m_nStartEntity: i32,
@@ -2242,13 +2242,13 @@ pub struct TEBeamLaser {
     pub m_nEndEntity: i32,
 }
 
-#[tf2_struct(BaseBeam)]
+#[tf2_struct(baselcass = BaseBeam)]
 pub struct TEBeamFollow {
     #[offset(92)]
     pub m_iEntIndex: i32,
 }
 
-#[tf2_struct(BaseBeam)]
+#[tf2_struct(baselcass = BaseBeam)]
 pub struct TEBeamEnts {
     #[offset(92)]
     pub m_nStartEntity: i32,
@@ -2256,7 +2256,7 @@ pub struct TEBeamEnts {
     pub m_nEndEntity: i32,
 }
 
-#[tf2_struct(BaseBeam)]
+#[tf2_struct(baselcass = BaseBeam)]
 pub struct TEBeamEntPoint {
     #[offset(92)]
     pub m_nStartEntity: i32,
@@ -2302,7 +2302,7 @@ pub struct BaseBeam {
     pub m_nFlags: i32,
 }
 
-#[tf2_struct(TEMetalSparks)]
+#[tf2_struct(baselcass = TEMetalSparks)]
 pub struct TEArmorRicochet;
 
 #[tf2_struct()]
@@ -2313,7 +2313,7 @@ pub struct TEMetalSparks {
     pub m_vecDir: Vector2,
 }
 
-#[tf2_struct(BaseParticleEntity)]
+#[tf2_struct(baselcass = BaseParticleEntity)]
 pub struct SteamJet {
     #[offset(2280)]
     pub m_SpreadSpeed: f32,
@@ -2339,7 +2339,7 @@ pub struct SteamJet {
     pub m_flRollSpeed: f32,
 }
 
-#[tf2_struct(BaseParticleEntity)]
+#[tf2_struct(baselcass = BaseParticleEntity)]
 pub struct SmokeStack {
     #[offset(2368)]
     pub m_SpreadSpeed: f32,
@@ -2379,7 +2379,7 @@ pub struct SmokeStack {
     pub m_flRollSpeed: f32,
 }
 
-#[tf2_struct(BaseParticleEntity)]
+#[tf2_struct(baselcass = BaseParticleEntity)]
 pub struct DustTrail {
     #[offset(2280)]
     pub m_SpawnRate: f32,
@@ -2409,7 +2409,7 @@ pub struct DustTrail {
     pub m_bEmit: bool,
 }
 
-#[tf2_struct(BaseParticleEntity)]
+#[tf2_struct(baselcass = BaseParticleEntity)]
 pub struct FireTrail {
     #[offset(2280)]
     pub m_nAttachment: i32,
@@ -2417,7 +2417,7 @@ pub struct FireTrail {
     pub m_flLifetime: f32,
 }
 
-#[tf2_struct(BaseParticleEntity)]
+#[tf2_struct(baselcass = BaseParticleEntity)]
 pub struct SporeTrail {
     #[offset(2272)]
     pub m_vecEndColor: Vector2,
@@ -2435,7 +2435,7 @@ pub struct SporeTrail {
     pub m_bEmit: bool,
 }
 
-#[tf2_struct(BaseParticleEntity)]
+#[tf2_struct(baselcass = BaseParticleEntity)]
 pub struct SporeExplosion {
     #[offset(2280)]
     pub m_flSpawnRate: f32,
@@ -2453,7 +2453,7 @@ pub struct SporeExplosion {
     pub m_bDontRemove: bool,
 }
 
-#[tf2_struct(BaseParticleEntity)]
+#[tf2_struct(baselcass = BaseParticleEntity)]
 pub struct RocketTrail {
     #[offset(2280)]
     pub m_SpawnRate: f32,
@@ -2487,7 +2487,7 @@ pub struct RocketTrail {
     pub m_flFlareScale: f32,
 }
 
-#[tf2_struct(BaseParticleEntity)]
+#[tf2_struct(baselcass = BaseParticleEntity)]
 pub struct SmokeTrail {
     #[offset(2280)]
     pub m_SpawnRate: f32,
@@ -2521,7 +2521,7 @@ pub struct SmokeTrail {
     pub m_nAttachment: i32,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct PropVehicleDriveable {
     #[offset(3096)]
     pub m_hPlayer: i32,
@@ -2553,7 +2553,7 @@ pub struct PropVehicleDriveable {
     pub m_bUnableToFire: bool,
 }
 
-#[tf2_struct(BaseParticleEntity)]
+#[tf2_struct(baselcass = BaseParticleEntity)]
 pub struct ParticleSmokeGrenade {
     #[offset(2280)]
     pub m_CurrentStage: i32,
@@ -2573,10 +2573,10 @@ pub struct ParticleFire {
     pub m_vDirection: Vector2,
 }
 
-#[tf2_struct(BaseParticleEntity)]
+#[tf2_struct(baselcass = BaseParticleEntity)]
 pub struct MovieExplosion;
 
-#[tf2_struct(TEParticleSystem)]
+#[tf2_struct(baselcass = TEParticleSystem)]
 pub struct TEGaussExplosion {
     #[offset(44)]
     pub m_nType: i32,
@@ -2584,7 +2584,7 @@ pub struct TEGaussExplosion {
     pub m_vecDirection: Vector2,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct QuadraticBeam {
     #[offset(1968)]
     pub m_targetPosition: Vector2,
@@ -2596,7 +2596,7 @@ pub struct QuadraticBeam {
     pub m_flWidth: f32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct Embers {
     #[offset(1968)]
     pub m_nDensity: i32,
@@ -2608,13 +2608,13 @@ pub struct Embers {
     pub m_bEmit: bool,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct EnvWind {
     #[offset(1968)]
     pub m_EnvWindShared: EnvWindShared,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct Precipitation {
     #[offset(2012)]
     pub m_nPrecipType: i32,
@@ -2623,7 +2623,7 @@ pub struct Precipitation {
 #[tf2_struct()]
 pub struct BaseTempEntity;
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct VoteController {
     #[offset(1980)]
     pub m_iActiveIssueIndex: i32,
@@ -2639,7 +2639,7 @@ pub struct VoteController {
     pub m_nVoteIdx: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct HandleTest {
     #[offset(1968)]
     pub m_Handle: i32,
@@ -2647,14 +2647,14 @@ pub struct HandleTest {
     pub m_bSendHandle: bool,
 }
 
-#[tf2_struct(GameRulesProxy)]
+#[tf2_struct(baselcass = GameRulesProxy)]
 pub struct TeamplayRoundBasedRulesProxy;
 
 impl TeamplayRoundBasedRulesProxy {
     pub type teamplayroundbased_gamerules_data = TeamplayRoundBasedRules;
 }
 
-#[tf2_struct(Sprite)]
+#[tf2_struct(baselcass = Sprite)]
 pub struct SpriteTrail {
     #[offset(8264)]
     pub m_flLifeTime: f32,
@@ -2674,10 +2674,10 @@ pub struct SpriteTrail {
     pub m_flSkyboxScale: f32,
 }
 
-#[tf2_struct(Sprite)]
+#[tf2_struct(baselcass = Sprite)]
 pub struct SpriteOriented;
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct Sprite {
     #[offset(1988)]
     pub m_hAttachedToEntity: i32,
@@ -2703,7 +2703,7 @@ pub struct Sprite {
     pub m_flHDRColorScale: f32,
 }
 
-#[tf2_struct(Ragdoll)]
+#[tf2_struct(baselcass = Ragdoll)]
 pub struct Ragdoll_Attached {
     #[offset(3944)]
     pub m_attachmentPointBoneSpace: Vector2,
@@ -2715,7 +2715,7 @@ pub struct Ragdoll_Attached {
     pub m_boneIndexAttached: bool,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct Ragdoll {
     #[offset(3084)]
     pub m_ragPos: [[Vector2; 1]; 24],
@@ -2729,7 +2729,7 @@ pub struct Ragdoll {
     pub m_nOverlaySequence: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct PoseController {
     #[offset(1988)]
     pub m_bPoseValueParity: bool,
@@ -2754,10 +2754,10 @@ pub struct PoseController {
 #[tf2_struct()]
 pub struct GameRulesProxy;
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct InfoLadderDismount;
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct FuncLadder {
     #[offset(1968)]
     pub m_vecLadderDir: Vector2,
@@ -2777,7 +2777,7 @@ pub struct DetailController {
     pub m_flFadeEndDist: f32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct World {
     #[offset(1968)]
     pub m_flWaveHeight: f32,
@@ -2801,7 +2801,7 @@ pub struct World {
     pub m_iszDetailSpriteMaterial: [i8; 256],
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct WaterLODControl {
     #[offset(1968)]
     pub m_flCheapWaterStartDistance: f32,
@@ -2809,10 +2809,10 @@ pub struct WaterLODControl {
     pub m_flCheapWaterEndDistance: f32,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct WaterBullet;
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct VGuiScreen {
     #[offset(1976)]
     pub m_flWidth: f32,
@@ -2830,13 +2830,13 @@ pub struct VGuiScreen {
     pub m_hPlayerOwner: i32,
 }
 
-#[tf2_struct(PropVehicleDriveable)]
+#[tf2_struct(baselcass = PropVehicleDriveable)]
 pub struct PropJeep {
     #[offset(3472)]
     pub m_bHeadlightIsOn: bool,
 }
 
-#[tf2_struct(DynamicProp)]
+#[tf2_struct(baselcass = DynamicProp)]
 pub struct PropVehicleChoreoGeneric {
     #[offset(3120)]
     pub m_hPlayer: i32,
@@ -2868,14 +2868,14 @@ pub struct PropVehicleChoreoGeneric {
     pub m_vehicleView_flPitchMax: f32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct ProxyToggle;
 
 impl ProxyToggle {
     pub type blah = ProxyToggle_ProxiedData;
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct Tesla {
     #[offset(2016)]
     pub m_SoundName: [i8; 64],
@@ -2923,7 +2923,7 @@ impl Sun {
     pub type HDRColorScale = f32;
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct ParticlePerformanceMonitor {
     #[offset(1965)]
     pub m_bDisplayPerf: bool,
@@ -2931,7 +2931,7 @@ pub struct ParticlePerformanceMonitor {
     pub m_bMeasurePerf: bool,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct SpotlightEnd {
     #[offset(1968)]
     pub m_flLightScale: f32,
@@ -2939,7 +2939,7 @@ pub struct SpotlightEnd {
     pub m_Radius: f32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct SlideshowDisplay {
     #[offset(1965)]
     pub m_bEnabled: bool,
@@ -2957,7 +2957,7 @@ pub struct SlideshowDisplay {
     pub m_bNoListRepeats: bool,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct ShadowControl {
     #[offset(1968)]
     pub m_shadowDirection: Vector2,
@@ -2969,7 +2969,7 @@ pub struct ShadowControl {
     pub m_bDisableShadows: bool,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct SceneEntity {
     //probably invalid
     #[offset(0)]
@@ -3028,7 +3028,7 @@ pub struct RagdollManager {
     pub m_iCurrentMaxRagdollCount: i32,
 }
 
-#[tf2_struct(PhysicsProp)]
+#[tf2_struct(baselcass = PhysicsProp)]
 pub struct PhysicsPropMultiplayer {
     #[offset(3096)]
     pub m_iPhysicsMode: i32,
@@ -3040,7 +3040,7 @@ pub struct PhysicsPropMultiplayer {
     pub m_collisionMaxs: Vector2,
 }
 
-#[tf2_struct(PhysBox)]
+#[tf2_struct(baselcass = PhysBox)]
 pub struct PhysBoxMultiplayer {
     #[offset(1984)]
     pub m_iPhysicsMode: i32,
@@ -3048,16 +3048,16 @@ pub struct PhysBoxMultiplayer {
     pub m_fMass: f32,
 }
 
-#[tf2_struct(DynamicProp)]
+#[tf2_struct(baselcass = DynamicProp)]
 pub struct BasePropDoor;
 
-#[tf2_struct(BreakableProp)]
+#[tf2_struct(baselcass = BreakableProp)]
 pub struct DynamicProp {
     #[offset(3081)]
     pub m_bUseHitboxesForRenderBox: bool,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct PointWorldText {
     #[offset(1992)]
     pub m_szText: [i8; 260],
@@ -3077,7 +3077,7 @@ pub struct PointWorldText {
     pub m_bRainbow: bool,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct PointCommentaryNode {
     #[offset(3081)]
     pub m_bActive: bool,
@@ -3097,7 +3097,7 @@ pub struct PointCommentaryNode {
     pub m_hViewPosition: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct PointCamera {
     #[offset(1968)]
     pub m_FOV: f32,
@@ -3143,7 +3143,7 @@ pub struct PlayerResource {
     pub m_iUserID: [i32; 102],
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct Plasma {
     #[offset(1968)]
     pub m_flStartScale: f32,
@@ -3161,16 +3161,16 @@ pub struct Plasma {
     pub m_nGlowModelIndex: i32,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct PhysMagnet;
 
-#[tf2_struct(BreakableProp)]
+#[tf2_struct(baselcass = BreakableProp)]
 pub struct PhysicsProp {
     #[offset(3081)]
     pub m_bAwake: bool,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct PhysBox {
     #[offset(1968)]
     pub m_mass: f32,
@@ -3200,7 +3200,7 @@ pub struct ParticleSystem {
     pub m_bWeatherEffect: bool,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct MaterialModifyControl {
     #[offset(1965)]
     pub m_szMaterialName: [i8; 255],
@@ -3268,10 +3268,10 @@ pub struct InfoOverlayAccessor {
     pub m_iOverlayID: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct FuncTrackTrain;
 
-#[tf2_struct(BaseParticleEntity)]
+#[tf2_struct(baselcass = BaseParticleEntity)]
 pub struct FuncSmokeVolume {
     #[offset(576)]
     pub m_Collision: CollisionProperty,
@@ -3297,7 +3297,7 @@ pub struct FuncSmokeVolume {
     pub m_spawnflags: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct FuncRotating {
     #[offset(152)]
     pub m_flSimulationTime: i32,
@@ -3307,10 +3307,10 @@ pub struct FuncRotating {
     pub m_angRotation: [f32; 3],
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct FuncReflectiveGlass;
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct FuncOccluder {
     #[offset(1968)]
     pub m_nOccluderIndex: i32,
@@ -3318,13 +3318,13 @@ pub struct FuncOccluder {
     pub m_bActive: bool,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct Func_LOD {
     #[offset(1968)]
     pub m_fDisappearDist: f32,
 }
 
-#[tf2_struct(TEParticleSystem)]
+#[tf2_struct(baselcass = TEParticleSystem)]
 pub struct TEDust {
     #[offset(44)]
     pub m_flSize: f32,
@@ -3362,13 +3362,13 @@ pub struct Func_Dust {
     pub m_DustFlags: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct FuncConveyor {
     #[offset(1968)]
     pub m_flConveyorSpeed: f32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct BreakableSurface {
     #[offset(1976)]
     pub m_nNumWide: i32,
@@ -3390,7 +3390,7 @@ pub struct BreakableSurface {
     pub m_RawPanelBitVec: [i32; 256],
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct FuncAreaPortalWindow {
     #[offset(1968)]
     pub m_flFadeStartDist: f32,
@@ -3422,13 +3422,13 @@ pub struct CFish {
     pub m_waterLevel: f32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct EntityFlame {
     #[offset(1976)]
     pub m_hEntAttached: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct FireSmoke {
     #[offset(1968)]
     pub m_flStartScale: f32,
@@ -3444,7 +3444,7 @@ pub struct FireSmoke {
     pub m_nFlameFromAboveModelIndex: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct EnvTonemapController {
     #[offset(1965)]
     pub m_bUseCustomAutoExposureMin: bool,
@@ -3462,7 +3462,7 @@ pub struct EnvTonemapController {
     pub m_flCustomBloomScaleMinimum: f32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct EnvScreenEffect {
     #[offset(1968)]
     pub m_flDuration: f32,
@@ -3470,7 +3470,7 @@ pub struct EnvScreenEffect {
     pub m_nType: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct EnvScreenOverlay {
     #[offset(1965)]
     pub m_iszOverlayNames: [[[i8; 255]; 1]; 10],
@@ -3484,7 +3484,7 @@ pub struct EnvScreenOverlay {
     pub m_bIsActive: bool,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct EnvProjectedTexture {
     #[offset(1968)]
     pub m_hTargetEntity: i32,
@@ -3516,7 +3516,7 @@ pub struct EnvProjectedTexture {
     pub m_nShadowQuality: i32,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct EnvParticleScript {
     #[offset(3392)]
     pub m_flSequenceScale: f32,
@@ -3556,7 +3556,7 @@ pub struct FogController {
     pub m_fog_blend: bool,
 }
 
-#[tf2_struct(BaseParticleEntity)]
+#[tf2_struct(baselcass = BaseParticleEntity)]
 pub struct EntityParticleTrail {
     #[offset(2272)]
     pub m_iMaterialName: i32,
@@ -3566,7 +3566,7 @@ pub struct EntityParticleTrail {
     pub m_hConstraintEntity: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct EntityDissolve {
     #[offset(1976)]
     pub m_flStartTime: f32,
@@ -3590,7 +3590,7 @@ pub struct EntityDissolve {
     pub m_nMagnitude: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct DynamicLight {
     #[offset(1965)]
     pub m_Flags: bool,
@@ -3606,7 +3606,7 @@ pub struct DynamicLight {
     pub m_SpotRadius: f32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct ColorCorrectionVolume {
     #[offset(1968)]
     pub m_Weight: f32,
@@ -3614,7 +3614,7 @@ pub struct ColorCorrectionVolume {
     pub m_lookupFilename: [i8; 260],
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct ColorCorrection {
     #[offset(1968)]
     pub m_vecOrigin: Vector2,
@@ -3630,10 +3630,10 @@ pub struct ColorCorrection {
     pub m_bEnabled: bool,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct BreakableProp;
 
-#[tf2_struct(BaseCombatCharacter)]
+#[tf2_struct(baselcass = BaseCombatCharacter)]
 pub struct BasePlayer {
     //probably invalid
     #[offset(0)]
@@ -3682,7 +3682,7 @@ impl BasePlayer {
     pub type localdata = LocalPlayerExclusive;
 }
 
-#[tf2_struct(BaseAnimatingOverlay)]
+#[tf2_struct(baselcass = BaseAnimatingOverlay)]
 pub struct BaseFlex {
     #[offset(3224)]
     pub m_viewtarget: Vector2,
@@ -3743,19 +3743,19 @@ pub struct BaseEntity {
 }
 
 impl BaseEntity {
-    pub type predictable_id = PredictableId;
     pub type movecollide = i32;
+    pub type predictable_id = PredictableId;
     pub type AnimTimeMustBeFirst = AnimTimeMustBeFirst;
     pub type movetype = i32;
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct BaseDoor {
     #[offset(1968)]
     pub m_flWaveHeight: f32,
 }
 
-#[tf2_struct(BaseFlex)]
+#[tf2_struct(baselcass = BaseFlex)]
 pub struct BaseCombatCharacter {
     #[offset(4368)]
     pub m_hMyWeapons: [i32; 48],
@@ -3769,14 +3769,14 @@ impl BaseCombatCharacter {
     pub type bcc_localdata = BCCLocalPlayerExclusive;
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct BaseAnimatingOverlay;
 
 impl BaseAnimatingOverlay {
     pub type overlay_vars = OverlayVars;
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct BoneFollower {
     #[offset(1968)]
     pub m_modelIndex: i32,
@@ -3784,7 +3784,7 @@ pub struct BoneFollower {
     pub m_solidIndex: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct BaseAnimating {
     #[offset(1984)]
     pub m_nSkin: i32,
@@ -3832,13 +3832,13 @@ impl BaseAnimating {
     pub type serveranimdata = ServerAnimationData;
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct InfoLightingRelative {
     #[offset(1968)]
     pub m_hLightingLandmark: i32,
 }
 
-#[tf2_struct(BaseCombatCharacter)]
+#[tf2_struct(baselcass = BaseCombatCharacter)]
 pub struct AI_BaseNPC {
     #[offset(209)]
     pub m_lifeState: bool,
@@ -3952,16 +3952,16 @@ pub struct BaseViewModel {
     pub m_hWeapon: i32,
 }
 
-#[tf2_struct(BaseAnimating)]
+#[tf2_struct(baselcass = BaseAnimating)]
 pub struct BaseProjectile {
     #[offset(3084)]
     pub m_hOriginalLauncher: i32,
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct BaseParticleEntity;
 
-#[tf2_struct(BaseProjectile)]
+#[tf2_struct(baselcass = BaseProjectile)]
 pub struct BaseGrenade {
     #[offset(360)]
     pub m_vecVelocity: Vector2,
@@ -3977,7 +3977,7 @@ pub struct BaseGrenade {
     pub m_hThrower: i32,
 }
 
-#[tf2_struct(EconEntity)]
+#[tf2_struct(baselcass = EconEntity)]
 pub struct BaseCombatWeapon {
     #[offset(3712)]
     pub m_hOwner: i32,
@@ -3990,11 +3990,11 @@ pub struct BaseCombatWeapon {
 }
 
 impl BaseCombatWeapon {
-    pub type LocalWeaponData = LocalWeaponData;
     pub type LocalActiveWeaponData = LocalActiveWeaponData;
+    pub type LocalWeaponData = LocalWeaponData;
 }
 
-#[tf2_struct(BaseEntity)]
+#[tf2_struct(baselcass = BaseEntity)]
 pub struct FuncMonitor;
 
 #[tf2_struct()]
@@ -4043,13 +4043,13 @@ pub struct PipebombLauncherLocalData {
 }
 
 #[tf2_struct()]
-pub struct LocalTFWeaponMedigunData {
+pub struct TFWeaponMedigunDataNonLocal {
     #[offset(4284)]
     pub m_flChargeLevel: f32,
 }
 
 #[tf2_struct()]
-pub struct TFWeaponMedigunDataNonLocal {
+pub struct LocalTFWeaponMedigunData {
     #[offset(4284)]
     pub m_flChargeLevel: f32,
 }
@@ -4103,27 +4103,27 @@ impl AttributeList {
 pub struct _ST_m_Attributes_20;
 
 impl _ST_m_Attributes_20 {
-    pub type i000 = ScriptCreatedAttribute;
-    pub type i003 = ScriptCreatedAttribute;
-    pub type i012 = ScriptCreatedAttribute;
-    pub type i004 = ScriptCreatedAttribute;
-    pub type i007 = ScriptCreatedAttribute;
     pub type i019 = ScriptCreatedAttribute;
-    pub type i016 = ScriptCreatedAttribute;
+    pub type i001 = ScriptCreatedAttribute;
     pub type i018 = ScriptCreatedAttribute;
+    pub type i014 = ScriptCreatedAttribute;
+    pub type i003 = ScriptCreatedAttribute;
+    pub type i006 = ScriptCreatedAttribute;
     pub type i011 = ScriptCreatedAttribute;
+    pub type i016 = ScriptCreatedAttribute;
+    pub type i017 = ScriptCreatedAttribute;
+    pub type i010 = ScriptCreatedAttribute;
     pub type i002 = ScriptCreatedAttribute;
     pub type i009 = ScriptCreatedAttribute;
-    pub type i010 = ScriptCreatedAttribute;
-    pub type lengthproxy = _LPT_m_Attributes_20;
-    pub type i017 = ScriptCreatedAttribute;
-    pub type i005 = ScriptCreatedAttribute;
-    pub type i008 = ScriptCreatedAttribute;
-    pub type i001 = ScriptCreatedAttribute;
-    pub type i006 = ScriptCreatedAttribute;
-    pub type i015 = ScriptCreatedAttribute;
+    pub type i004 = ScriptCreatedAttribute;
     pub type i013 = ScriptCreatedAttribute;
-    pub type i014 = ScriptCreatedAttribute;
+    pub type i007 = ScriptCreatedAttribute;
+    pub type i015 = ScriptCreatedAttribute;
+    pub type i008 = ScriptCreatedAttribute;
+    pub type i000 = ScriptCreatedAttribute;
+    pub type i005 = ScriptCreatedAttribute;
+    pub type i012 = ScriptCreatedAttribute;
+    pub type lengthproxy = _LPT_m_Attributes_20;
 }
 
 #[tf2_struct()]
@@ -4520,138 +4520,138 @@ pub struct TFPlayerScoringDataExclusive {
 pub struct _ST_m_ConditionData_131;
 
 impl _ST_m_ConditionData_131 {
-    pub type i005 = TFPlayerConditionSource;
-    pub type i040 = TFPlayerConditionSource;
-    pub type i045 = TFPlayerConditionSource;
-    pub type i017 = TFPlayerConditionSource;
-    pub type i048 = TFPlayerConditionSource;
-    pub type lengthproxy = _LPT_m_ConditionData_131;
-    pub type i036 = TFPlayerConditionSource;
-    pub type i033 = TFPlayerConditionSource;
-    pub type i043 = TFPlayerConditionSource;
-    pub type i122 = TFPlayerConditionSource;
-    pub type i129 = TFPlayerConditionSource;
-    pub type i061 = TFPlayerConditionSource;
-    pub type i009 = TFPlayerConditionSource;
-    pub type i023 = TFPlayerConditionSource;
-    pub type i046 = TFPlayerConditionSource;
-    pub type i074 = TFPlayerConditionSource;
-    pub type i120 = TFPlayerConditionSource;
+    pub type i039 = TFPlayerConditionSource;
+    pub type i082 = TFPlayerConditionSource;
     pub type i071 = TFPlayerConditionSource;
-    pub type i091 = TFPlayerConditionSource;
-    pub type i101 = TFPlayerConditionSource;
-    pub type i067 = TFPlayerConditionSource;
-    pub type i014 = TFPlayerConditionSource;
+    pub type i065 = TFPlayerConditionSource;
+    pub type i106 = TFPlayerConditionSource;
+    pub type i121 = TFPlayerConditionSource;
+    pub type i012 = TFPlayerConditionSource;
+    pub type i105 = TFPlayerConditionSource;
+    pub type i113 = TFPlayerConditionSource;
+    pub type i102 = TFPlayerConditionSource;
+    pub type i072 = TFPlayerConditionSource;
     pub type i114 = TFPlayerConditionSource;
     pub type i024 = TFPlayerConditionSource;
-    pub type i034 = TFPlayerConditionSource;
-    pub type i025 = TFPlayerConditionSource;
-    pub type i053 = TFPlayerConditionSource;
-    pub type i089 = TFPlayerConditionSource;
-    pub type i106 = TFPlayerConditionSource;
-    pub type i125 = TFPlayerConditionSource;
-    pub type i075 = TFPlayerConditionSource;
-    pub type i126 = TFPlayerConditionSource;
-    pub type i083 = TFPlayerConditionSource;
-    pub type i116 = TFPlayerConditionSource;
-    pub type i044 = TFPlayerConditionSource;
-    pub type i070 = TFPlayerConditionSource;
-    pub type i029 = TFPlayerConditionSource;
-    pub type i038 = TFPlayerConditionSource;
-    pub type i092 = TFPlayerConditionSource;
-    pub type i088 = TFPlayerConditionSource;
-    pub type i127 = TFPlayerConditionSource;
-    pub type i035 = TFPlayerConditionSource;
-    pub type i099 = TFPlayerConditionSource;
-    pub type i084 = TFPlayerConditionSource;
-    pub type i105 = TFPlayerConditionSource;
-    pub type i041 = TFPlayerConditionSource;
-    pub type i060 = TFPlayerConditionSource;
-    pub type i068 = TFPlayerConditionSource;
-    pub type i031 = TFPlayerConditionSource;
-    pub type i079 = TFPlayerConditionSource;
-    pub type i022 = TFPlayerConditionSource;
-    pub type i104 = TFPlayerConditionSource;
-    pub type i065 = TFPlayerConditionSource;
-    pub type i093 = TFPlayerConditionSource;
-    pub type i096 = TFPlayerConditionSource;
-    pub type i081 = TFPlayerConditionSource;
-    pub type i118 = TFPlayerConditionSource;
-    pub type i082 = TFPlayerConditionSource;
-    pub type i085 = TFPlayerConditionSource;
-    pub type i032 = TFPlayerConditionSource;
-    pub type i007 = TFPlayerConditionSource;
-    pub type i049 = TFPlayerConditionSource;
-    pub type i037 = TFPlayerConditionSource;
-    pub type i076 = TFPlayerConditionSource;
-    pub type i077 = TFPlayerConditionSource;
-    pub type i090 = TFPlayerConditionSource;
-    pub type i100 = TFPlayerConditionSource;
-    pub type i042 = TFPlayerConditionSource;
-    pub type i130 = TFPlayerConditionSource;
-    pub type i073 = TFPlayerConditionSource;
-    pub type i013 = TFPlayerConditionSource;
-    pub type i110 = TFPlayerConditionSource;
-    pub type i001 = TFPlayerConditionSource;
-    pub type i011 = TFPlayerConditionSource;
-    pub type i052 = TFPlayerConditionSource;
-    pub type i113 = TFPlayerConditionSource;
-    pub type i063 = TFPlayerConditionSource;
-    pub type i123 = TFPlayerConditionSource;
-    pub type i047 = TFPlayerConditionSource;
-    pub type i059 = TFPlayerConditionSource;
-    pub type i062 = TFPlayerConditionSource;
-    pub type i111 = TFPlayerConditionSource;
-    pub type i000 = TFPlayerConditionSource;
-    pub type i055 = TFPlayerConditionSource;
-    pub type i010 = TFPlayerConditionSource;
-    pub type i027 = TFPlayerConditionSource;
-    pub type i058 = TFPlayerConditionSource;
-    pub type i128 = TFPlayerConditionSource;
-    pub type i109 = TFPlayerConditionSource;
-    pub type i072 = TFPlayerConditionSource;
-    pub type i080 = TFPlayerConditionSource;
-    pub type i018 = TFPlayerConditionSource;
-    pub type i030 = TFPlayerConditionSource;
-    pub type i026 = TFPlayerConditionSource;
-    pub type i002 = TFPlayerConditionSource;
-    pub type i028 = TFPlayerConditionSource;
-    pub type i103 = TFPlayerConditionSource;
-    pub type i115 = TFPlayerConditionSource;
-    pub type i021 = TFPlayerConditionSource;
-    pub type i078 = TFPlayerConditionSource;
-    pub type i004 = TFPlayerConditionSource;
-    pub type i064 = TFPlayerConditionSource;
-    pub type i098 = TFPlayerConditionSource;
-    pub type i108 = TFPlayerConditionSource;
-    pub type i094 = TFPlayerConditionSource;
-    pub type i095 = TFPlayerConditionSource;
+    pub type i043 = TFPlayerConditionSource;
     pub type i019 = TFPlayerConditionSource;
-    pub type i087 = TFPlayerConditionSource;
-    pub type i066 = TFPlayerConditionSource;
-    pub type i003 = TFPlayerConditionSource;
-    pub type i117 = TFPlayerConditionSource;
-    pub type i015 = TFPlayerConditionSource;
-    pub type i086 = TFPlayerConditionSource;
-    pub type i124 = TFPlayerConditionSource;
-    pub type i016 = TFPlayerConditionSource;
-    pub type i107 = TFPlayerConditionSource;
-    pub type i056 = TFPlayerConditionSource;
-    pub type i097 = TFPlayerConditionSource;
-    pub type i006 = TFPlayerConditionSource;
-    pub type i020 = TFPlayerConditionSource;
-    pub type i008 = TFPlayerConditionSource;
-    pub type i054 = TFPlayerConditionSource;
-    pub type i051 = TFPlayerConditionSource;
-    pub type i102 = TFPlayerConditionSource;
+    pub type i033 = TFPlayerConditionSource;
+    pub type i078 = TFPlayerConditionSource;
     pub type i112 = TFPlayerConditionSource;
+    pub type i007 = TFPlayerConditionSource;
+    pub type i025 = TFPlayerConditionSource;
+    pub type i077 = TFPlayerConditionSource;
+    pub type i035 = TFPlayerConditionSource;
+    pub type i093 = TFPlayerConditionSource;
+    pub type i130 = TFPlayerConditionSource;
+    pub type i066 = TFPlayerConditionSource;
+    pub type i027 = TFPlayerConditionSource;
+    pub type i122 = TFPlayerConditionSource;
+    pub type i118 = TFPlayerConditionSource;
+    pub type i126 = TFPlayerConditionSource;
+    pub type i044 = TFPlayerConditionSource;
+    pub type i048 = TFPlayerConditionSource;
+    pub type i041 = TFPlayerConditionSource;
+    pub type i073 = TFPlayerConditionSource;
+    pub type i032 = TFPlayerConditionSource;
+    pub type i083 = TFPlayerConditionSource;
+    pub type i104 = TFPlayerConditionSource;
+    pub type i115 = TFPlayerConditionSource;
+    pub type i006 = TFPlayerConditionSource;
+    pub type i068 = TFPlayerConditionSource;
+    pub type i080 = TFPlayerConditionSource;
+    pub type i014 = TFPlayerConditionSource;
     pub type i119 = TFPlayerConditionSource;
+    pub type i037 = TFPlayerConditionSource;
+    pub type i051 = TFPlayerConditionSource;
+    pub type i088 = TFPlayerConditionSource;
+    pub type i000 = TFPlayerConditionSource;
+    pub type i129 = TFPlayerConditionSource;
+    pub type i120 = TFPlayerConditionSource;
+    pub type i031 = TFPlayerConditionSource;
+    pub type i098 = TFPlayerConditionSource;
+    pub type i023 = TFPlayerConditionSource;
+    pub type i053 = TFPlayerConditionSource;
+    pub type i094 = TFPlayerConditionSource;
+    pub type i038 = TFPlayerConditionSource;
+    pub type i100 = TFPlayerConditionSource;
+    pub type i111 = TFPlayerConditionSource;
+    pub type i058 = TFPlayerConditionSource;
+    pub type i067 = TFPlayerConditionSource;
     pub type i050 = TFPlayerConditionSource;
+    pub type i046 = TFPlayerConditionSource;
+    pub type i076 = TFPlayerConditionSource;
+    pub type i090 = TFPlayerConditionSource;
+    pub type i055 = TFPlayerConditionSource;
+    pub type i107 = TFPlayerConditionSource;
+    pub type i123 = TFPlayerConditionSource;
+    pub type i029 = TFPlayerConditionSource;
+    pub type i116 = TFPlayerConditionSource;
+    pub type i034 = TFPlayerConditionSource;
+    pub type i001 = TFPlayerConditionSource;
+    pub type i081 = TFPlayerConditionSource;
+    pub type i017 = TFPlayerConditionSource;
+    pub type i047 = TFPlayerConditionSource;
+    pub type i009 = TFPlayerConditionSource;
+    pub type i052 = TFPlayerConditionSource;
+    pub type i008 = TFPlayerConditionSource;
+    pub type i117 = TFPlayerConditionSource;
+    pub type i064 = TFPlayerConditionSource;
+    pub type i016 = TFPlayerConditionSource;
+    pub type i054 = TFPlayerConditionSource;
+    pub type i097 = TFPlayerConditionSource;
+    pub type i109 = TFPlayerConditionSource;
     pub type i069 = TFPlayerConditionSource;
-    pub type i039 = TFPlayerConditionSource;
-    pub type i012 = TFPlayerConditionSource;
+    pub type i074 = TFPlayerConditionSource;
+    pub type i092 = TFPlayerConditionSource;
+    pub type i030 = TFPlayerConditionSource;
+    pub type i103 = TFPlayerConditionSource;
+    pub type i086 = TFPlayerConditionSource;
+    pub type i004 = TFPlayerConditionSource;
+    pub type i110 = TFPlayerConditionSource;
+    pub type i011 = TFPlayerConditionSource;
+    pub type i013 = TFPlayerConditionSource;
+    pub type i061 = TFPlayerConditionSource;
+    pub type i003 = TFPlayerConditionSource;
+    pub type i062 = TFPlayerConditionSource;
+    pub type i085 = TFPlayerConditionSource;
+    pub type i005 = TFPlayerConditionSource;
+    pub type i108 = TFPlayerConditionSource;
+    pub type i096 = TFPlayerConditionSource;
+    pub type i018 = TFPlayerConditionSource;
+    pub type i040 = TFPlayerConditionSource;
+    pub type i087 = TFPlayerConditionSource;
+    pub type i028 = TFPlayerConditionSource;
+    pub type i091 = TFPlayerConditionSource;
+    pub type i128 = TFPlayerConditionSource;
+    pub type i059 = TFPlayerConditionSource;
+    pub type i084 = TFPlayerConditionSource;
+    pub type i010 = TFPlayerConditionSource;
+    pub type i049 = TFPlayerConditionSource;
+    pub type i070 = TFPlayerConditionSource;
+    pub type i089 = TFPlayerConditionSource;
+    pub type i079 = TFPlayerConditionSource;
+    pub type i101 = TFPlayerConditionSource;
+    pub type i075 = TFPlayerConditionSource;
+    pub type lengthproxy = _LPT_m_ConditionData_131;
+    pub type i042 = TFPlayerConditionSource;
+    pub type i036 = TFPlayerConditionSource;
+    pub type i002 = TFPlayerConditionSource;
+    pub type i099 = TFPlayerConditionSource;
+    pub type i124 = TFPlayerConditionSource;
+    pub type i020 = TFPlayerConditionSource;
+    pub type i022 = TFPlayerConditionSource;
+    pub type i125 = TFPlayerConditionSource;
+    pub type i127 = TFPlayerConditionSource;
+    pub type i026 = TFPlayerConditionSource;
+    pub type i056 = TFPlayerConditionSource;
+    pub type i060 = TFPlayerConditionSource;
+    pub type i095 = TFPlayerConditionSource;
+    pub type i045 = TFPlayerConditionSource;
     pub type i057 = TFPlayerConditionSource;
-    pub type i121 = TFPlayerConditionSource;
+    pub type i015 = TFPlayerConditionSource;
+    pub type i063 = TFPlayerConditionSource;
+    pub type i021 = TFPlayerConditionSource;
 }
 
 #[tf2_struct()]
@@ -4665,6 +4665,14 @@ pub struct _LPT_m_ConditionData_131 {
     //probably invalid
     #[offset(0)]
     pub lengthprop131: i32,
+}
+
+#[tf2_struct()]
+pub struct TFNonLocalPlayerExclusive {
+    #[offset(1096)]
+    pub m_vecOrigin: Vector3,
+    #[offset(9196)]
+    pub m_angEyeAngles: [f32; 2],
 }
 
 #[tf2_struct()]
@@ -4690,14 +4698,6 @@ pub struct TFLocalPlayerExclusive {
     pub m_nExperienceLevelProgress: i32,
     #[offset(14776)]
     pub m_bMatchSafeToLeave: bool,
-}
-
-#[tf2_struct()]
-pub struct TFNonLocalPlayerExclusive {
-    #[offset(1096)]
-    pub m_vecOrigin: Vector3,
-    #[offset(9196)]
-    pub m_angEyeAngles: [f32; 2],
 }
 
 #[tf2_struct()]
@@ -5044,22 +5044,22 @@ impl OverlayVars {
 pub struct _ST_m_AnimOverlay_15;
 
 impl _ST_m_AnimOverlay_15 {
-    pub type i000 = Animationlayer;
-    pub type i004 = Animationlayer;
-    pub type i006 = Animationlayer;
-    pub type i014 = Animationlayer;
-    pub type i005 = Animationlayer;
-    pub type i010 = Animationlayer;
-    pub type lengthproxy = _LPT_m_AnimOverlay_15;
-    pub type i008 = Animationlayer;
-    pub type i012 = Animationlayer;
-    pub type i002 = Animationlayer;
-    pub type i001 = Animationlayer;
-    pub type i011 = Animationlayer;
     pub type i007 = Animationlayer;
+    pub type i005 = Animationlayer;
+    pub type lengthproxy = _LPT_m_AnimOverlay_15;
     pub type i013 = Animationlayer;
+    pub type i010 = Animationlayer;
+    pub type i004 = Animationlayer;
+    pub type i014 = Animationlayer;
+    pub type i008 = Animationlayer;
     pub type i009 = Animationlayer;
     pub type i003 = Animationlayer;
+    pub type i002 = Animationlayer;
+    pub type i012 = Animationlayer;
+    pub type i006 = Animationlayer;
+    pub type i001 = Animationlayer;
+    pub type i011 = Animationlayer;
+    pub type i000 = Animationlayer;
 }
 
 #[tf2_struct()]
@@ -5099,6 +5099,18 @@ pub struct BeamPredictableId {
 }
 
 #[tf2_struct()]
+pub struct LocalActiveWeaponData {
+    #[offset(180)]
+    pub m_nNextThinkTick: i32,
+    #[offset(3732)]
+    pub m_flNextPrimaryAttack: f32,
+    #[offset(3736)]
+    pub m_flNextSecondaryAttack: f32,
+    #[offset(3740)]
+    pub m_flTimeWeaponIdle: f32,
+}
+
+#[tf2_struct()]
 pub struct LocalWeaponData {
     #[offset(3728)]
     pub m_nViewModelIndex: i32,
@@ -5114,17 +5126,5 @@ pub struct LocalWeaponData {
     pub m_bFlipViewModel: bool,
     #[offset(3892)]
     pub m_nCustomViewmodelModelIndex: i32,
-}
-
-#[tf2_struct()]
-pub struct LocalActiveWeaponData {
-    #[offset(180)]
-    pub m_nNextThinkTick: i32,
-    #[offset(3732)]
-    pub m_flNextPrimaryAttack: f32,
-    #[offset(3736)]
-    pub m_flNextSecondaryAttack: f32,
-    #[offset(3740)]
-    pub m_flTimeWeaponIdle: f32,
 }
 

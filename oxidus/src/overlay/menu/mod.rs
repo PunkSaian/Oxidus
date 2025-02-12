@@ -1,9 +1,19 @@
+use std::thread;
+
 use imgui::WindowFlags;
 
-use crate::util::consts::info_string;
+use crate::{oxidus_cleanup, util::consts::info_string};
 
 pub fn show(ui: &mut imgui::Ui) {
     ui.show_demo_window(&mut false);
+
+    ui.window("Oxidus").build(|| {
+        if ui.button("unload") {
+            thread::spawn(|| {
+                oxidus_cleanup();
+            });
+        }
+    });
 
     show_watermark(ui);
 }
@@ -14,7 +24,7 @@ pub fn show_watermark(ui: &mut imgui::Ui) {
     let window_pos = [viewport.Pos.x, viewport.Pos.y];
     let window_size = [viewport.Size.x, viewport.Size.y];
 
-    ui.window("Oxidus")
+    ui.window("watermark")
         .position(
             [
                 window_pos[0] + window_size[0] - PAD,

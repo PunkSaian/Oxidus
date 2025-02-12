@@ -2,17 +2,17 @@
 #![allow(clippy::cargo_common_metadata)]
 extern crate proc_macro;
 
-use proc_macro::TokenStream;
-use proc_macro2::{Span, TokenTree};
+use proc_macro::{TokenStream, TokenTree};
+use proc_macro2::Span;
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, FnArg, Ident, ItemFn, Meta};
+use syn::{parse_macro_input, BareFnArg, Data, DeriveInput, FnArg, Ident, ItemFn, Meta, Type};
 
 #[proc_macro_attribute]
-pub fn tf2_struct(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn vmt(attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as DeriveInput);
     let struct_name = &input.ident;
 
-    let base_class = attr.into_iter().next();
+    //let base_class = attr.into_iter().next();
     let Data::Struct(data) = input.data else {
         panic!("tf2_struct can only be used on structs");
     };
@@ -34,7 +34,113 @@ pub fn tf2_struct(attr: TokenStream, item: TokenStream) -> TokenStream {
                 };
                 let tokens = offset.tokens.into_iter().collect::<Vec<_>>();
                 assert!((tokens.len() == 1), "Invalid offset attribute");
-                let TokenTree::Literal(literal) = tokens.into_iter().next().unwrap() else {
+                let proc_macro2::TokenTree::Literal(literal) = tokens.into_iter().next().unwrap()
+                else {
+                    panic!("Invalid offset attribute");
+                };
+                let offset = literal.to_string().parse::<usize>().unwrap();
+
+                fields_with_offsets.push((field.ident.clone(), field.ty.clone(), offset));
+            }
+
+            fields_with_offsets
+        }
+        syn::Fields::Unnamed(_) => panic!("Unnamed fields are not supported"),
+        syn::Fields::Unit => {
+            vec![]
+        }
+    };
+
+    fields.sort_by_key(|(_, _, offset)| *offset);
+
+    let mut generated_funcs = vec![];
+
+    for (i, (ident, ty, mut offset)) in fields.iter().enumerate() {
+        let Type::BareFn(func) = ty else {
+            panic!("Only function pointers are allowed in vmt struct")
+        };
+
+        let args_with_types = func.inputs.clone();
+        let args = func
+            .inputs
+            .clone()
+            .into_iter()
+            .map(|arg| arg.name.unwrap().1);
+        let ret = func.output.clone();
+
+        generated_funcs.push(quote! {
+            pub fn #ident(&self, #args_with_types) -> #ret {
+                unsafe {
+                    let vtable = self as *const Self as *const *const extern "C" fn();
+                    let func = *vtable.offset(#offset as isize);
+                    func(#(#args),*)
+                }
+            }
+        });
+    }
+
+    let trait_name = Ident::new(format!("VMT{struct_name}").as_str(), Span::call_site());
+
+    let generated_trait = quote! {
+        #[repr(C)]
+        pub trait #trait_name {
+            #(#generated_funcs)*
+        }
+    };
+
+    let output = quote! {
+        #generated_trait
+    };
+    output.into()
+}
+
+#[allow(clippy::too_many_lines)]
+#[proc_macro_attribute]
+pub fn tf2_struct(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(item as DeriveInput);
+    let struct_name = &input.ident;
+
+    //#[tf2_struct(base_class = <base class>, vmt = <vmt>)]
+
+    //group attrs into touples 3
+    let attrs = proc_macro2::TokenStream::from(attr)
+        .into_iter()
+        .filter(|x| !matches!(x, proc_macro2::TokenTree::Punct(_)))
+        .collect::<Vec<_>>();
+    let mut grouped = attrs.chunks(2);
+
+    let base_class = grouped.clone().find_map(|x| {
+        if x[0].to_string() == "baseclass" {
+            return Some(x[1].clone());
+        }
+        None
+    });
+
+
+    let Data::Struct(data) = input.data else {
+        panic!("tf2_struct can only be used on structs");
+    };
+
+    let mut fields = match data.fields {
+        syn::Fields::Named(fields) => {
+            let mut fields_with_offsets = Vec::new();
+            for field in fields.named {
+                assert!(
+                    (field.attrs.len() == 1),
+                    "Each field must have offset attribute"
+                );
+                let attr = field.attrs[0].clone();
+                assert!(
+                    attr.path().is_ident("offset"),
+                    "Each field must have offset attribute"
+                );
+                let Meta::List(offset) = attr.meta else {
+                    panic!("Each field must have offset attribute");
+                };
+                let tokens = offset.tokens.into_iter().collect::<Vec<_>>();
+                assert!((tokens.len() == 1), "Invalid offset attribute");
+                let proc_macro2::TokenTree::Literal(literal) = tokens.into_iter().next().unwrap()
+                else {
                     panic!("Invalid offset attribute");
                 };
                 let offset = literal.to_string().parse::<usize>().unwrap();
@@ -73,6 +179,34 @@ pub fn tf2_struct(attr: TokenStream, item: TokenStream) -> TokenStream {
         last = Some((offset, ty));
     }
 
+    let generated_impl = base_class.map(|base_class: proc_macro2::TokenTree| {
+        let base_class = Ident::new(base_class.to_string().as_str(), Span::call_site());
+        quote! {
+            impl ::std::ops::Deref for #struct_name {
+                type Target = #base_class;
+
+                fn deref(&self) -> &Self::Target {
+                    unsafe { &*(self as *const Self as *const Self::Target) }
+                }
+            }
+            impl ::std::ops::DerefMut for #struct_name {
+                fn deref_mut(&mut self) -> &mut Self::Target {
+                    unsafe { &mut *(self as *mut Self as *mut Self::Target) }
+                }
+            }
+            //TODO: add print and debug stuff
+        }
+    });
+
+    //let mut generated_vmt_funcs = vec![];
+    //let ret = func.output.clone();
+    //let args = func.inputs;
+    //generated_funcs.push(quote! {
+    //    pub fn #ident(#args) -> #ret {
+
+    //    },
+    //});
+
     let generated_struct = quote! {
         #[repr(C)]
         pub struct #struct_name {
@@ -81,8 +215,8 @@ pub fn tf2_struct(attr: TokenStream, item: TokenStream) -> TokenStream {
     };
 
     let output = quote! {
-
         #generated_struct
+        #generated_impl
     };
 
     output.into()
@@ -142,6 +276,7 @@ pub fn detour_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let after = quote! {
 
         (*hook).install().unwrap();
+        drop(hook);
     };
 
     let original_block = &input_fn.block;

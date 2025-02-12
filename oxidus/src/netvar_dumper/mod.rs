@@ -414,7 +414,7 @@ pub fn dump_netvars(base_client: *const BaseClient) -> OxidusResult {
             netvar_struct
                 .baseclass
                 .clone()
-                .unwrap_or_else(|| { String::new() }),
+                .map_or_else(|| { String::new() }, |baselcass|{ format!("baselcass = {}", baselcass) }),
         )?;
         write!(&mut file, "pub struct {}", netvar_struct.name)?;
         if netvar_struct.fields.is_empty() {

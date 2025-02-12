@@ -207,6 +207,7 @@ impl Drop for Overlay {
     }
 }
 
+
 pub static OVERLAY: RwLock<Option<Overlay>> = const { RwLock::new(None) };
 pub static TEXTURES: RwLock<Option<Textures>> = const { RwLock::new(None) };
 
