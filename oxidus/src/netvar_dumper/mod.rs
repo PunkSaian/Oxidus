@@ -55,6 +55,8 @@ const BOOL_TYPE_OVERRIDES: &[&str] = &[
     "m_Flags",
 ];
 
+const VMT_STRUCTS: &[&str] = &["BaseEntity"];
+
 #[allow(clippy::too_many_lines)]
 pub fn parse_table(table: &RecvTable) -> NetvarStruct {
     let struct_name = unsafe {
@@ -402,7 +404,7 @@ pub fn dump_netvars(base_client: *const BaseClient) -> OxidusResult {
 
     writeln!(
         &mut file,
-        "use libc::c_void;\npub type Vector2 = [f32;2];\npub type Vector3 = [f32;3];\npub type Unknown = [u8;0];\nuse macros::tf2_struct;"
+        "use libc::c_void;\npub type Vector2 = [f32;2];\npub type Vector3 = [f32;3];\npub type Unknown = [u8;0];\nuse macros::tf2_struct;\nuse super::vmts::*;"
     )?;
 
     writeln!(&mut file)?;
@@ -411,11 +413,12 @@ pub fn dump_netvars(base_client: *const BaseClient) -> OxidusResult {
         writeln!(
             &mut file,
             "#[tf2_struct({})]",
-            netvar_struct
-                .baseclass
-                .clone()
-                .map_or_else(|| { String::new() }, |baselcass|{ format!("baselcass = {}", baselcass) }),
+            netvar_struct.baseclass.clone().map_or_else(
+                || { String::new() },
+                |baselcass| { format!("baselcass = {baselcass}") }
+            ),
         )?;
+
         write!(&mut file, "pub struct {}", netvar_struct.name)?;
         if netvar_struct.fields.is_empty() {
             writeln!(&mut file, ";\n")?;
@@ -462,6 +465,13 @@ pub fn dump_netvars(base_client: *const BaseClient) -> OxidusResult {
                 )?;
             }
             writeln!(&mut file, "}}\n")?;
+        }
+        if VMT_STRUCTS.contains(&netvar_struct.name.as_str()) {
+            writeln!(
+                &mut file,
+                "impl VMT{} for {} {{}}\n",
+                netvar_struct.name, netvar_struct.name
+            )?;
         }
     }
     Ok(())

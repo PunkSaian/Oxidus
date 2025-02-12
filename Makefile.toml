@@ -20,7 +20,7 @@ if [ ! -f "$lib_path" ]; then
     exit 1
 fi
 
-mkdir /tmp/oxidus
+mkdir -p /tmp/oxidus
 tmp_lib_path="/tmp/oxidus/liboxidus_$(date +%Y%m%d%H%M%S).so"
 cp "$lib_path" "$tmp_lib_path"
 
@@ -56,6 +56,8 @@ if [ ! -f "$lib_path" ]; then
     echo "liboxidus.so not found"
     exit 1
 fi
+
+mkdir -p /tmp/oxidus
 
 tmp_lib_path="/tmp/oxidus/liboxidus_$(date +%Y%m%d%H%M%S).so"
 cp "$lib_path" "$tmp_lib_path"
@@ -154,7 +156,8 @@ cd ~/.local/share/Steam/steamapps/common/Team\ Fortress\ 2
 export LD_LIBRARY_PATH='bin/linux64';
 #export LD_DEBUG=all;
 #export LD_DEBUG=libs;
-./tf_linux64 -game tf -steam -novid -nojoy -nosteamcontroller -nohltv -particles 1 -precachefontchars -noquicktime -nobreakpad -gl
+~/.local/share/Steam/steamapps/common/Team\ Fortress\ 2/tf_linux64
+~/.local/share/Steam/steamapps/common/Team\ Fortress\ 2/tf_linux64 -steam -gl
 '''
 
 [tasks.attach-gdb]

@@ -2,10 +2,10 @@
 #![allow(clippy::cargo_common_metadata)]
 extern crate proc_macro;
 
-use proc_macro::{TokenStream, TokenTree};
+use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
-use syn::{parse_macro_input, BareFnArg, Data, DeriveInput, FnArg, Ident, ItemFn, Meta, Type};
+use syn::{parse_macro_input, Data, DeriveInput, FnArg, Ident, ItemFn, Meta, Type};
 
 #[proc_macro_attribute]
 pub fn vmt(attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -14,7 +14,7 @@ pub fn vmt(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     //let base_class = attr.into_iter().next();
     let Data::Struct(data) = input.data else {
-        panic!("tf2_struct can only be used on structs");
+        panic!("can only be used on structs");
     };
     let mut fields = match data.fields {
         syn::Fields::Named(fields) => {
@@ -55,7 +55,7 @@ pub fn vmt(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let mut generated_funcs = vec![];
 
-    for (i, (ident, ty, mut offset)) in fields.iter().enumerate() {
+    for (ident, ty, offset) in &fields {
         let Type::BareFn(func) = ty else {
             panic!("Only function pointers are allowed in vmt struct")
         };
@@ -120,7 +120,7 @@ pub fn tf2_struct(attr: TokenStream, item: TokenStream) -> TokenStream {
         .into_iter()
         .filter(|x| !matches!(x, proc_macro2::TokenTree::Punct(_)))
         .collect::<Vec<_>>();
-    let mut grouped = attrs.chunks(2);
+    let grouped = attrs.chunks(2);
 
     let base_class = grouped.clone().find_map(|x| {
         if x[0].to_string() == "baseclass" {
@@ -206,18 +206,8 @@ pub fn tf2_struct(attr: TokenStream, item: TokenStream) -> TokenStream {
                     unsafe { &mut *(self as *mut Self as *mut Self::Target) }
                 }
             }
-            //TODO: add print and debug stuff
         }
     });
-
-    //let mut generated_vmt_funcs = vec![];
-    //let ret = func.output.clone();
-    //let args = func.inputs;
-    //generated_funcs.push(quote! {
-    //    pub fn #ident(#args) -> #ret {
-
-    //    },
-    //});
 
     let generated_struct = quote! {
         #[repr(C)]
