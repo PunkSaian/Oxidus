@@ -16,3 +16,14 @@ cargo-make
 ### Running developemnt
 1. cargo make start-tf2
 2. cargo make inject
+
+### Common issues
+1. when running `start-tf2`
+
+#### Issue
+`AppFramework : Unable to load module engine.so!
+Unable to load interface VCvarQuery001 from engine.so`
+
+#### Fix 
+install openal 
+`sudo pacman -S openal`
