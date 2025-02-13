@@ -1,6 +1,7 @@
 use macros::vmt;
+use super::bindings::*;
 
-#[vmt]
+#[vmt(BaseEntity)]
 pub struct BaseEntity {
     #[offset(2)]
     pub get_origin: extern "C" fn() -> [f32; 3],

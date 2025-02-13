@@ -24,12 +24,12 @@ pub fn resolve_fn(module: &str, name: &str) -> Option<*mut ()> {
     }
 }
 
-pub fn create_interface<T>(module_name: &str, interface_name: &str) -> Option<*mut T> {
+pub fn create_interface<T>(module_name: &str, interface_name: &str) -> Option<&'static T> {
     unsafe {
         let create_interface: extern "C" fn(*const i8, *const isize) -> *const () =
             std::mem::transmute(resolve_fn(module_name, "CreateInterface")?);
         Some(
-            create_interface(
+            &*create_interface(
                 CString::new(interface_name).unwrap().as_ptr(),
                 std::ptr::null(),
             )

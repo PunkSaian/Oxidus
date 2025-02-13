@@ -16,13 +16,17 @@
 extern crate thiserror;
 
 use std::ffi::CString;
-use std::{sync::Mutex, thread};
+use std::thread;
 
-use hook::detour::WrappedDetourHook;
+use hook::restore_hooks;
 use libc::{dlopen, RTLD_NOLOAD, RTLD_NOW};
 use log::{error, info};
+
+#[cfg(not(feature = "dump-netvars"))]
 use modules::init_modules;
+#[cfg(feature = "dump-netvars")]
 use netvar_dumper::dump_netvars;
+#[cfg(not(feature = "dump-netvars"))]
 use overlay::init as init_overlay;
 use overlay::unload as unload_overlay;
 use prelude::*;
@@ -32,15 +36,16 @@ use sdk::module_names;
 extern crate log;
 
 mod hook;
+
+#[cfg(not(feature = "dump-netvars"))]
 mod modules;
+
+#[cfg(feature = "dump-netvars")]
 mod netvar_dumper;
 mod overlay;
 mod prelude;
 mod sdk;
 mod util;
-
-#[allow(clippy::type_complexity)]
-static HOOKS: Mutex<Vec<WrappedDetourHook>> = const { Mutex::new(Vec::new()) };
 
 pub fn wait_for_client() {
     let mut logged = false;
@@ -62,31 +67,26 @@ pub fn wait_for_client() {
 }
 
 pub fn main() -> OxidusResult {
-    if cfg!(feature = "dump-netvars") {
-        wait_for_client();
+    wait_for_client();
+    #[cfg(feature = "dump-netvars")]
+    {
         info!("Dumping netvars");
         dump_netvars()?;
-        return Ok(());
+        Ok(())
     }
 
-    wait_for_client();
-    init_overlay()?;
+    #[cfg(not(feature = "dump-netvars"))]
+    {
+        init_overlay()?;
 
-    init_modules();
-
-    Ok(())
+        init_modules();
+        Ok(())
+    }
 }
 
 #[allow(clippy::missing_panics_doc)]
 pub fn cleanup() -> OxidusResult {
-    let mut hooks = HOOKS.lock().unwrap();
-    for hook in hooks.iter_mut() {
-        let mut hook = hook.write().unwrap();
-        if let Err(e) = hook.restore() {
-            warn!("Failed to restore hook: {:?}", e);
-        }
-    }
-    hooks.clear();
+    restore_hooks();
 
     unload_overlay();
     Ok(())

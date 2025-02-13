@@ -58,36 +58,44 @@ pub fn sig(input: TokenStream) -> TokenStream {
     })
 }
 
+#[allow(clippy::too_many_lines)]
 #[proc_macro_attribute]
-pub fn vmt(_: TokenStream, item: TokenStream) -> TokenStream {
+pub fn vmt(attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as DeriveInput);
-    let struct_name = &input.ident;
 
     //let base_class = attr.into_iter().next();
     let Data::Struct(data) = input.data else {
         panic!("can only be used on structs");
     };
+
+    let target_struct = proc_macro2::TokenStream::from(attr)
+        .into_iter()
+        .next()
+        .expect("Specify the struct that this vmt is for");
+
     let mut fields = match data.fields {
         syn::Fields::Named(fields) => {
             let mut fields_with_offsets = Vec::new();
             for field in fields.named {
-                let offset = (|| {
-                    if field.attrs.len() != 1 {
-                        return 0;
-                    }
-                    let attr = field.attrs[0].clone();
-
-                    let Meta::List(offset) = attr.meta else {
-                        return 0
-                    };
-                    let tokens = offset.tokens.into_iter().collect::<Vec<_>>();
-                    assert!((tokens.len() == 1), "Invalid offset attribute");
-                    let proc_macro2::TokenTree::Literal(literal) = tokens.into_iter().next().unwrap()
-                    else {
-                        panic!("Invalid offset attribute");
-                    };
-                    literal.to_string().parse::<isize>().unwrap()
-                })();
+                assert!(
+                    (field.attrs.len() == 1),
+                    "Each field must have offset attribute"
+                );
+                let attr = field.attrs[0].clone();
+                assert!(
+                    attr.path().is_ident("offset"),
+                    "Each field must have offset attribute"
+                );
+                let Meta::List(offset) = attr.meta else {
+                    panic!("Each field must have offset attribute");
+                };
+                let tokens = offset.tokens.into_iter().collect::<Vec<_>>();
+                assert!((tokens.len() == 1), "Invalid offset attribute");
+                let proc_macro2::TokenTree::Literal(literal) = tokens.into_iter().next().unwrap()
+                else {
+                    panic!("Invalid offset attribute");
+                };
+                let offset = literal.to_string().parse::<isize>().unwrap();
 
                 fields_with_offsets.push((field.ident.clone(), field.ty.clone(), offset));
             }
@@ -123,21 +131,22 @@ pub fn vmt(_: TokenStream, item: TokenStream) -> TokenStream {
         let ret = func.output.clone();
         let function = if args_with_types.is_empty() {
             quote! {
-                fn #ident(&self) #ret {
+                pub fn #ident(&self) #ret {
                     unsafe {
-                        let vtable = self as *const Self as *const &extern "C" fn(&Self) #ret;
-                        let func = *vtable.offset(#offset);
-                        (func)(self, #(#args),*)
+                        let vtable = self as *const Self as *const *const extern "C" fn(&Self) #ret;
+                        let func = (*vtable).offset(#offset);
+
+                        (*func)(self, #(#args),*)
                     }
                 }
             }
         } else {
             quote! {
-                fn #ident(&self, #args_with_types) #ret {
+                pub fn #ident(&self, #args_with_types) #ret {
                     unsafe {
-                        let vtable = self as *const Self as *const &extern "C" fn(&Self,#args_with_types) #ret;
-                        let func = *vtable.offset(#offset);
-                        (func)(self, #(#args),*)
+                        let vtable = self as *const Self as *const *const extern "C" fn(&Self,#args_with_types) #ret;
+                        let func = (*vtable).offset(#offset);
+                        (*func)(self, #(#args),*)
                     }
                 }
             }
@@ -146,10 +155,8 @@ pub fn vmt(_: TokenStream, item: TokenStream) -> TokenStream {
         generated_funcs.push(function);
     }
 
-    let trait_name = Ident::new(format!("VMT{struct_name}").as_str(), Span::call_site());
-
     let generated_trait = quote! {
-        pub trait #trait_name {
+        impl #target_struct {
             #(#generated_funcs)*
         }
     };
@@ -165,6 +172,7 @@ pub fn vmt(_: TokenStream, item: TokenStream) -> TokenStream {
 pub fn tf2_struct(attr: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as DeriveInput);
     let struct_name = &input.ident;
+    let generics = &input.generics;
 
     //#[tf2_struct(base_class = <base class>, vmt = <vmt>)]
 
@@ -231,7 +239,7 @@ pub fn tf2_struct(attr: TokenStream, item: TokenStream) -> TokenStream {
 
         if let Some((last_offset, last_type)) = last {
             generated_fields.push(quote! {
-                #padding_ident: [u8; #offset - ::std::mem::size_of::<#last_type>() - #last_offset],
+                #padding_ident: [u8; (#offset) - ::std::mem::size_of::<#last_type>() - #last_offset],
             });
         } else {
             generated_fields.push(quote! {
@@ -264,7 +272,7 @@ pub fn tf2_struct(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let generated_struct = quote! {
         #[repr(C)]
-        pub struct #struct_name {
+        pub struct #struct_name #generics {
             #(#generated_fields)*
         }
     };
@@ -364,7 +372,6 @@ pub fn vmt_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut input_fn = parse_macro_input!(item as ItemFn);
     let fn_name = &input_fn.sig.ident;
 
-    // Extract function signature components
     let sig = &input_fn.sig;
     let unsafety = sig.unsafety;
     let abi = sig.abi.clone();
@@ -380,9 +387,9 @@ pub fn vmt_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
     // Generate original retrieval code
     let original_code = quote! {
-        let __original = {
-            let hook_fn = #fn_name as *mut ();
-            let registry = ::oxidius::hook::vmt::HOOK_REGISTRY
+        let original_function = {
+            let hook_fn = unsafe {std::mem::transmute::<_,&crate::hook::vmt::FnPtr>(&#fn_name)};
+            let registry = crate::hook::vmt::VMT_HOOK_REGISTRY.get().unwrap()
                 .read()
                 .expect("Failed to acquire registry lock");
             let original_ptr = registry.get(&hook_fn)
@@ -391,13 +398,11 @@ pub fn vmt_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
         };
     };
 
-    // Insert original retrieval code at start of function
     input_fn
         .block
         .stmts
         .insert(0, parse_quote! { #original_code });
 
-    // Replace all 'original' identifiers with '__original'
     let mut replacer = OriginalReplacer;
     replacer.visit_block_mut(&mut input_fn.block);
 

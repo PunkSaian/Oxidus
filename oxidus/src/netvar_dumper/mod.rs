@@ -1,4 +1,6 @@
-use sdk::{ClientClass, Netvar, NetvarType, RecvTable, SendPropType};
+use crate::sdk::client_class::{
+    ClientClass, Netvar, NetvarStruct, NetvarType, RecvTable, SendPropType,
+};
 use std::collections::HashSet;
 use std::io::Write;
 use std::{collections::HashMap, ffi::CStr, fs::File, slice};
@@ -7,17 +9,6 @@ use crate::sdk::interface::interface_names;
 use crate::sdk::module_names;
 use crate::util::create_interface;
 use crate::{sdk::interface::base_client::BaseClient, OxidusResult};
-
-pub mod sdk;
-
-#[derive(Debug, Clone)]
-pub struct NetvarStruct {
-    name: String,
-    fields: Vec<(String, Netvar)>,
-    baseclass: Option<String>,
-    /// `Netvar::Object`
-    custom: HashMap<String, Netvar>,
-}
 
 const IGNORE: &[&str] = &[
     "m_flMvMLastDamageTime",
@@ -57,8 +48,6 @@ const BOOL_TYPE_OVERRIDES: &[&str] = &[
     "m_lifeState",
     "m_Flags",
 ];
-
-const VMT_STRUCTS: &[&str] = &["BaseEntity"];
 
 #[allow(clippy::too_many_lines)]
 pub fn parse_table(table: &RecvTable) -> NetvarStruct {
@@ -245,8 +234,7 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
             SendPropType::String => NetvarType::String {
                 buffer_size: prop.string_buffer_size as usize,
             },
-
-            _ => NetvarType::Unknown,
+            _ => unreachable!(),
         };
 
         if IGNORE.contains(&name.as_str()) {
@@ -284,7 +272,7 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
             }
             let netvar = Netvar {
                 r#type: NetvarType::Array {
-                    r#type: Box::new(NetvarType::Unknown),
+                    r#type: Box::new(NetvarType::Int),
                     length: prop.elements as usize,
                 },
                 offset: prop.offset as usize,
@@ -369,17 +357,15 @@ fn process_netvar_struct(
     }
 }
 
-use crate::sdk::interface::base_client::VMTBaseClient;
-
 pub fn dump_netvars() -> OxidusResult {
-    let base_client: *mut BaseClient =
-        create_interface(module_names::CLIENT, interface_names::CLIENT).unwrap();
-    let mut client_class: ClientClass = unsafe { (*base_client).get_all_classes().read().into() };
+    let base_client =
+        create_interface::<BaseClient>(module_names::CLIENT, interface_names::CLIENT).unwrap();
+    let mut client_class: ClientClass = unsafe { base_client.get_all_classes().read().into() };
 
     let mut classes = Vec::new();
     loop {
-        let table = unsafe { client_class.recv_table.read() };
-        let netvar_struct = parse_table(&table);
+        let table = client_class.recv_table;
+        let netvar_struct = parse_table(table);
 
         classes.push(netvar_struct);
 
@@ -407,7 +393,7 @@ pub fn dump_netvars() -> OxidusResult {
 
     writeln!(
         &mut file,
-        "use libc::c_void;\npub type Vector2 = [f32;2];\npub type Vector3 = [f32;3];\npub type Unknown = [u8;0];\nuse macros::tf2_struct;\nuse super::vmts::*;"
+        "pub type Vector2 = [f32;2];\npub type Vector3 = [f32;3];\nuse macros::tf2_struct;"
     )?;
 
     writeln!(&mut file)?;
@@ -439,8 +425,7 @@ pub fn dump_netvars() -> OxidusResult {
                         let struct_name = if class_names.contains(struct_name) {
                             struct_name.to_owned()
                         } else {
-                            writeln!(&mut file, "    /// unknown struct {struct_name}")?;
-                            "*const c_void".to_owned()
+                            panic!("struct_name not found");
                         };
                         writeln!(file, "    pub {name}: {struct_name},")?;
                     }
@@ -468,13 +453,6 @@ pub fn dump_netvars() -> OxidusResult {
                 )?;
             }
             writeln!(&mut file, "}}\n")?;
-        }
-        if VMT_STRUCTS.contains(&netvar_struct.name.as_str()) {
-            writeln!(
-                &mut file,
-                "impl VMT{} for {} {{}}\n",
-                netvar_struct.name, netvar_struct.name
-            )?;
         }
     }
     Ok(())

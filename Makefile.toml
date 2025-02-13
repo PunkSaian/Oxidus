@@ -109,7 +109,8 @@ workspace = false
 script = '''
 pkill -9 tf_linux64 || true
 cd "${TF2_DIR}"
-export LD_LIBRARY_PATH="${TF2_BIN_PATH}"
+#export LD_LIBRARY_PATH="${TF2_BIN_PATH}:/usr/lib/libtcmalloc.so"
+export LD_LIBRARY_PATH="${TF2_BIN_PATH}:/usr/lib/"
 "${TF2_DIR}/tf_linux64" -steam -gl
 '''
 

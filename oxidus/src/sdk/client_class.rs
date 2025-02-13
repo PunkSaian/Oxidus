@@ -1,8 +1,17 @@
-use std::ffi::{c_void, CStr};
+use std::{
+    collections::HashMap,
+    ffi::{c_void, CStr},
+};
 
 use crate::sdk::class_id::ClassId;
 
-use super::NetvarStruct;
+#[derive(Debug, Clone)]
+pub struct NetvarStruct {
+    pub name: String,
+    pub fields: Vec<(String, Netvar)>,
+    pub baseclass: Option<String>,
+    pub custom: HashMap<String, Netvar>,
+}
 
 #[allow(dead_code)]
 #[repr(i32)]
@@ -49,13 +58,13 @@ pub struct RecvTable {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct UnparsedClientClass {
     _pad1: [[u8; 8]; 2],
     pub network_name: *const char,
     pub recv_table: &'static RecvTable,
-    pub next: &'static UnparsedClientClass,
-    _pad2: [[u8; 8]; 3],
+    pub next: *const UnparsedClientClass,
+    pub class_id: ClassId,
 }
 
 #[derive(Debug, Clone)]
@@ -80,7 +89,6 @@ pub enum NetvarType {
         length: usize,
     },
     Datatable(NetvarStruct),
-    Unknown,
 }
 
 impl NetvarType {
@@ -97,7 +105,6 @@ impl NetvarType {
                 format!("[{}; {length}]", r#type.to_rust_type())
             }
             Self::Datatable(NetvarStruct { name, .. }) => name.clone(),
-            Self::Unknown => "*const Unknown".to_owned(),
         }
     }
 }
@@ -107,7 +114,7 @@ impl NetvarType {
 pub struct ClientClass {
     pub network_name: String,
     pub next: *const UnparsedClientClass,
-    pub recv_table: *const RecvTable,
+    pub recv_table: &'static RecvTable,
     pub class_id: ClassId,
 }
 impl From<UnparsedClientClass> for ClientClass {

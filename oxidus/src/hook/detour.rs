@@ -1,5 +1,9 @@
 use libc::{mprotect, PROT_EXEC, PROT_READ, PROT_WRITE};
-use std::{pin::Pin, ptr, sync::RwLock};
+use std::{
+    pin::Pin,
+    ptr,
+    sync::{Mutex, RwLock},
+};
 
 const NOP: u8 = 0x90;
 
@@ -12,7 +16,19 @@ const JMP_SIZE: usize = JMP_INSTRUCTION.len() + 8;
 
 const PATCH_SIZE: usize = JMP_SIZE;
 
-use crate::{prelude::*, util::resolve_fn, HOOKS};
+use crate::{prelude::*, util::resolve_fn};
+
+static DETOUR_HOOKS: Mutex<Vec<WrappedDetourHook>> = const { Mutex::new(Vec::new()) };
+
+pub fn restore_detour_hooks() {
+    let mut hooks = DETOUR_HOOKS.lock().unwrap();
+    for hook in hooks.iter_mut() {
+        if let Err(e) = hook.write().unwrap().restore() {
+            error!("Failed to restore hook: {e}");
+        }
+    }
+    hooks.clear();
+}
 
 #[allow(clippy::module_name_repetitions)]
 pub struct DetourHook {
@@ -185,7 +201,7 @@ impl Drop for DetourHook {
 
 pub fn install_detour(target_fn: *mut (), hook_fn: *mut ()) -> OxidusResult {
     let hook = DetourHook::new_and_install(target_fn, hook_fn)?;
-    HOOKS.lock().unwrap().push(hook);
+    DETOUR_HOOKS.lock().unwrap().push(hook);
     Ok(())
 }
 pub fn install_detour_from_symbol(module: &str, symbol: &str, hook_fn: *mut ()) -> OxidusResult {
