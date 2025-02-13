@@ -1,11 +1,9 @@
 use macros::vmt;
-use super::bindings::*;
+use super::{bindings::*, collidable::Collidable};
 
-#[vmt(BaseEntity)]
+#[vmt]
 pub struct BaseEntity {
-    #[offset(2)]
-    pub get_origin: extern "C" fn() -> [f32; 3],
-    #[offset(3)]
-    pub get_origin2: extern "C" fn(test: f32) -> [f32; 3],
+    #[offset(4)]
+    pub get_collidable: extern "C" fn() -> &Collidable,
 }
 

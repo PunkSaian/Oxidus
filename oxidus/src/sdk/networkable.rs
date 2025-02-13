@@ -2,7 +2,7 @@ use macros::vmt;
 
 use super::{client_class::UnparsedClientClass, unknown::Unknown};
 
-#[vmt(Networkable)]
+#[vmt]
 pub struct Networkable {
     #[offset(0)]
     pub get_client_unknown: extern "C" fn() -> *const Unknown,

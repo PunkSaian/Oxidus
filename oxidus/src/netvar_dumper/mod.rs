@@ -5,10 +5,10 @@ use std::collections::HashSet;
 use std::io::Write;
 use std::{collections::HashMap, ffi::CStr, fs::File, slice};
 
-use crate::sdk::interface::interface_names;
+use crate::sdk::interface::{client::Client, interface_names};
 use crate::sdk::module_names;
 use crate::util::create_interface;
-use crate::{sdk::interface::base_client::BaseClient, OxidusResult};
+use crate::util::error::OxidusResult;
 
 const IGNORE: &[&str] = &[
     "m_flMvMLastDamageTime",
@@ -27,6 +27,9 @@ const IGNORE: &[&str] = &[
     "m_chPoseIndex",
     "m_iControlPointParents",
     "m_LightStyle",
+    "m_LightStyle",
+    //wtf
+    "m_iParentAttachment",
 ];
 const CUSTOM_OVERRIDE: &[&str] = &[
     "team_object_array",
@@ -35,6 +38,7 @@ const CUSTOM_OVERRIDE: &[&str] = &[
     "HDRColorScale",
     "movetype",
     "movecollide",
+    "moveparent",
 ];
 const BOOL_TYPE_OVERRIDES: &[&str] = &[
     "m_skybox3d_fog_enable",
@@ -77,10 +81,8 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
             }
             let name = name.trim_matches('"').to_owned();
             if IGNORE.contains(&name.as_str()) {
-                warn!("Ignoring field: {}", name);
                 continue;
             }
-
             if name.ends_with("[0]") {
                 let name = name.split('[').next().unwrap().to_owned();
                 inlined_arrays.insert(name.clone(), (prop, 1));
@@ -111,8 +113,8 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                         }
                         SendPropType::Int => NetvarType::Int,
                         SendPropType::Float => NetvarType::Float,
-                        SendPropType::Vector => NetvarType::Vector2,
-                        SendPropType::Vector2D => NetvarType::Vector3,
+                        SendPropType::Vector2D => NetvarType::Vector2,
+                        SendPropType::Vector => NetvarType::Vector3,
                         _ => unreachable!(),
                     };
                     let netvar = Netvar {
@@ -140,7 +142,7 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
                         }
 
                         if IGNORE.contains(&name.as_str()) {
-                            warn!("Ignoring field: {}", name);
+                            //warn!("Ignoring field: {}", name);
                             continue;
                         }
                         let netvar = Netvar {
@@ -241,6 +243,7 @@ pub fn parse_table(table: &RecvTable) -> NetvarStruct {
             warn!("Ignoring field: {}", name);
             continue;
         }
+
         let netvar = Netvar {
             r#type: NetvarType::Array {
                 r#type: Box::new(r#type),
@@ -359,7 +362,7 @@ fn process_netvar_struct(
 
 pub fn dump_netvars() -> OxidusResult {
     let base_client =
-        create_interface::<BaseClient>(module_names::CLIENT, interface_names::CLIENT).unwrap();
+        create_interface::<Client>(module_names::CLIENT, interface_names::CLIENT).unwrap();
     let mut client_class: ClientClass = unsafe { base_client.get_all_classes().read().into() };
 
     let mut classes = Vec::new();
@@ -393,7 +396,7 @@ pub fn dump_netvars() -> OxidusResult {
 
     writeln!(
         &mut file,
-        "pub type Vector2 = [f32;2];\npub type Vector3 = [f32;3];\nuse macros::tf2_struct;"
+        "use crate::math::Vector3\n\n;pub type Vector2 = [f32;2];\nuse macros::tf2_struct;"
     )?;
 
     writeln!(&mut file)?;
@@ -402,10 +405,7 @@ pub fn dump_netvars() -> OxidusResult {
         writeln!(
             &mut file,
             "#[tf2_struct({})]",
-            netvar_struct.baseclass.clone().map_or_else(
-                || { String::new() },
-                |baselcass| { format!("baselcass = {baselcass}") }
-            ),
+            netvar_struct.baseclass.clone().unwrap_or_else(String::new),
         )?;
 
         write!(&mut file, "pub struct {}", netvar_struct.name)?;

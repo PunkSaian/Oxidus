@@ -60,18 +60,14 @@ pub fn sig(input: TokenStream) -> TokenStream {
 
 #[allow(clippy::too_many_lines)]
 #[proc_macro_attribute]
-pub fn vmt(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn vmt(_: TokenStream, item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as DeriveInput);
+    let struct_name = &input.ident;
 
     //let base_class = attr.into_iter().next();
     let Data::Struct(data) = input.data else {
         panic!("can only be used on structs");
     };
-
-    let target_struct = proc_macro2::TokenStream::from(attr)
-        .into_iter()
-        .next()
-        .expect("Specify the struct that this vmt is for");
 
     let mut fields = match data.fields {
         syn::Fields::Named(fields) => {
@@ -156,7 +152,7 @@ pub fn vmt(attr: TokenStream, item: TokenStream) -> TokenStream {
     }
 
     let generated_trait = quote! {
-        impl #target_struct {
+        impl #struct_name {
             #(#generated_funcs)*
         }
     };
@@ -177,18 +173,7 @@ pub fn tf2_struct(attr: TokenStream, item: TokenStream) -> TokenStream {
     //#[tf2_struct(base_class = <base class>, vmt = <vmt>)]
 
     //group attrs into touples 3
-    let attrs = proc_macro2::TokenStream::from(attr)
-        .into_iter()
-        .filter(|x| !matches!(x, proc_macro2::TokenTree::Punct(_)))
-        .collect::<Vec<_>>();
-    let grouped = attrs.chunks(2);
-
-    let base_class = grouped.clone().find_map(|x| {
-        if x[0].to_string() == "baseclass" {
-            return Some(x[1].clone());
-        }
-        None
-    });
+    let base_class = proc_macro2::TokenStream::from(attr).into_iter().next();
 
     let Data::Struct(data) = input.data else {
         panic!("tf2_struct can only be used on structs");
@@ -239,7 +224,7 @@ pub fn tf2_struct(attr: TokenStream, item: TokenStream) -> TokenStream {
 
         if let Some((last_offset, last_type)) = last {
             generated_fields.push(quote! {
-                #padding_ident: [u8; (#offset) - ::std::mem::size_of::<#last_type>() - #last_offset],
+                #padding_ident: [u8; (#offset) - (::std::mem::size_of::<#last_type>() + #last_offset)],
             });
         } else {
             generated_fields.push(quote! {

@@ -5,6 +5,8 @@ use imgui::WindowFlags;
 use crate::{oxidus_cleanup, util::consts::info_string};
 
 pub fn show(ui: &mut imgui::Ui) {
+    crate::modules::esp::draw(ui);
+
     ui.show_demo_window(&mut false);
 
     ui.window("Oxidus").build(|| {

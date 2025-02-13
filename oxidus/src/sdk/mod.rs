@@ -9,6 +9,8 @@ pub mod networkable;
 pub mod unknown;
 #[cfg(not(feature = "dump-netvars"))]
 pub mod vmts;
+#[cfg(not(feature = "dump-netvars"))]
+pub mod collidable;
 
 #[allow(clippy::all,non_snake_case, non_camel_case_types)]
 #[rustfmt::skip]

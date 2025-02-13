@@ -56,7 +56,7 @@ pub struct ClientEntityList {
     base_entities: UtilLinekdList<*const BaseEntity, u8>,
 }
 
-#[vmt(ClientEntityList)]
+#[vmt]
 pub struct ClientEntityList {
     #[offset(0)]
     pub on_add_entity: extern "C" fn(handle_entity: *const (), handle: i32),

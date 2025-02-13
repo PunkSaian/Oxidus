@@ -28,6 +28,7 @@ use modules::init_modules;
 use netvar_dumper::dump_netvars;
 #[cfg(not(feature = "dump-netvars"))]
 use overlay::init as init_overlay;
+#[cfg(not(feature = "dump-netvars"))]
 use overlay::unload as unload_overlay;
 use prelude::*;
 use sdk::module_names;
@@ -36,12 +37,14 @@ use sdk::module_names;
 extern crate log;
 
 mod hook;
+mod math;
 
 #[cfg(not(feature = "dump-netvars"))]
 mod modules;
 
 #[cfg(feature = "dump-netvars")]
 mod netvar_dumper;
+#[cfg(not(feature = "dump-netvars"))]
 mod overlay;
 mod prelude;
 mod sdk;
@@ -88,6 +91,7 @@ pub fn main() -> OxidusResult {
 pub fn cleanup() -> OxidusResult {
     restore_hooks();
 
+    #[cfg(not(feature = "dump-netvars"))]
     unload_overlay();
     Ok(())
 }
