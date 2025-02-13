@@ -13,6 +13,7 @@ use sdl2_sys::{
     SDL_BUTTON_RIGHT, SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_PRESSED,
 };
 use sdl_renderer::{SdlRenderer, Textures};
+use styles::set_styles;
 
 use crate::{
     hook::detour::install_detour_from_symbol,
@@ -23,6 +24,7 @@ pub mod hooks;
 pub mod menu;
 pub mod scan_code_map;
 pub mod sdl_renderer;
+pub mod styles;
 
 pub use crate::prelude::*;
 
@@ -41,6 +43,7 @@ impl Overlay {
     pub fn new(window: *mut SDL_Window) -> OxidusResult<Self> {
         unsafe {
             let mut context = imgui::Context::create();
+            set_styles(context.style_mut());
 
             let tf2_gl_ctx = SDL_GL_GetCurrentContext();
             let oxidus_gl_ctx = SDL_GL_CreateContext(window);
@@ -206,7 +209,6 @@ impl Drop for Overlay {
         }
     }
 }
-
 
 pub static OVERLAY: RwLock<Option<Overlay>> = const { RwLock::new(None) };
 pub static TEXTURES: RwLock<Option<Textures>> = const { RwLock::new(None) };

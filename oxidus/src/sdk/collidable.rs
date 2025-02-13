@@ -2,8 +2,6 @@
 use macros::vmt;
 use crate::math::{Angles, Vector3};
 
-use super::bindings::*;
-
 pub struct Collidable;
 
 #[vmt]

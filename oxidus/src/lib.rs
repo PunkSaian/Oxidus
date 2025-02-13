@@ -22,15 +22,12 @@ use hook::restore_hooks;
 use libc::{dlopen, RTLD_NOLOAD, RTLD_NOW};
 use log::{error, info};
 
-#[cfg(not(feature = "dump-netvars"))]
 use modules::init_modules;
-#[cfg(feature = "dump-netvars")]
 use netvar_dumper::dump_netvars;
-#[cfg(not(feature = "dump-netvars"))]
 use overlay::init as init_overlay;
-#[cfg(not(feature = "dump-netvars"))]
 use overlay::unload as unload_overlay;
 use prelude::*;
+use sdk::interface::interfaces::Interfaces;
 use sdk::module_names;
 
 #[macro_use]
@@ -39,12 +36,9 @@ extern crate log;
 mod hook;
 mod math;
 
-#[cfg(not(feature = "dump-netvars"))]
 mod modules;
 
-#[cfg(feature = "dump-netvars")]
 mod netvar_dumper;
-#[cfg(not(feature = "dump-netvars"))]
 mod overlay;
 mod prelude;
 mod sdk;
@@ -71,27 +65,23 @@ pub fn wait_for_client() {
 
 pub fn main() -> OxidusResult {
     wait_for_client();
-    #[cfg(feature = "dump-netvars")]
-    {
+    if cfg!(feature = "dump-netvars") {
         info!("Dumping netvars");
         dump_netvars()?;
-        Ok(())
+        return Ok(());
     }
+    Interfaces::init();
 
-    #[cfg(not(feature = "dump-netvars"))]
-    {
-        init_overlay()?;
+    init_overlay()?;
 
-        init_modules();
-        Ok(())
-    }
+    init_modules();
+    Ok(())
 }
 
 #[allow(clippy::missing_panics_doc)]
 pub fn cleanup() -> OxidusResult {
     restore_hooks();
 
-    #[cfg(not(feature = "dump-netvars"))]
     unload_overlay();
     Ok(())
 }

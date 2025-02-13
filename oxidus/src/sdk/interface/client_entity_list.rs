@@ -31,13 +31,12 @@ pub struct UtilLinekdList<T, I> {
 }
 
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct EntityCacheInfo {
     pub networkable: *const Networkable,
     pub base_entities_index: u8,
 }
 
-#[derive(Debug)]
 #[tf2_struct()]
 pub struct ClientEntityList {
     #[offset(8)]
