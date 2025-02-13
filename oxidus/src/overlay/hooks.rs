@@ -12,8 +12,7 @@ pub unsafe extern "C" fn swap_window(window: *mut SDL_Window) {
 
     if overlay.is_none() {
         info!("Initializing overlay");
-        // Initialize ImGui context
-        //
+
         *overlay = Some(Overlay::new(window).unwrap());
 
         info!("Overlay initialized");

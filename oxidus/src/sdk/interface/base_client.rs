@@ -1,14 +1,16 @@
-use crate::netvar_dumper::sdk::UnparsedClientClass;
+use macros::vmt;
 
-#[repr(C)]
-#[derive(Debug, Clone)]
-pub struct VMTBaseClient {
-    _pad1: [usize; 6],
-    pub level_init_post_entity: extern "C" fn(*const BaseClient) -> (),
-    pub level_shutdown: extern "C" fn(*const BaseClient) -> (),
-    pub get_all_classes: extern "C" fn(*const BaseClient) -> *const UnparsedClientClass,
+use crate::{netvar_dumper::sdk::UnparsedClientClass, sdk::vmts::VMTBaseEntity};
+
+#[vmt]
+pub struct BaseClient {
+    #[offset(7)]
+    pub level_init_post_entity: extern "C" fn(),
+    pub level_shutdown: extern "C" fn(),
+    pub get_all_classes: extern "C" fn() -> *const UnparsedClientClass,
 }
 
-pub struct BaseClient {
-    pub(crate) vtable: &'static VMTBaseClient,
+pub struct BaseClient;
+
+impl VMTBaseClient for BaseClient {
 }

@@ -3,6 +3,9 @@ use std::collections::HashSet;
 use std::io::Write;
 use std::{collections::HashMap, ffi::CStr, fs::File, slice};
 
+use crate::sdk::interface::interface_names;
+use crate::sdk::module_names;
+use crate::util::create_interface;
 use crate::{sdk::interface::base_client::BaseClient, OxidusResult};
 
 pub mod sdk;
@@ -366,12 +369,12 @@ fn process_netvar_struct(
     }
 }
 
-pub fn dump_netvars(base_client: *const BaseClient) -> OxidusResult {
-    let mut client_class: ClientClass = unsafe {
-        (base_client.read().vtable.get_all_classes)(base_client)
-            .read()
-            .into()
-    };
+use crate::sdk::interface::base_client::VMTBaseClient;
+
+pub fn dump_netvars() -> OxidusResult {
+    let base_client: *mut BaseClient =
+        create_interface(module_names::CLIENT, interface_names::CLIENT).unwrap();
+    let mut client_class: ClientClass = unsafe { (*base_client).get_all_classes().read().into() };
 
     let mut classes = Vec::new();
     loop {

@@ -6,7 +6,10 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
 use syn::{
-    parse::{Parse, ParseStream}, parse_macro_input, parse_quote, visit_mut::{self, VisitMut}, Data, DeriveInput, FnArg, Ident, ItemFn, LitStr, Meta, Type
+    parse::{Parse, ParseStream},
+    parse_macro_input, parse_quote,
+    visit_mut::{self, VisitMut},
+    Data, DeriveInput, FnArg, Ident, ItemFn, LitStr, Meta, Type,
 };
 
 struct SignatureInput {
@@ -68,25 +71,23 @@ pub fn vmt(_: TokenStream, item: TokenStream) -> TokenStream {
         syn::Fields::Named(fields) => {
             let mut fields_with_offsets = Vec::new();
             for field in fields.named {
-                assert!(
-                    (field.attrs.len() == 1),
-                    "Each field must have offset attribute"
-                );
-                let attr = field.attrs[0].clone();
-                assert!(
-                    attr.path().is_ident("offset"),
-                    "Each field must have offset attribute"
-                );
-                let Meta::List(offset) = attr.meta else {
-                    panic!("Each field must have offset attribute");
-                };
-                let tokens = offset.tokens.into_iter().collect::<Vec<_>>();
-                assert!((tokens.len() == 1), "Invalid offset attribute");
-                let proc_macro2::TokenTree::Literal(literal) = tokens.into_iter().next().unwrap()
-                else {
-                    panic!("Invalid offset attribute");
-                };
-                let offset = literal.to_string().parse::<isize>().unwrap();
+                let offset = (|| {
+                    if field.attrs.len() != 1 {
+                        return 0;
+                    }
+                    let attr = field.attrs[0].clone();
+
+                    let Meta::List(offset) = attr.meta else {
+                        return 0
+                    };
+                    let tokens = offset.tokens.into_iter().collect::<Vec<_>>();
+                    assert!((tokens.len() == 1), "Invalid offset attribute");
+                    let proc_macro2::TokenTree::Literal(literal) = tokens.into_iter().next().unwrap()
+                    else {
+                        panic!("Invalid offset attribute");
+                    };
+                    literal.to_string().parse::<isize>().unwrap()
+                })();
 
                 fields_with_offsets.push((field.ident.clone(), field.ty.clone(), offset));
             }
@@ -113,16 +114,20 @@ pub fn vmt(_: TokenStream, item: TokenStream) -> TokenStream {
             .inputs
             .clone()
             .into_iter()
-            .map(|arg| arg.name.unwrap().0)
+            .map(|arg| {
+                arg.name
+                    .expect("this macro doesnt support unnamed arguments")
+                    .0
+            })
             .collect::<Vec<_>>();
         let ret = func.output.clone();
         let function = if args_with_types.is_empty() {
             quote! {
                 fn #ident(&self) #ret {
                     unsafe {
-                        let vtable = self as *const Self as *const &extern "C" fn() #ret;
+                        let vtable = self as *const Self as *const &extern "C" fn(&Self) #ret;
                         let func = *vtable.offset(#offset);
-                        (func)(#(#args),*)
+                        (func)(self, #(#args),*)
                     }
                 }
             }
@@ -130,9 +135,9 @@ pub fn vmt(_: TokenStream, item: TokenStream) -> TokenStream {
             quote! {
                 fn #ident(&self, #args_with_types) #ret {
                     unsafe {
-                        let vtable = self as *const Self as *const &extern "C" fn(#args_with_types) #ret;
+                        let vtable = self as *const Self as *const &extern "C" fn(&Self,#args_with_types) #ret;
                         let func = *vtable.offset(#offset);
-                        (func)(#(#args),*)
+                        (func)(self, #(#args),*)
                     }
                 }
             }

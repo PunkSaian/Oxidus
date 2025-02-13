@@ -11,7 +11,7 @@
     incomplete_features,
     dead_code
 )]
-#![feature(inherent_associated_types,generic_const_exprs)]
+#![feature(inherent_associated_types, generic_const_exprs)]
 
 extern crate thiserror;
 
@@ -26,19 +26,18 @@ use netvar_dumper::dump_netvars;
 use overlay::init as init_overlay;
 use overlay::unload as unload_overlay;
 use prelude::*;
-use sdk::interface::base_client::BaseClient;
 use sdk::module_names;
 
 #[macro_use]
 extern crate log;
 
 mod hook;
+mod modules;
 mod netvar_dumper;
 mod overlay;
 mod prelude;
 mod sdk;
 mod util;
-mod modules;
 
 #[allow(clippy::type_complexity)]
 static HOOKS: Mutex<Vec<WrappedDetourHook>> = const { Mutex::new(Vec::new()) };
@@ -66,17 +65,13 @@ pub fn main() -> OxidusResult {
     if cfg!(feature = "dump-netvars") {
         wait_for_client();
         info!("Dumping netvars");
-        let create_interface: extern "C" fn(*const i8, *const isize) -> *const () = unsafe {
-            std::mem::transmute(util::resolve_fn(module_names::CLIENT, "CreateInterface").unwrap())
-        };
-        let base_client: *mut BaseClient =
-            create_interface(c"VClient017".as_ptr(), std::ptr::null()) as *mut BaseClient;
-        dump_netvars(base_client)?;
+        dump_netvars()?;
         return Ok(());
     }
 
     wait_for_client();
     init_overlay()?;
+
     init_modules();
 
     Ok(())
