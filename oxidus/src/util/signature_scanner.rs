@@ -1,4 +1,7 @@
-use std::ffi::{CStr, CString};
+use std::{
+    env,
+    ffi::{CStr, CString},
+};
 
 use libc::dl_phdr_info;
 
@@ -58,10 +61,10 @@ unsafe extern "C" fn callback(
     };
 
     if module_name.contains(search_data.cname.to_str().unwrap_or("")) {
-        let mut max_addr = info.dlpi_addr;
+        let mut max_addr = 0;
         for i in 0..info.dlpi_phnum {
             let phdr = info.dlpi_phdr.add(i as usize).read();
-            let end = phdr.p_vaddr + phdr.p_memsz;
+            let end = info.dlpi_addr + phdr.p_vaddr + phdr.p_memsz;
             if end > max_addr {
                 max_addr = end;
             }
@@ -80,7 +83,7 @@ unsafe extern "C" fn callback(
 
 fn find_module(name: &str) -> Option<ModuleInfo> {
     let mut search_data = SearchData {
-        cname: CString::new(name).ok()?,
+        cname: CString::new(name.strip_prefix("./").unwrap()).ok()?,
         result: None,
     };
 
@@ -92,19 +95,19 @@ fn find_module(name: &str) -> Option<ModuleInfo> {
 }
 
 fn sig_scan(memory: &[u8], pattern: &[u8], mask: &[u8]) -> Option<usize> {
+    dbg!(memory as *const _, &pattern, &mask);
     let pattern_len = pattern.len();
     if memory.len() < pattern_len || pattern_len != mask.len() {
         return None;
     }
 
-    'outer: for i in 0..=memory.len() - pattern_len {
-        for j in 0..pattern_len {
-            if mask[j] == b'x' && memory[i + j] != pattern[j] {
+    'outer: for i in 0..=memory.len().saturating_sub(pattern_len) {
+        for (j, (&pat_byte, &mask_byte)) in pattern.iter().zip(mask).enumerate() {
+            if mask_byte == b'x' && memory[i + j] != pat_byte {
                 continue 'outer;
             }
         }
         return Some(i);
     }
-
     None
 }

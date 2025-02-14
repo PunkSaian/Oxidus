@@ -22,6 +22,7 @@ use hook::restore_hooks;
 use libc::{dlopen, RTLD_NOLOAD, RTLD_NOW};
 use log::{error, info};
 
+use macros::sig;
 use modules::init_modules;
 use netvar_dumper::dump_netvars;
 use overlay::init as init_overlay;
@@ -29,6 +30,8 @@ use overlay::unload as unload_overlay;
 use prelude::*;
 use sdk::interface::interfaces::Interfaces;
 use sdk::module_names;
+use util::signature_scanner;
+use util::signature_scanner::Signature;
 
 #[macro_use]
 extern crate log;
@@ -71,6 +74,11 @@ pub fn main() -> OxidusResult {
         return Ok(());
     }
     Interfaces::init();
+
+    let sig: Signature =
+        sig!("55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC ? 83 3D ? ? ? ? ? F3 0F 11 85");
+    let res = sig.scan_module(module_names::CLIENT);
+    dbg!(res);
 
     init_overlay()?;
 

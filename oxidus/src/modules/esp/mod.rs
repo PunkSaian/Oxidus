@@ -49,8 +49,6 @@ pub fn draw(ui: &mut imgui::Ui) {
 
         let player = unsafe { &*(*(*entry.networkable).get_client_unknown()).get_base_entity() };
         let player_pos = player.m_vecOrigin;
-        dbg!(player.m_Collision.m_vecMins);
-        dbg!(player.m_Collision.m_vecMaxs);
 
         let w = w2s.origin.vec.dot(&player_pos) + w2s.origin.w;
         let x = w2s.right.vec.dot(&player_pos) + w2s.right.w;

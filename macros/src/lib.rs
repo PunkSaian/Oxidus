@@ -49,8 +49,7 @@ pub fn sig(input: TokenStream) -> TokenStream {
 
     TokenStream::from(quote! {
         {
-            use ::your_crate_name::Signature;
-            Signature::new(
+            crate::util::signature_scanner::Signature::new(
                 vec![#(#pattern),*],
                 vec![#(#mask),*]
             )
