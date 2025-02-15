@@ -1,6 +1,5 @@
 use macros::detour_hook;
 use sdl2_sys::{SDL_Event, SDL_Window};
-use std::{ffi::c_void, mem::MaybeUninit};
 
 use crate::overlay::Overlay;
 
@@ -33,7 +32,6 @@ pub unsafe extern "C" fn poll_event(event: &mut SDL_Event) -> i32 {
             state.poll_event(event);
             if state.visible {
                 return 0;
-                //event.type_ = 0;
             }
         }
         result

@@ -24,7 +24,7 @@ pub fn show_watermark(ui: &mut imgui::Ui) {
                 | WindowFlags::NO_DECORATION
                 | WindowFlags::NO_NAV,
         )
-        .bg_alpha(0.35)
+        .bg_alpha(0.80)
         .always_auto_resize(true)
         .build(|| {
             let textures = TEXTURES.read().unwrap();

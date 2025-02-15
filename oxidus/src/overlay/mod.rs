@@ -6,12 +6,12 @@ use std::{
 
 use hooks::{poll_event, swap_window};
 use imgui::{Key, MouseButton};
-use menu::windows::watermark::show_watermark;
+use menu::windows::{debug::show_debug_window, watermark::show_watermark};
 use scan_code_map::sdl_scancode_to_imgui_key;
 use sdl2_sys::{
     SDL_Event, SDL_EventType, SDL_GL_CreateContext, SDL_GL_GetCurrentContext, SDL_GetWindowSize,
-    SDL_GetWindowTitle, SDL_SetWindowTitle, SDL_Window, SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE,
-    SDL_BUTTON_RIGHT, SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_PRESSED,
+    SDL_GetWindowTitle, SDL_SetWindowTitle, SDL_ShowCursor, SDL_Window, SDL_BUTTON_LEFT,
+    SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT, SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_PRESSED,
 };
 use sdl_renderer::{SdlRenderer, Textures};
 use styles::set_styles;
@@ -138,8 +138,8 @@ impl Overlay {
 
         self.show();
 
-        self.last_frame = Instant::now();
         self.renderer.render(&mut self.context);
+        self.last_frame = Instant::now();
         unsafe {
             sdl2_sys::SDL_GL_MakeCurrent(window, self.tf2_gl_ctx);
         }
@@ -151,10 +151,12 @@ impl Overlay {
             self.visible = !self.visible;
         }
         if self.visible {
+            //unsafe { SDL_ShowCursor(1) };
             menu::show(ui);
         }
-        crate::modules::esp::draw(ui);
-        show_watermark(ui);
+        //show_debug_window(ui, self.visible);
+        //crate::modules::esp::draw(ui);
+        //show_watermark(ui);
     }
 
     pub fn poll_event(&mut self, event: &mut SDL_Event) {

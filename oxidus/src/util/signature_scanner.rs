@@ -59,7 +59,6 @@ unsafe extern "C" fn callback(
     };
 
     if module_name.contains(search_data.cname.to_str().unwrap_or("")) {
-        dbg!(module_name);
         let mut max_addr = 0;
         for i in 0..info.dlpi_phnum {
             let phdr = info.dlpi_phdr.add(i as usize).read();
@@ -100,10 +99,6 @@ fn sig_scan(memory: &[u8], pattern: &[u8], mask: &[u8]) -> Option<usize> {
     }
     'outer: for i in 0..=memory.len().saturating_sub(pattern_len) {
         for (j, (&pat_byte, &mask_byte)) in pattern.iter().zip(mask).enumerate() {
-            if j > 17 || i == 0x0161c0a0 {
-                debug!("{}", j);
-                debug!("{}", i);
-            }
             if mask_byte == b'x' && memory[i + j] != pat_byte {
                 continue 'outer;
             }

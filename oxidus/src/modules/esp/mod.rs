@@ -2,7 +2,7 @@ use std::mem::MaybeUninit;
 
 pub use crate::prelude::*;
 
-use crate::{math::VMatrix, sdk::class_id::ClassId};
+use crate::{math::VMatrix, mdbg, sdk::class_id::ClassId};
 
 pub fn init_esp() {}
 
@@ -50,10 +50,10 @@ pub fn draw(ui: &mut imgui::Ui) {
 
         let (screen_pos, w) = w2s.transform_vector(&player_pos);
 
-        dbg!(screen_pos, w);
         if w < 0.01 {
             continue;
         }
+        mdbg!((screen_pos, w));
 
         let x = screen_w as f32 / 2f32 * (1f32 + screen_pos.x / w);
         let y = screen_h as f32 / 2f32 * (1f32 - screen_pos.y / w);
