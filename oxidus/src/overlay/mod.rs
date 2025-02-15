@@ -151,12 +151,12 @@ impl Overlay {
             self.visible = !self.visible;
         }
         if self.visible {
-            //unsafe { SDL_ShowCursor(1) };
+            unsafe { SDL_ShowCursor(1) };
             menu::show(ui);
         }
-        //show_debug_window(ui, self.visible);
-        //crate::modules::esp::draw(ui);
-        //show_watermark(ui);
+        show_debug_window(ui, self.visible);
+        crate::modules::esp::draw(ui);
+        show_watermark(ui);
     }
 
     pub fn poll_event(&mut self, event: &mut SDL_Event) {

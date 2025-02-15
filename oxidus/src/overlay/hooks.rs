@@ -31,7 +31,8 @@ pub unsafe extern "C" fn poll_event(event: &mut SDL_Event) -> i32 {
         if result != 0 {
             state.poll_event(event);
             if state.visible {
-                return 0;
+                event.type_ = 0;
+                return result;
             }
         }
         result
