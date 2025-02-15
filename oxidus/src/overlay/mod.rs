@@ -5,7 +5,8 @@ use std::{
 };
 
 use hooks::{poll_event, swap_window};
-use imgui::MouseButton;
+use imgui::{Key, MouseButton};
+use menu::windows::watermark::show_watermark;
 use scan_code_map::sdl_scancode_to_imgui_key;
 use sdl2_sys::{
     SDL_Event, SDL_EventType, SDL_GL_CreateContext, SDL_GL_GetCurrentContext, SDL_GetWindowSize,
@@ -34,6 +35,7 @@ pub struct Overlay {
     last_frame: Instant,
     tf2_gl_ctx: *mut c_void,
     oxidus_gl_ctx: *mut c_void,
+    pub visible: bool,
 }
 
 const IMGUI_CONFIG_FLAGS: imgui::ConfigFlags = imgui::ConfigFlags::DOCKING_ENABLE;
@@ -80,6 +82,7 @@ impl Overlay {
                 last_frame: Instant::now(),
                 tf2_gl_ctx,
                 oxidus_gl_ctx,
+                visible: true,
             })
         }
     }
@@ -133,19 +136,29 @@ impl Overlay {
         self.context.io_mut().display_size = [window_width as f32, window_height as f32];
         self.context.io_mut().update_delta_time(delta);
 
+        self.show();
+
         self.last_frame = Instant::now();
-
-        menu::show(self.context.new_frame());
-
         self.renderer.render(&mut self.context);
         unsafe {
             sdl2_sys::SDL_GL_MakeCurrent(window, self.tf2_gl_ctx);
         }
     }
-    pub fn poll_event(&mut self, event: *mut c_void) {
+
+    pub fn show(&mut self) {
+        let ui = self.context.new_frame();
+        if ui.is_key_pressed(Key::Insert) {
+            self.visible = !self.visible;
+        }
+        if self.visible {
+            menu::show(ui);
+        }
+        crate::modules::esp::draw(ui);
+        show_watermark(ui);
+    }
+
+    pub fn poll_event(&mut self, event: &mut SDL_Event) {
         unsafe {
-            let event_ptr = event as *const SDL_Event;
-            let event = &*event_ptr;
             let io = self.context.io_mut();
             #[allow(non_snake_case)]
             match std::mem::transmute::<u32, sdl2_sys::SDL_EventType>(event.type_) {

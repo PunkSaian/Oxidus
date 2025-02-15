@@ -34,3 +34,16 @@ pub struct VMatrix {
     pub forward: VMatrixRow,
     pub origin: VMatrixRow,
 }
+
+impl VMatrix {
+    pub fn transform_vector(&self, vec: &Vector3) -> (Vector3, f32) {
+        (
+            Vector3 {
+                x: self.right.vec.dot(vec) + self.right.w,
+                y: self.up.vec.dot(vec) + self.up.w,
+                z: self.forward.vec.dot(vec) + self.forward.w,
+            },
+            self.origin.vec.dot(vec) + self.origin.w,
+        )
+    }
+}

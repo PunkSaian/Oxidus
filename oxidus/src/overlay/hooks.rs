@@ -1,6 +1,6 @@
 use macros::detour_hook;
-use sdl2_sys::SDL_Window;
-use std::ffi::c_void;
+use sdl2_sys::{SDL_Event, SDL_Window};
+use std::{ffi::c_void, mem::MaybeUninit};
 
 use crate::overlay::Overlay;
 
@@ -25,15 +25,18 @@ pub unsafe extern "C" fn swap_window(window: *mut SDL_Window) {
 }
 
 #[detour_hook]
-pub unsafe extern "C" fn poll_event(event: *mut c_void) -> i32 {
-    let result = original_function(event);
-
-    if result != 0 {
-        let mut state = OVERLAY.write().unwrap();
-        if let Some(state) = state.as_mut() {
+pub unsafe extern "C" fn poll_event(event: &mut SDL_Event) -> i32 {
+    let mut state = OVERLAY.write().unwrap();
+    if let Some(state) = state.as_mut() {
+        let result = original_function(event);
+        if result != 0 {
             state.poll_event(event);
+            if state.visible {
+                event.type_ = 0;
+            }
         }
+        result
+    } else {
+        original_function(event)
     }
-
-    result
 }

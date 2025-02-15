@@ -48,17 +48,16 @@ pub fn draw(ui: &mut imgui::Ui) {
         let player = unsafe { &*(*(*entry.networkable).get_client_unknown()).get_base_entity() };
         let player_pos = player.m_vecOrigin;
 
-        let w = w2s.origin.vec.dot(&player_pos) + w2s.origin.w;
-        let x = w2s.right.vec.dot(&player_pos) + w2s.right.w;
-        let y = w2s.up.vec.dot(&player_pos) + w2s.up.w;
+        let (screen_pos, w) = w2s.transform_vector(&player_pos);
 
+        dbg!(screen_pos, w);
         if w < 0.01 {
             continue;
         }
 
-        let x = screen_w as f32 / 2f32 * (1f32 + x / w);
-        let y = screen_h as f32 / 2f32 * (1f32 - y / w);
+        let x = screen_w as f32 / 2f32 * (1f32 + screen_pos.x / w);
+        let y = screen_h as f32 / 2f32 * (1f32 - screen_pos.y / w);
 
-        draw_list.add_circle([x, y], 50.0, [1.0, 0.0, 0.0]).build();
+        draw_list.add_rect([x, y], [x, y], [1.0, 0.0, 0.0]).build();
     }
 }
