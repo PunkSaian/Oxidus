@@ -4,8 +4,6 @@ pub use crate::prelude::*;
 
 use crate::{math::VMatrix, sdk::class_id::ClassId};
 
-pub mod viewmatrix;
-
 pub fn init_esp() {}
 
 #[allow(clippy::similar_names)]

@@ -2,7 +2,6 @@ use macros::{tf2_struct, vmt};
 
 use crate::sdk::{bindings::BaseEntity, networkable::Networkable};
 
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct UtilMemory<T> {

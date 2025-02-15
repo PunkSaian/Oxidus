@@ -6,7 +6,7 @@ use imgui::{Context, DrawCmd};
 
 use std::io::Cursor;
 
-use crate::util::consts::OXIDE_LOGO_PNG;
+use crate::util::consts::{OXIDE_LOGO_PNG, OXIDE_LOGO_TRANS_OUTLINED_PNG, OXIDE_LOGO_TRANS_PNG};
 
 use super::OxidusResult;
 
@@ -17,13 +17,22 @@ pub struct Texture {
 
 pub struct Textures {
     pub logo: Texture,
+    pub logo_trans: Texture,
+    pub logo_trans_outlined: Texture,
 }
 
 impl Textures {
     pub fn new(renderer: &mut SdlRenderer) -> OxidusResult<Self> {
         let logo = renderer.create_texture_from_bytes(OXIDE_LOGO_PNG)?;
+        let logo_trans = renderer.create_texture_from_bytes(OXIDE_LOGO_TRANS_PNG)?;
+        let logo_trans_outlined =
+            renderer.create_texture_from_bytes(OXIDE_LOGO_TRANS_OUTLINED_PNG)?;
 
-        Ok(Self { logo })
+        Ok(Self {
+            logo,
+            logo_trans,
+            logo_trans_outlined,
+        })
     }
 }
 
@@ -65,7 +74,7 @@ impl SdlRenderer {
             atlas.tex_id = (font_texture as usize).into();
             sdl2_sys::SDL_SetTextureScaleMode(
                 font_texture,
-                sdl2_sys::SDL_ScaleMode::SDL_ScaleModeLinear,
+                sdl2_sys::SDL_ScaleMode::SDL_ScaleModeNearest,
             );
 
             Self {

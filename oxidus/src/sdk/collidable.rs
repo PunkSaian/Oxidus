@@ -1,6 +1,5 @@
-
-use macros::vmt;
 use crate::math::{Angles, Vector3};
+use macros::vmt;
 
 pub struct Collidable;
 
@@ -19,4 +18,3 @@ pub struct Collidable {
     #[offset(12)]
     pub get_angles: extern "C" fn() -> &Angles,
 }
-

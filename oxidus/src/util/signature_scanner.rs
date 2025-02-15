@@ -1,7 +1,4 @@
-use std::{
-    env,
-    ffi::{CStr, CString},
-};
+use std::ffi::{CStr, CString};
 
 use libc::dl_phdr_info;
 
@@ -28,8 +25,9 @@ impl Signature {
     pub fn scan_module(&self, module_name: &str) -> Option<*const u8> {
         find_module(module_name).and_then(|module| {
             let memory = unsafe { std::slice::from_raw_parts(module.base, module.size) };
-            self.scan(memory)
-                .map(|offset| unsafe { module.base.add(offset) })
+            let raw_res = self.scan(memory);
+
+            raw_res.map(|offset| unsafe { module.base.add(offset) })
         })
     }
 }
@@ -61,10 +59,11 @@ unsafe extern "C" fn callback(
     };
 
     if module_name.contains(search_data.cname.to_str().unwrap_or("")) {
+        dbg!(module_name);
         let mut max_addr = 0;
         for i in 0..info.dlpi_phnum {
             let phdr = info.dlpi_phdr.add(i as usize).read();
-            let end = info.dlpi_addr + phdr.p_vaddr + phdr.p_memsz;
+            let end = phdr.p_vaddr + phdr.p_memsz;
             if end > max_addr {
                 max_addr = end;
             }
@@ -72,7 +71,7 @@ unsafe extern "C" fn callback(
 
         search_data.result = Some(ModuleInfo {
             base: info.dlpi_addr as *const u8,
-            size: (max_addr - info.dlpi_addr) as usize,
+            size: (max_addr) as usize,
             name: module_name.to_string(),
         });
         1
@@ -95,14 +94,16 @@ fn find_module(name: &str) -> Option<ModuleInfo> {
 }
 
 fn sig_scan(memory: &[u8], pattern: &[u8], mask: &[u8]) -> Option<usize> {
-    dbg!(memory as *const _, &pattern, &mask);
     let pattern_len = pattern.len();
     if memory.len() < pattern_len || pattern_len != mask.len() {
         return None;
     }
-
     'outer: for i in 0..=memory.len().saturating_sub(pattern_len) {
         for (j, (&pat_byte, &mask_byte)) in pattern.iter().zip(mask).enumerate() {
+            if j > 17 || i == 0x0161c0a0 {
+                debug!("{}", j);
+                debug!("{}", i);
+            }
             if mask_byte == b'x' && memory[i + j] != pat_byte {
                 continue 'outer;
             }
