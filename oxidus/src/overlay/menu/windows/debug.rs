@@ -36,10 +36,13 @@ pub fn show_debug_window(ui: &mut Ui, visible: bool) {
         .size([300.0, 200.0], imgui::Condition::FirstUseEver)
         .collapsible(true)
         .flags(WindowFlags::NO_TITLE_BAR)
+        .bg_alpha(if visible { 1.0 } else { 0.2 })
+        .resizable(visible)
+        .movable(visible)
         .build(|| {
             // Display tracked variables
             for ((file, line, name), value) in state.variables.iter() {
-                ui.text(&format!("{}:{} - {} = {}", file, line, name, value));
+                ui.text_wrapped(format!("{}:{} - {} = {}", file, line, name, value));
             }
 
             // Display and manage inputs

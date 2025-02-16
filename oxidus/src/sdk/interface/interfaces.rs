@@ -4,7 +4,7 @@ use crate::{sdk::module_names, util::create_interface};
 
 use super::{
     client::Client, client_entity_list::ClientEntityList, engine::Engine,
-    engine_render_view::EngineRenderView, interface_names,
+    engine_render_view::EngineRenderView, interface_names, mat_system_surface::MatSystemSurface,
 };
 
 pub struct Interfaces {
@@ -12,6 +12,7 @@ pub struct Interfaces {
     pub client: &'static Client,
     pub engine: &'static Engine,
     pub engine_render_view: &'static EngineRenderView,
+    pub mat_system_surface: &'static MatSystemSurface,
 }
 
 unsafe impl Sync for Interfaces {}
@@ -37,6 +38,11 @@ impl Interfaces {
             engine_render_view: create_interface::<EngineRenderView>(
                 module_names::ENGINE,
                 interface_names::ENGINE_RENDER_VIEW,
+            )
+            .unwrap(),
+            mat_system_surface: create_interface::<MatSystemSurface>(
+                module_names::MATERIAL_SYSTEM,
+                interface_names::MATERIAL_SYSTEM_SURFACE,
             )
             .unwrap(),
         });

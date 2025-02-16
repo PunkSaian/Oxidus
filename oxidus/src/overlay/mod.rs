@@ -151,6 +151,9 @@ impl Overlay {
             self.visible = !self.visible;
         }
         if self.visible {
+            let interfaces = INTERFACES.get().unwrap();
+            interfaces.mat_system_surface.unlock_cursor();
+
             unsafe { SDL_ShowCursor(1) };
             menu::show(ui);
         }
