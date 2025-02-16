@@ -1,7 +1,10 @@
-use macros::detour_hook;
+use macros::{detour_hook, vmt_hook};
 use sdl2_sys::{SDL_Event, SDL_Window};
 
-use crate::overlay::Overlay;
+use crate::{
+    overlay::Overlay,
+    sdk::interface::gui_surface::{EMouseCursor, GuiSurface},
+};
 
 use super::OVERLAY;
 
@@ -39,4 +42,28 @@ pub unsafe extern "C" fn poll_event(event: &mut SDL_Event) -> i32 {
     } else {
         original_function(event)
     }
+}
+
+#[vmt_hook]
+pub unsafe extern "C" fn lock_cursor(this: &GuiSurface) {
+    let state = OVERLAY.read().unwrap();
+    if let Some(state) = state.as_ref() {
+        if state.visible {
+            this.unlock_cursor();
+        }
+    }
+    original_function(this);
+}
+
+#[vmt_hook]
+pub unsafe extern "C" fn set_cursor(this: *const (), cursor: EMouseCursor) {
+    if let Ok(state) = OVERLAY.read() {
+        if let Some(state) = state.as_ref() {
+            if state.visible {
+                original_function(this, EMouseCursor::dc_arrow);
+                return;
+            }
+        }
+    }
+    original_function(this, cursor);
 }

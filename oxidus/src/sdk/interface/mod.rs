@@ -4,6 +4,6 @@ pub mod client;
 pub mod client_entity_list;
 pub mod engine;
 pub mod engine_render_view;
-pub mod mat_system_surface;
+pub mod gui_surface;
 
 pub mod interfaces;

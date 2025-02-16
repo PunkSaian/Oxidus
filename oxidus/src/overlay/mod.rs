@@ -1,23 +1,25 @@
 use std::{
     ffi::{c_void, CStr, CString},
+    ptr,
     sync::RwLock,
     time::Instant,
 };
 
-use hooks::{poll_event, swap_window};
+use hooks::{lock_cursor, poll_event, set_cursor, swap_window};
 use imgui::{Key, MouseButton};
 use menu::windows::{debug::show_debug_window, watermark::show_watermark};
 use scan_code_map::sdl_scancode_to_imgui_key;
 use sdl2_sys::{
     SDL_Event, SDL_EventType, SDL_GL_CreateContext, SDL_GL_GetCurrentContext, SDL_GetWindowSize,
-    SDL_GetWindowTitle, SDL_SetWindowTitle, SDL_ShowCursor, SDL_Window, SDL_BUTTON_LEFT,
-    SDL_BUTTON_MIDDLE, SDL_BUTTON_RIGHT, SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_PRESSED,
+    SDL_GetWindowTitle, SDL_SetWindowTitle, SDL_Window, SDL_BUTTON_LEFT, SDL_BUTTON_MIDDLE,
+    SDL_BUTTON_RIGHT, SDL_BUTTON_X1, SDL_BUTTON_X2, SDL_PRESSED,
 };
 use sdl_renderer::{SdlRenderer, Textures};
 use styles::set_styles;
 
 use crate::{
-    hook::detour::install_detour_from_symbol,
+    hook::{detour::install_detour_from_symbol, vmt::install_vmt},
+    mdbg,
     util::consts::{self, OXIDE_LOGO_BMP_48},
 };
 
@@ -70,10 +72,12 @@ impl Overlay {
             );
 
             let mut renderer = SdlRenderer::new(sdl_renderer, &mut context);
+
             TEXTURES
                 .write()
                 .unwrap()
                 .replace(Textures::new(&mut renderer)?);
+
             sdl2_sys::SDL_GL_MakeCurrent(window, tf2_gl_ctx);
 
             Ok(Self {
@@ -147,14 +151,16 @@ impl Overlay {
 
     pub fn show(&mut self) {
         let ui = self.context.new_frame();
+
         if ui.is_key_pressed(Key::Insert) {
             self.visible = !self.visible;
-        }
-        if self.visible {
             let interfaces = INTERFACES.get().unwrap();
-            interfaces.mat_system_surface.unlock_cursor();
+            interfaces
+                .gui_surface
+                .set_cursor_always_visible(self.visible);
+        }
 
-            unsafe { SDL_ShowCursor(1) };
+        if self.visible {
             menu::show(ui);
         }
         show_debug_window(ui, self.visible);
@@ -238,11 +244,26 @@ pub fn init() -> OxidusResult {
         "SDL_GL_SwapWindow",
         swap_window as *mut (),
     )?;
+    let interfaces = INTERFACES.get().unwrap();
+    unsafe {
+        install_vmt(
+            *(ptr::from_ref(interfaces.gui_surface).cast()),
+            51,
+            set_cursor as *mut (),
+        );
+        install_vmt(
+            *(ptr::from_ref(interfaces.gui_surface).cast()),
+            62,
+            lock_cursor as *mut (),
+        );
+    }
     Ok(())
 }
 
 pub fn unload() {
     let mut state = OVERLAY.write().unwrap();
+    let interfaces = INTERFACES.get().unwrap();
+    interfaces.gui_surface.set_cursor_always_visible(false);
 
     *state = None;
 }

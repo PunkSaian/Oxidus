@@ -95,11 +95,11 @@ pub fn get_original(hook_fn: *mut ()) -> OxidusResult<*mut ()> {
         .ok_or_else(|| OxidusError::Hooking("Original function not found".into()))
 }
 
-pub fn install_vmt(vmt: *mut *mut (), index: usize, hook_fn: *mut ()) {
+pub fn install_vmt(vmt_ptr: *mut *mut (), index: usize, hook_fn: *mut ()) {
     VMT_HOOKS
         .lock()
         .unwrap()
-        .push(VmtHook::new(vmt, index, hook_fn).unwrap());
+        .push(VmtHook::new(vmt_ptr, index, hook_fn).unwrap());
 }
 
 pub fn restore_vmt_hooks() {

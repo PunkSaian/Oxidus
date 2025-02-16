@@ -7,8 +7,7 @@ use proc_macro2::Span;
 use quote::quote;
 use syn::{
     parse::{Parse, ParseStream},
-    parse_macro_input, parse_quote,
-    visit_mut::{self, VisitMut},
+    parse_macro_input,
     Data, DeriveInput, FnArg, Ident, ItemFn, LitStr, Meta, Type,
 };
 
@@ -340,17 +339,6 @@ pub fn detour_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
     TokenStream::from(quote! { #input_fn })
 }
 
-struct OriginalReplacer;
-
-impl VisitMut for OriginalReplacer {
-    fn visit_ident_mut(&mut self, node: &mut Ident) {
-        if node == "original" {
-            *node = Ident::new("__original", node.span());
-        }
-        visit_mut::visit_ident_mut(self, node);
-    }
-}
-
 #[proc_macro_attribute]
 pub fn vmt_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut input_fn = parse_macro_input!(item as ItemFn);
@@ -369,26 +357,23 @@ pub fn vmt_hook(_attr: TokenStream, item: TokenStream) -> TokenStream {
         .collect();
     let return_type = &sig.output;
 
+    let original_block = &input_fn.block;
     // Generate original retrieval code
-    let original_code = quote! {
-        let original_function = {
-            let hook_fn = unsafe {std::mem::transmute::<_,&crate::hook::vmt::FnPtr>(&#fn_name)};
-            let registry = crate::hook::vmt::VMT_HOOK_REGISTRY.get().unwrap()
-                .read()
-                .expect("Failed to acquire registry lock");
-            let original_ptr = registry.get(&hook_fn)
-                .expect("Original function not found for hook");
-            unsafe { std::mem::transmute::<_, #unsafety #abi fn(#(#params),*) #return_type>(*original_ptr) }
-        };
-    };
+    input_fn.block = syn::parse2(quote! {
+        {
+            let original_function = {
+                let hook_fn = unsafe {std::mem::transmute::<_,crate::hook::vmt::FnPtr>(#fn_name as *const ())};
+                let registry = crate::hook::vmt::VMT_HOOK_REGISTRY.get().unwrap()
+                    .read()
+                    .expect("Failed to acquire registry lock");
+                let original_ptr = registry.get(&hook_fn)
+                    .expect("Original function not found for hook");
+                unsafe { std::mem::transmute::<_, #unsafety #abi fn(#(#params),*) #return_type>(*original_ptr) }
+            };
+            #original_block
+        }
 
-    input_fn
-        .block
-        .stmts
-        .insert(0, parse_quote! { #original_code });
-
-    let mut replacer = OriginalReplacer;
-    replacer.visit_block_mut(&mut input_fn.block);
+    }).expect("Failed to parse modified block");
 
     TokenStream::from(quote! { #input_fn })
 }

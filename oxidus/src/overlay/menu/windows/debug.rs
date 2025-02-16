@@ -41,15 +41,15 @@ pub fn show_debug_window(ui: &mut Ui, visible: bool) {
         .movable(visible)
         .build(|| {
             // Display tracked variables
-            for ((file, line, name), value) in state.variables.iter() {
-                ui.text_wrapped(format!("{}:{} - {} = {}", file, line, name, value));
+            for ((file, line, name), value) in &state.variables {
+                ui.text_wrapped(format!("{file}:{line} - {name} = {value}"));
             }
 
             // Display and manage inputs
-            for ((file, line, label), value) in state.inputs.iter_mut() {
+            for ((file, line, label), value) in &mut state.inputs {
                 let mut buffer = value.clone();
                 if ui
-                    .input_text(&format!("{}##{}:{}", label, file, line), &mut buffer)
+                    .input_text(&format!("{label}##{file}:{line}"), &mut buffer)
                     .flags(InputTextFlags::ENTER_RETURNS_TRUE)
                     .build()
                 {
