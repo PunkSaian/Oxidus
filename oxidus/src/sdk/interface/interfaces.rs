@@ -48,7 +48,7 @@ impl Interfaces {
         });
     }
 
-    fn get() -> &'static Self {
+    pub fn get() -> &'static Self {
         INTERFACES.get().expect("Interfaces not initialized")
     }
 }

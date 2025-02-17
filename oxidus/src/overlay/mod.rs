@@ -20,6 +20,7 @@ use styles::set_styles;
 use crate::{
     hook::{detour::install_detour_from_symbol, vmt::install_vmt},
     mdbg,
+    modules::esp::ESP,
     util::consts::{self, OXIDE_LOGO_BMP_48},
 };
 
@@ -164,7 +165,9 @@ impl Overlay {
             menu::show(ui);
         }
         show_debug_window(ui, self.visible);
-        crate::modules::esp::draw(ui);
+        let mut esp = ESP.write().unwrap();
+        let esp = esp.as_mut().unwrap();
+        esp.draw(ui);
         show_watermark(ui);
     }
 

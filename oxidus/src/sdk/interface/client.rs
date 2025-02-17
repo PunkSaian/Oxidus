@@ -42,6 +42,19 @@ pub struct ViewSetup {
     pub view_to_projection: VMatrix,
 }
 
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub enum FrameStage {
+    Undefined = -1,
+    Start,
+    NetUpdateStart,
+    NetUpdatePostdataupdateStart,
+    NetUpdatePostdataupdateEnd,
+    NetUpdateEnd,
+    RenderStart,
+    RenderEnd,
+}
+
 #[vmt]
 pub struct Client {
     #[offset(6)]
@@ -50,6 +63,8 @@ pub struct Client {
     pub level_shutdown: extern "C" fn(),
     #[offset(8)]
     pub get_all_classes: extern "C" fn() -> *const UnparsedClientClass,
+    #[offset(35)]
+    pub fram_stage_notify: extern "C" fn(stage: FrameStage),
     #[offset(59)]
     pub get_player_view: extern "C" fn(view: &mut ViewSetup) -> bool,
 }

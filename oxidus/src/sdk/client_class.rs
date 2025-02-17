@@ -117,19 +117,26 @@ pub struct ClientClass {
     pub recv_table: &'static RecvTable,
     pub class_id: ClassId,
 }
-impl From<UnparsedClientClass> for ClientClass {
-    fn from(value: UnparsedClientClass) -> Self {
+
+impl UnparsedClientClass {
+    pub fn parse(&self) -> ClientClass {
         let network_name = unsafe {
-            CStr::from_ptr(value.network_name.cast::<i8>())
+            CStr::from_ptr(self.network_name.cast::<i8>())
                 .to_str()
                 .unwrap_or("")
                 .to_owned()
         };
         ClientClass {
             network_name,
-            next: value.next,
-            recv_table: value.recv_table,
+            next: self.next,
+            recv_table: self.recv_table,
             class_id: ClassId::CSun,
         }
+    }
+}
+
+impl From<UnparsedClientClass> for ClientClass {
+    fn from(value: UnparsedClientClass) -> Self {
+        value.parse()
     }
 }

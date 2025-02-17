@@ -31,6 +31,7 @@ pub fn show_watermark(ui: &mut imgui::Ui) {
             let logo = &textures.as_ref().unwrap().logo_trans;
 
             let text_height = ui.text_line_height_with_spacing();
+            #[allow(deprecated)]
             imgui::ImageButton::new(logo.id, [text_height, text_height])
                 .frame_padding(0)
                 .build(ui);

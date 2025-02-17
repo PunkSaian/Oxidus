@@ -56,8 +56,8 @@ pub struct ClientEntityList {
 
 #[vmt]
 pub struct ClientEntityList {
-    #[offset(0)]
-    pub on_add_entity: extern "C" fn(handle_entity: *const (), handle: i32),
-    #[offset(1)]
-    pub on_remove_entity: extern "C" fn(),
+    #[offset(3)]
+    pub get_client_entity_from_index: extern "C" fn(entindex: i32) -> &'static BaseEntity,
+    #[offset(4)]
+    pub get_client_entity_from_handle: extern "C" fn(handle: i32) -> &'static BaseEntity,
 }
