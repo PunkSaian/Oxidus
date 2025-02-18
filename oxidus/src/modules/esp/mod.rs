@@ -97,8 +97,8 @@ impl Esp {
 
             points.sort_by(|a, b| {
                 (*a - local_eyes)
-                    .squared_distance_2d()
-                    .partial_cmp(&(*b - local_eyes).squared_distance_2d())
+                    .squared_len_2d()
+                    .partial_cmp(&(*b - local_eyes).squared_len_2d())
                     .unwrap_or(Ordering::Equal)
             });
 

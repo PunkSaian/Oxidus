@@ -7,8 +7,7 @@ use proc_macro2::Span;
 use quote::quote;
 use syn::{
     parse::{Parse, ParseStream},
-    parse_macro_input,
-    Data, DeriveInput, FnArg, Ident, ItemFn, LitStr, Meta, Type,
+    parse_macro_input, Data, DeriveInput, FnArg, Ident, ItemFn, LitStr, Meta, Type,
 };
 
 struct SignatureInput {

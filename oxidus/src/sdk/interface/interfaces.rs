@@ -1,4 +1,4 @@
-use std::sync::OnceLock;
+use std::{mem::transmute, sync::OnceLock, usize};
 
 use macros::sig;
 
@@ -6,7 +6,8 @@ use crate::{sdk::module_names, util::create_interface};
 
 use super::{
     client::Client, client_entity_list::ClientEntityList, client_mode::ClientMode, engine::Engine,
-    engine_render_view::EngineRenderView, gui_surface::GuiSurface, interface_names,
+    engine_render_view::EngineRenderView, global_vars::GlobalVars, gui_surface::GuiSurface,
+    interface_names, model_info::ModelInfo,
 };
 
 pub struct Interfaces {
@@ -16,6 +17,8 @@ pub struct Interfaces {
     pub engine_render_view: &'static EngineRenderView,
     pub gui_surface: &'static GuiSurface,
     pub client_mode: &'static ClientMode,
+    pub global_vars: &'static GlobalVars,
+    pub model_info: &'static ModelInfo,
 }
 
 unsafe impl Sync for Interfaces {}
@@ -26,18 +29,11 @@ pub static INTERFACES: OnceLock<Interfaces> = OnceLock::new();
 impl Interfaces {
     pub fn init() {
         INTERFACES.get_or_init(|| {
-            type GetClientModeFn = extern "C" fn() -> &'static ClientMode;
-            let client_mode_sig =
-                //sig!("0f b6 05 ? ? ? ? 84 c0 74 0d 48 8d 05 ? ? ? ? c3 ? ? ? ? ? 55 48 8d 3d ? ? ? ? 48 89 e5 41 54 48 83 ec ? e8 e2 3b ? ? 85 c0 75 0e 4c 8b 65 f8 48 8d 05 ? ? ? ? c9 c3 ? 48 8d 3d ? ? ? ? 38 94 fe ? ? 48 8d 15 ? ? ? ? 48 8d 35 ? ? ? ? 48 8d 3d ? ? ? ? e8 fa 3f ? ? 48 8d 3d ? ? ? ? e8 ee 6c ? ? 4c 8b 65 f8 48 8d 05 ? ? ? ? c9 c3 49 89 c4 e9 39 b4 ? ? 90 0f 1f 84 00 00 00 00 00 55 48 89 e5");
+            let client =
+                create_interface::<Client>(module_names::CLIENT, interface_names::CLIENT).unwrap();
 
-                sig!("0F B6 05 D9 16 30 01 84 C0 ? ? 48 8D 05 EE 16 30 01 ? 55 48 8D 3D C0 16 30 01 48 89 E5 41 54 48 83 EC 08 ? ? ? ? ? 85 C0 ? ? 4C 8B 65 F8 48 8D 05 C3 16 30 01 C9 ? 48 8D 3D B9 16 30 01 ? ? ? ? ? 48 8D 15 0D CB 1D 01 48 8D 35 A6 16 30 01 48 8D 3D 9F F4 FF FF ? ? ? ? ? 48 8D 3D 73 16 30 01 ? ? ? ? ? 4C 8B 65 F8 48 8D 05 83 16 30 01 C9 ? ");
-
-            let get_client_mode_fn = unsafe {
-                (std::mem::transmute::<_,GetClientModeFn>(dbg!(client_mode_sig.scan_module(module_names::CLIENT).unwrap()))
-                    )
-            };
-            dbg!(get_client_mode_fn);
-            dbg!(get_client_mode_fn());
+            let client_mode = Self::get_client_mode(client);
+            let global_vars = Self::get_global_vars(client);
 
             Interfaces {
                 entity_list: create_interface::<ClientEntityList>(
@@ -46,8 +42,7 @@ impl Interfaces {
                 )
                 .unwrap(),
 
-                client: create_interface::<Client>(module_names::CLIENT, interface_names::CLIENT)
-                    .unwrap(),
+                client,
 
                 engine: create_interface::<Engine>(module_names::ENGINE, interface_names::ENGINE)
                     .unwrap(),
@@ -62,9 +57,43 @@ impl Interfaces {
                     interface_names::GUI_SURFACE,
                 )
                 .unwrap(),
-                client_mode: get_client_mode_fn(),
+                client_mode,
+                global_vars,
+                model_info: create_interface::<ModelInfo>(
+                    module_names::ENGINE,
+                    interface_names::MODEL_INFO,
+                )
+                .unwrap(),
             }
         });
+    }
+
+    pub fn get_client_mode(client: &'static Client) -> &'static ClientMode {
+        unsafe {
+            let vmt_ptr = *std::ptr::from_ref(client).cast::<*const *const ()>();
+            let hud_process_input = *vmt_ptr.offset(10);
+            let client_mode_relative_offset =
+                hud_process_input.byte_add(3).cast::<u32>().read_unaligned() as usize;
+
+            let client_mode = hud_process_input
+                .byte_add(3 + 4 + client_mode_relative_offset)
+                .cast::<&'static ClientMode>();
+            *client_mode
+        }
+    }
+
+    pub fn get_global_vars(client: &'static Client) -> &'static GlobalVars {
+        unsafe {
+            let vmt_ptr = *std::ptr::from_ref(client).cast::<*const *const ()>();
+            let hud_update = *vmt_ptr.offset(11);
+            let global_vars_relative_offset =
+                hud_update.byte_add(0x16).cast::<u32>().read_unaligned() as usize;
+
+            let global_vars = hud_update
+                .byte_add(0x16 + 4 + global_vars_relative_offset)
+                .cast::<&'static GlobalVars>();
+            *global_vars
+        }
     }
 
     pub fn get() -> &'static Self {

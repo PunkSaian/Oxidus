@@ -4,3 +4,4 @@ pub const ENGINE: &str = "VEngineClient014";
 pub const ENGINE_RENDER_VIEW: &str = "VEngineRenderView014";
 pub const MATERIAL_SYSTEM: &str = "VMaterialSystem081";
 pub const GUI_SURFACE: &str = "VGUI_Surface030";
+pub const MODEL_INFO: &str = "VModelInfoClient006";

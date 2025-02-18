@@ -5,15 +5,40 @@ pub struct Vector3 {
     pub y: f32,
     pub z: f32,
 }
+
+impl From<[f32; 3]> for Vector3 {
+    fn from(array: [f32; 3]) -> Self {
+        Vector3 {
+            x: array[0],
+            y: array[1],
+            z: array[2],
+        }
+    }
+}
+
 impl Vector3 {
     pub fn dot(&self, other: &Vector3) -> f32 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
-    pub fn squared_distance(&self) -> f32 {
+    pub fn squared_len(&self) -> f32 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
-    pub fn squared_distance_2d(&self) -> f32 {
+    pub fn squared_len_2d(&self) -> f32 {
         self.x * self.x + self.y * self.y
+    }
+    pub fn len_2d(&self) -> f32 {
+        self.squared_len_2d().sqrt()
+    }
+    pub fn len(&self) -> f32 {
+        self.squared_len().sqrt()
+    }
+
+    pub fn angle(&self) -> Angles {
+        Angles {
+            pitch: -self.z.atan2(self.len_2d()) / std::f32::consts::PI * 180f32,
+            yaw: -(self.x.atan2(self.y) / std::f32::consts::PI * 180f32) + 90.0,
+            roll: 0.0,
+        }
     }
 }
 

@@ -36,8 +36,8 @@ extern crate log;
 mod hook;
 mod math;
 
-mod modules;
 mod hooks;
+mod modules;
 
 mod netvar_dumper;
 mod overlay;
@@ -76,7 +76,6 @@ pub fn main() -> OxidusResult {
     //let sig: Signature =
     //    sig!("55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC ?? 0f b7 ?? ?? ?? ?? ?? 81 FB FF FF");
     //let res = sig.scan_module(module_names::CLIENT);
-
 
     init_overlay()?;
 

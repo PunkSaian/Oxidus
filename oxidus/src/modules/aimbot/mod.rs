@@ -9,11 +9,10 @@ pub mod hooks;
 
 pub fn init() {
     unsafe {
-        dbg!(Interfaces::get().client_mode as *const _ as *const ());
-        //install_vmt(
-        //    *(ptr::from_ref(Interfaces::get().client_mode).cast()),
-        //    22,
-        //    hooks::create_move as *mut (),
-        //);
+        install_vmt(
+            *(ptr::from_ref(Interfaces::get().client_mode).cast()),
+            22,
+            hooks::create_move as *mut (),
+        );
     }
 }
