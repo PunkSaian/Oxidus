@@ -1,8 +1,11 @@
 use std::{ffi::CStr, mem::transmute, ptr};
 
+use crate::math::Vector3;
+
 use super::{
-    bindings::{BaseEntity, BasePlayer, TFPlayer, TFWeaponBase, TFWeaponBat},
+    bindings::{BaseEntity, BasePlayer, TFPlayer, TFWeaponBase},
     collidable::Collidable,
+    interface::{engine::PlayerInfo, interfaces::Interfaces},
     networkable::Networkable,
 };
 use macros::vmt;
@@ -12,29 +15,40 @@ pub struct BaseEntity {
     #[offset(4)]
     pub get_collidable: extern "c" fn() -> &Collidable,
     #[offset(79)]
-    pub get_index: extern "C" fn() -> i32,
+    pub get_entindex: extern "C" fn() -> i32,
     #[offset(153)]
     pub get_max_health: extern "C" fn() -> i32,
+    #[offset(183)]
+    pub is_alive: extern "C" fn() -> bool,
+    #[offset(194)]
+    pub get_eye_position: extern "C" fn() -> Vector3,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Team {
+    Red = 2,
+    Blue = 3,
 }
 
 impl BaseEntity {
-    //pub fn as_renderable(&self) -> &mut RenderablE {
-    //    unsafe{transmute(ptr::from_ref(self).byte_add(0x8))}
-    //}
-    pub fn as_networkable(&self) -> &mut Networkable {
+    pub fn as_networkable(&mut self) -> &mut Networkable {
         unsafe { &mut *(ptr::from_ref(self).byte_add(0x10) as *mut _) }
     }
-}
-
-impl<'a> Into<&'a BasePlayer> for &'a TFPlayer {
-    fn into(self) -> &'a BasePlayer {
-        unsafe { &*(self as *const TFPlayer as *const BasePlayer) }
+    pub fn get_team(&self) -> Team {
+        unsafe { transmute(self.m_iTeamNum) }
     }
 }
 
-impl<'a> Into<&'a mut BasePlayer> for &'a mut TFPlayer {
-    fn into(self) -> &'a mut BasePlayer {
-        unsafe { &mut *(self as *mut TFPlayer as *mut BasePlayer) }
+impl<'a> From<&'a TFPlayer> for &'a BasePlayer {
+    fn from(val: &'a TFPlayer) -> Self {
+        unsafe { &*std::ptr::from_ref::<TFPlayer>(val).cast::<BasePlayer>() }
+    }
+}
+
+impl<'a> From<&'a mut TFPlayer> for &'a mut BasePlayer {
+    fn from(val: &'a mut TFPlayer) -> Self {
+        unsafe { &mut *std::ptr::from_mut::<TFPlayer>(val).cast::<BasePlayer>() }
     }
 }
 
@@ -42,6 +56,14 @@ impl<'a> Into<&'a mut BasePlayer> for &'a mut TFPlayer {
 pub struct TFPlayer {
     #[offset(291)]
     pub get_weapon: extern "c" fn() -> &TFWeaponBase,
+}
+
+impl TFPlayer {
+    pub fn get_info(&self) -> PlayerInfo {
+        Interfaces::get()
+            .engine
+            .get_player_info(self.get_entindex())
+    }
 }
 
 #[vmt]

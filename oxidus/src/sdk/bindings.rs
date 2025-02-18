@@ -1,6 +1,5 @@
-use crate::math::Vector3
+use crate::math::{Vector3, Vector2};
 
-;pub type Vector2 = [f32;2];
 use macros::tf2_struct;
 
 #[tf2_struct(WeaponIFMBaseCamera)]

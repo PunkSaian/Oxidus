@@ -3,6 +3,10 @@ use std::mem::MaybeUninit;
 use imgui::sys::cty::c_char;
 use macros::vmt;
 
+use crate::sdk::bindings::{BaseEntity, TFPlayer};
+
+use super::interfaces::Interfaces;
+
 pub struct Engine;
 
 const MAX_PLAYER_NAME_LENGTH: usize = 32;
@@ -77,6 +81,16 @@ impl Engine {
             let mut info = MaybeUninit::zeroed().assume_init();
             self._get_player_info(index, &mut info);
             info.into()
+        }
+    }
+    pub fn get_local_player(&self) -> &'static TFPlayer {
+        unsafe {
+            &*std::ptr::from_ref::<BaseEntity>(
+                Interfaces::get()
+                    .entity_list
+                    .get_client_entity_from_index(self.get_loacl_player_entindex()),
+            )
+            .cast::<TFPlayer>()
         }
     }
 }

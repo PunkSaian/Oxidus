@@ -396,7 +396,7 @@ pub fn dump_netvars() -> OxidusResult {
 
     writeln!(
         &mut file,
-        "use crate::math::Vector3\n\n;pub type Vector2 = [f32;2];\nuse macros::tf2_struct;"
+        "use crate::math::{{Vector2, Vector3}};\nuse macros::tf2_struct;"
     )?;
 
     writeln!(&mut file)?;

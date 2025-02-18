@@ -9,6 +9,48 @@ impl Vector3 {
     pub fn dot(&self, other: &Vector3) -> f32 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
+    pub fn squared_distance(&self) -> f32 {
+        self.x * self.x + self.y * self.y + self.z * self.z
+    }
+    pub fn squared_distance_2d(&self) -> f32 {
+        self.x * self.x + self.y * self.y
+    }
+}
+
+impl std::ops::Add for Vector3 {
+    type Output = Vector3;
+
+    fn add(mut self, rhs: Self) -> Self::Output {
+        self.x += rhs.x;
+        self.y += rhs.y;
+        self.z += rhs.z;
+        self
+    }
+}
+
+impl std::ops::Sub for Vector3 {
+    type Output = Vector3;
+
+    fn sub(mut self, rhs: Self) -> Self::Output {
+        self.x -= rhs.x;
+        self.y -= rhs.y;
+        self.z -= rhs.z;
+        self
+    }
+}
+
+pub struct Vector2 {
+    pub x: f32,
+    pub y: f32,
+}
+
+impl From<[f32; 2]> for Vector2 {
+    fn from(array: [f32; 2]) -> Self {
+        Vector2 {
+            x: array[0],
+            y: array[1],
+        }
+    }
 }
 
 #[repr(C)]

@@ -1,38 +1,38 @@
-use std::{
-    mem::{transmute, MaybeUninit},
-    sync::RwLock,
-};
-
-use imgui::sys;
+use core::f32;
+use std::{cmp::Ordering, mem::MaybeUninit, sync::RwLock};
 
 pub use crate::prelude::*;
 
 use crate::{
     math::VMatrix,
-    mdbg, mdbg_input,
     sdk::{
         bindings::{BaseEntity, TFPlayer},
         class_id::ClassId,
         interface::interfaces::Interfaces,
-        networkable,
+        vmts::Team,
     },
 };
 
 pub static ESP: RwLock<Option<Esp>> = const { RwLock::new(None) };
 
 pub struct Esp {
-    pub entities: Vec<(([f32; 2], [f32; 2]), &'static TFPlayer)>,
+    //TODO(oxy): store different entities, a enum or something
+    #[allow(clippy::type_complexity)]
+    pub entities: Vec<(([f32; 2], [f32; 2], [f32; 2], [f32; 2]), &'static TFPlayer)>,
 }
 
 impl Esp {
+    //TODO(oxy):refactor this
+    #[allow(clippy::too_many_lines, clippy::similar_names)]
     pub fn store_entities(&mut self) {
         let interfaces = INTERFACES.get().unwrap();
 
         self.entities.clear();
 
-        let local_player_entindex = Interfaces::get().engine.get_loacl_player_entindex();
+        let local_player = Interfaces::get().engine.get_local_player();
+        let local_eyes = local_player.get_eye_position();
 
-        for entry in &interfaces.entity_list.cache {
+        'ent_lop: for entry in &interfaces.entity_list.cache {
             if entry.networkable.is_null() {
                 continue;
             }
@@ -44,7 +44,7 @@ impl Esp {
             }
 
             let networkable = unsafe { &*entry.networkable };
-            if networkable.get_index() == local_player_entindex {
+            if networkable.get_index() == local_player.get_entindex() {
                 continue;
             }
 
@@ -56,15 +56,6 @@ impl Esp {
 
             let mut view_setup = unsafe { MaybeUninit::zeroed().assume_init() };
             interfaces.client.get_player_view(&mut view_setup);
-
-            let mut screen_w = 0;
-            let mut screen_h = 0;
-
-            mdbg!((screen_w, screen_h));
-
-            interfaces
-                .engine
-                .get_screen_size(&mut screen_w, &mut screen_h);
 
             let mut w2v: VMatrix = unsafe { MaybeUninit::zeroed().assume_init() };
             let mut v2pr: VMatrix = unsafe { MaybeUninit::zeroed().assume_init() };
@@ -79,55 +70,68 @@ impl Esp {
                 &mut w2px,
             );
 
-            let mut min = [f32::INFINITY, f32::INFINITY];
-            let mut max = [f32::NEG_INFINITY, f32::NEG_INFINITY];
+            let mut points = (0..8)
+                .map(|i| {
+                    let mut pos = pos;
+                    if i & 1 == 0 {
+                        pos.x += mins.x;
+                    } else {
+                        pos.x += maxs.x;
+                    }
+                    if i & 2 == 0 {
+                        pos.y += mins.y;
+                    } else {
+                        pos.y += maxs.y;
+                    }
+                    if i & 4 == 0 {
+                        pos.z += mins.z;
+                    } else {
+                        pos.z += maxs.z;
+                    }
+                    pos
+                })
+                .collect::<Vec<_>>();
 
-            for i in 0..8 {
-                let mut pos = pos;
-                if i & 1 == 0 {
-                    pos.x += mins.x;
-                } else {
-                    pos.x += maxs.x;
-                }
-                if i & 2 == 0 {
-                    pos.y += mins.y;
-                } else {
-                    pos.y += maxs.y;
-                }
-                if i & 4 == 0 {
-                    pos.z += mins.z;
-                } else {
-                    pos.z += maxs.z;
-                }
+            points.sort_by(|a, b| {
+                (*a - local_eyes)
+                    .squared_distance_2d()
+                    .partial_cmp(&(*b - local_eyes).squared_distance_2d())
+                    .unwrap_or(Ordering::Equal)
+            });
 
-                let (screen_pos, w) = w2s.transform_vector(&pos);
+            let mut points_2d = Vec::with_capacity(4);
+
+            for point in points.iter().skip(2).take(4) {
+                let (screen_pos, w) = w2s.transform_vector(point);
 
                 if w < 0.01 {
-                    continue;
+                    continue 'ent_lop;
                 }
 
-                let x = screen_pos.x / w;
-                let y = 0.0 - (screen_pos.y / w);
-
-                if x < min[0] {
-                    min[0] = x;
-                }
-                if y < min[1] {
-                    min[1] = y;
-                }
-                if x > max[0] {
-                    max[0] = x;
-                }
-                if y > max[1] {
-                    max[1] = y;
-                }
-            }
-            if min[0] == f32::INFINITY || min[1] == f32::INFINITY || max[0] == f32::NEG_INFINITY {
-                continue;
+                let x = 1.0 + (screen_pos.x / w);
+                let y = 1.0 - (screen_pos.y / w);
+                points_2d.push([x, y]);
             }
 
-            self.entities
-                .push(((min, max), unsafe { std::mem::transmute(player) }));
+            let mut points_2d_ltr = points_2d.clone();
+            points_2d_ltr.sort_by(|a, b| a[0].partial_cmp(&b[0]).unwrap_or(Ordering::Equal));
+
+            if points_2d_ltr[0][1] < points_2d_ltr[1][1] {
+                points_2d_ltr.swap(0, 1);
+            }
+            if points_2d[2][1] < points_2d[3][1] {
+                points_2d_ltr.swap(2, 3);
+            }
+
+            self.entities.push((
+                (
+                    points_2d_ltr[1],
+                    points_2d_ltr[3],
+                    points_2d_ltr[0],
+                    points_2d_ltr[2],
+                ),
+                unsafe { &*std::ptr::from_ref::<BaseEntity>(player).cast::<TFPlayer>() },
+            ));
         }
     }
 
@@ -140,46 +144,76 @@ impl Esp {
         let window_size = [viewport.Size.x, viewport.Size.y];
 
         for (mut pos, player) in &self.entities {
-            let ent_index = player.get_index();
-            let info = Interfaces::get().engine.get_player_info(ent_index);
+            if !player.is_alive() {
+                continue;
+            }
+            let scale = (window_size[0] as f32 / 2f32, window_size[1] as f32 / 2f32);
+
+            pos.0[0] *= scale.0;
+            pos.0[1] *= scale.1;
+
+            pos.1[0] *= scale.0;
+            pos.1[1] *= scale.1;
+
+            pos.2[0] *= scale.0;
+            pos.2[1] *= scale.1;
+
+            pos.3[0] *= scale.0;
+            pos.3[1] *= scale.1;
+
+            // name
+            let team_color = match player.get_team() {
+                Team::Red => 0xFF_00_00_FF,
+                Team::Blue => 0xFF_FF_00_00,
+            };
+            let info = player.get_info();
             let text_size = ui.calc_text_size(&info.name);
-
-            pos.0[0] = (window_size[0] as f32 / 2f32) * (1f32 + pos.0[0]);
-            pos.0[1] = (window_size[1] as f32 / 2f32) * (1f32 + pos.0[1]);
-
-            pos.1[0] = (window_size[0] as f32 / 2f32) * (1f32 + pos.1[0]);
-            pos.1[1] = (window_size[1] as f32 / 2f32) * (1f32 + pos.1[1]);
-
             draw_list.add_text(
                 [
                     pos.0[0] + (pos.1[0] - pos.0[0] - text_size[0]) / 2.0,
                     pos.0[1] - text_size[1],
                 ],
-                0xFF_FF_FF_FF,
+                team_color,
                 info.name,
             );
 
-            let hp_bar_pos = ([pos.0[0] - 2.0 * PAD, pos.0[1]], [pos.0[0] - PAD, pos.1[1]]);
+            //weapon
+            let weapon_name = player.get_weapon().get_print_name();
+            let text_size = ui.calc_text_size(&weapon_name);
+            draw_list.add_text(
+                [
+                    pos.0[0] + (pos.1[0] - pos.0[0] - text_size[0]) / 2.0,
+                    pos.2[1] + text_size[1],
+                ],
+                0xFF_FF_FF_FF,
+                weapon_name,
+            );
 
-            let hp = player.m_iHealth;
-            let weapon = player.get_weapon();
-            mdbg!(weapon.get_print_name());
-            //mdbg!(unsafe { &*weapon.as_networkable().get_client_class() }.parse());
-            let mut hp_color = 0xFF_00_FF_00;
-            let mut hp_ratio = hp as f32 / player.get_max_health() as f32;
+            //hp bar
+            let hp_bar_pos = ([pos.0[0] - 2.0 * PAD, pos.0[1]], [pos.0[0] - PAD, pos.2[1]]);
 
-            if hp_ratio < 0.2 {
-                hp_color = 0xFF_FF_00_00;
-            } else if hp_ratio > 1.0 {
-                hp_ratio -= 1.0;
-                hp_color = 0xFF_00_00_FF;
-            }
-
+            let hp = player.m_iHealth as f32;
+            let max_hp = player.get_max_health() as f32;
             draw_list
                 .add_rect(hp_bar_pos.0, hp_bar_pos.1, 0xFF_00_00_00)
                 .thickness(1.0)
                 .filled(true)
                 .build();
+
+            let mut hp_color = 0xFF_00_FF_00;
+            let mut hp_ratio = hp / max_hp;
+
+            if hp_ratio < 0.2 {
+                hp_color = 0xFF_00_00_FF;
+            } else if hp_ratio > 1.0 {
+                draw_list
+                    .add_rect(hp_bar_pos.0, hp_bar_pos.1, hp_color)
+                    .thickness(1.0)
+                    .filled(true)
+                    .build();
+                hp_ratio -= 0.5;
+                hp_color = 0xFF_FF_00_00;
+            }
 
             let hp_bar_pos_top = [
                 hp_bar_pos.0[0],
@@ -196,6 +230,19 @@ impl Esp {
                 .add_rect(hp_bar_pos.0, hp_bar_pos.1, 0xFF_00_00_00)
                 .thickness(1.0)
                 .build();
+
+            // hp text
+            let hp_text = format!("{hp}/{max_hp}");
+            let text_size = ui.calc_text_size(&hp_text);
+
+            draw_list.add_text(
+                [
+                    hp_bar_pos.0[0] + (hp_bar_pos.1[0] - hp_bar_pos.0[0] - text_size[0]) / 2.0,
+                    pos.0[1] - text_size[1],
+                ],
+                0xFF_FF_FF_FF,
+                hp_text,
+            );
         }
     }
 }

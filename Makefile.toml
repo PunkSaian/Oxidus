@@ -43,8 +43,8 @@ run_inject_gdb() {
         -ex "call \$dlerror()"
     )
     
-    if $continue_exec; then
-        sudo rust-gdb -q "${gdb_cmds[@]}" -ex "continue"
+    if ${continue_exec}; then
+        sudo -t rust-gdb -q "${gdb_cmds[@]}" -ex "continue"
     else
         sudo rust-gdb -n -q -batch "${gdb_cmds[@]}" -ex "detach" -ex "quit"
     fi
@@ -109,7 +109,6 @@ workspace = false
 script = '''
 pkill -9 tf_linux64 || true
 cd "${TF2_DIR}"
-#export LD_LIBRARY_PATH="${TF2_BIN_PATH}:/usr/lib/libtcmalloc.so"
 export LD_LIBRARY_PATH="${TF2_BIN_PATH}:/usr/lib/"
 "${TF2_DIR}/tf_linux64" -steam -gl
 '''
@@ -119,7 +118,7 @@ workspace = false
 script = '''
 eval "${COMMON_HELPERS}"
 pid=$(get_pid)
-sudo rust-gdb -q \
+sudo -t rust-gdb -q \
     -ex "set solib-search-path ${TF2_BIN_PATH}" \
     -ex "attach $pid" \
     -ex "set \$dlopen = (void* (*)(char*, int))dlopen" \

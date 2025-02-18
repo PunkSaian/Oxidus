@@ -19,7 +19,6 @@ use styles::set_styles;
 
 use crate::{
     hook::{detour::install_detour_from_symbol, vmt::install_vmt},
-    mdbg,
     modules::esp::ESP,
     util::consts::{self, OXIDE_LOGO_BMP_48},
 };

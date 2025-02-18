@@ -61,3 +61,4 @@ pub struct ClientEntityList {
     #[offset(4)]
     pub get_client_entity_from_handle: extern "C" fn(handle: i32) -> &'static BaseEntity,
 }
+
