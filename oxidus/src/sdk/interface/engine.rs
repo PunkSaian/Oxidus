@@ -73,6 +73,8 @@ pub struct Engine {
     pub _get_player_info: extern "C" fn(index: i32, info: &mut PlayerInfoUnparsed),
     #[offset(12)]
     pub get_loacl_player_entindex: extern "C" fn() -> i32,
+    #[offset(26)]
+    pub is_in_game: extern "C" fn() -> bool,
 }
 
 impl Engine {

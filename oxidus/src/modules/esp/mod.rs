@@ -28,6 +28,9 @@ impl Esp {
         let interfaces = INTERFACES.get().unwrap();
 
         self.entities.clear();
+        if !Interfaces::get().engine.is_in_game() {
+            return;
+        }
 
         let local_player = Interfaces::get().engine.get_local_player();
         let local_eyes = local_player.get_eye_position();
