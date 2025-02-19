@@ -25,14 +25,15 @@ use crate::{
     util::consts::{self, OXIDE_LOGO_BMP_48},
 };
 
+pub mod fov;
 pub mod hooks;
 pub mod menu;
 pub mod scan_code_map;
 pub mod sdl_renderer;
 pub mod styles;
-pub mod fov;
 
 pub use crate::prelude::*;
+pub static mut AIMBOT: bool = false;
 
 pub struct Overlay {
     context: imgui::Context,
@@ -164,6 +165,8 @@ impl Overlay {
                 .set_cursor_always_visible(self.visible);
         }
 
+        unsafe { AIMBOT = ui.is_key_down(Key::LeftShift) };
+
         if self.visible {
             menu::show(ui);
         }
@@ -191,7 +194,7 @@ impl Overlay {
                         SDL_BUTTON_MIDDLE => MouseButton::Middle,
                         SDL_BUTTON_X1 => MouseButton::Extra1,
                         SDL_BUTTON_X2 => MouseButton::Extra2,
-                        _ => unreachable!(),
+                        _ => unreachable!("{}", event),
                     },
                     true,
                 ),

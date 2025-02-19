@@ -1,3 +1,5 @@
+use std::mem::transmute;
+
 use macros::vmt;
 
 use crate::math::Angles;
@@ -29,6 +31,54 @@ pub struct UserCmd {
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct Buttons(u32);
+
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub enum ButtonFlags {
+    InAttack,
+    InJump,
+    InDuck,
+    InForward,
+    InBack,
+    InUse,
+    InCancel,
+    InLeft,
+    InRight,
+    InMoveleft,
+    InMoveright,
+    InAttack2,
+    InRun,
+    InReload,
+    InAlt1,
+    InAlt2,
+    InScore,
+    InSpeed,
+    InWalk,
+    InZoom,
+    InWeapon1,
+    InWeapon2,
+    InBullrush,
+    InGrenade1,
+    InGrenade2,
+    InAttack3,
+}
+
+impl Buttons {
+    pub fn get(&self, flag: ButtonFlags) -> bool {
+        let flag = flag as u8;
+        let b: u32 = *unsafe { transmute::<&Self, &u32>(self) };
+        (b & (1 << flag)) != 0
+    }
+    pub fn set(&mut self, flag: ButtonFlags, val: bool) {
+        let flag = flag as u8;
+        let b: &mut u32 = unsafe { transmute::<&mut Self, &mut u32>(self) };
+        if val {
+            *b |= 1 << flag;
+        } else {
+            *b &= !(1 << flag);
+        }
+    }
+}
 
 #[vmt]
 pub struct ClientMode {

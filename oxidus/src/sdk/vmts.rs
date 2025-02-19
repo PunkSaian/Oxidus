@@ -170,7 +170,7 @@ impl<'a> From<&'a mut TFPlayer> for &'a mut BasePlayer {
 #[vmt]
 pub struct TFPlayer {
     #[offset(292)]
-    pub get_weapon: extern "c" fn() -> &TFWeaponBase,
+    pub _get_weapon: extern "c" fn() -> *const TFWeaponBase,
 }
 
 impl TFPlayer {
@@ -178,6 +178,14 @@ impl TFPlayer {
         Interfaces::get()
             .engine
             .get_player_info(self.get_entindex())
+    }
+    pub fn get_weapon(&self) -> Option<&TFWeaponBase> {
+        let weapon = self._get_weapon();
+        if weapon.is_null() {
+            warn!("weapon is null");
+            return None;
+        }
+        unsafe { Some(&*self._get_weapon()) }
     }
 }
 
@@ -192,6 +200,9 @@ impl TFWeaponBase {
     pub fn get_print_name(&self) -> String {
         unsafe {
             let name = self._get_print_name();
+            if name.is_null() {
+                return "Unknown".to_owned();
+            }
             CStr::from_ptr(name).to_string_lossy().into_owned()
         }
     }

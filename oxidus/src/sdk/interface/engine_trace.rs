@@ -136,10 +136,8 @@ impl EngineTrace {
         let ray = Ray::new(start, end);
         let filter = TraceFilter::new(local_player);
         let mut trace = unsafe { MaybeUninit::zeroed().assume_init() };
-        dbg!(&ray, mask, &filter, &mut trace);
 
         self.trace_ray(&ray, mask, &filter, &mut trace);
-        dbg!("1");
         trace
     }
 }

@@ -1,14 +1,17 @@
 use std::f32;
 
 use crate::{
+    overlay::AIMBOT,
     prelude::*,
-    sdk::interface::engine_trace::{self, Ray, TraceFilter, CONTENTS_GRATE, MASK_SHOT},
+    sdk::interface::{
+        client_mode::ButtonFlags,
+        engine_trace::{CONTENTS_GRATE, MASK_SHOT},
+    },
 };
 use macros::vmt_hook;
 
 use crate::{
     math::Vector2,
-    mdbg,
     sdk::{
         bindings::{BaseEntity, TFPlayer},
         class_id::ClassId,
@@ -41,7 +44,11 @@ pub unsafe extern "C" fn create_move(
 ) -> bool {
     let org_res = original_function(client_mode, input_sample_time, cmd);
 
-    let org_cmd = *cmd;
+    dbg!("b");
+    if !AIMBOT {
+        return org_res;
+    }
+    dbg!("a");
 
     let local_player = Interfaces::get().engine.get_local_player();
 
@@ -49,20 +56,20 @@ pub unsafe extern "C" fn create_move(
         return org_res;
     }
 
+    let org_cmd = *cmd;
     let local_eyes = local_player.get_eye_position();
 
     for entry in &Interfaces::get().entity_list.cache {
         if entry.networkable.is_null() {
             continue;
         }
-        if !matches!(
-            (unsafe { &*entry.networkable }).get_client_class().class_id,
-            ClassId::CTFPlayer
-        ) {
+        let networkable = unsafe { &*entry.networkable };
+        if !matches!(networkable.get_client_class().class_id, ClassId::CTFPlayer)
+            || networkable.is_dormant()
+        {
             continue;
         }
 
-        let networkable = unsafe { &*entry.networkable };
         if networkable.get_index() == local_player.get_entindex() {
             continue;
         }
@@ -87,16 +94,6 @@ pub unsafe extern "C" fn create_move(
 
         let rotation = bone.rotation();
 
-        let points = Vector3::empty()
-            .corners(&hitbox.min, &hitbox.max)
-            .iter()
-            .map(|x| x.rotate(&rotation) + pos)
-            .collect::<Vec<_>>();
-
-        for (i, point) in points.iter().enumerate() {
-            mdbg_point!(format!("{i}"), *point);
-        }
-
         pos += ((hitbox.max + hitbox.min) / 2.0).rotate(&rotation);
 
         let diff = pos - local_eyes;
@@ -105,7 +102,6 @@ pub unsafe extern "C" fn create_move(
             continue
         };
 
-        mdbg!(org_cmd.viewangles);
         let forward = org_cmd.viewangles.forward();
 
         let fov = 30.0;
@@ -113,10 +109,6 @@ pub unsafe extern "C" fn create_move(
         let dot = forward.dot(&diff_normalized);
         let fov_threshold = dtr(fov / 2.0).cos();
 
-        mdbg!(forward);
-        mdbg!((dot, fov_threshold));
-        mdbg!(dot >= fov_threshold);
-        dbg!("b");
         let trace =
             Interfaces::get()
                 .engine_trace
@@ -124,10 +116,10 @@ pub unsafe extern "C" fn create_move(
         if trace.entity != ent {
             continue;
         }
-        dbg!("a");
         if dot < fov_threshold {
             continue;
         }
+        cmd.buttons.set(ButtonFlags::InAttack, true);
         let angle = diff.angle();
         cmd.viewangles = angle;
 

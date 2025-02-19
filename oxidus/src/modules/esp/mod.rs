@@ -22,30 +22,36 @@ impl Esp {
     //TODO(oxy):refactor this
     pub fn store_entities(&mut self) {
         let interfaces = Interfaces::get();
+        dbg!(1);
 
         self.entities.clear();
         if !interfaces.engine.is_in_game() {
             return;
         }
+        dbg!(1);
 
         let local_player = interfaces.engine.get_local_player();
+        dbg!(1);
         let local_eyes = local_player.get_eye_position();
+        dbg!(1);
 
         'ent_lop: for entry in &interfaces.entity_list.cache {
             if entry.networkable.is_null() {
                 continue;
             }
             if !matches!(
-                (unsafe{&*entry.networkable}).get_client_class().class_id,
+                (unsafe { &*entry.networkable }).get_client_class().class_id,
                 ClassId::CTFPlayer
             ) {
                 continue;
             }
+            dbg!(1);
 
             let networkable = unsafe { &*entry.networkable };
             if networkable.get_index() == local_player.get_entindex() {
                 continue;
             }
+            dbg!(1);
 
             let player = unsafe { &*(*(networkable).get_client_unknown()).get_base_entity() };
             let pos = player.m_vecOrigin;
@@ -53,19 +59,23 @@ impl Esp {
             let mins = collidable.obb_mins();
             let maxs = collidable.obb_maxs();
 
+            dbg!(1);
             let w2s = interfaces.client.get_w2s_matrix();
 
             let mut points = pos.corners(mins, maxs);
 
+            dbg!(1);
             points.sort_by(|a, b| {
                 (*a - local_eyes)
                     .squared_len_2d()
                     .partial_cmp(&(*b - local_eyes).squared_len_2d())
                     .unwrap_or(Ordering::Equal)
             });
+            dbg!(1);
 
             let mut points_2d = Vec::with_capacity(4);
 
+            dbg!(1);
             for point in points.iter().skip(2).take(4) {
                 let Some(point) = w2s.transform_vector(point) else {
                     continue 'ent_lop;
@@ -74,16 +84,20 @@ impl Esp {
                 points_2d.push(point);
             }
 
+            dbg!(1);
             let mut points_2d_ltr = points_2d.clone();
             points_2d_ltr.sort_by(|a, b| a[0].partial_cmp(&b[0]).unwrap_or(Ordering::Equal));
 
+            dbg!(1);
             if points_2d_ltr[0][1] < points_2d_ltr[1][1] {
                 points_2d_ltr.swap(0, 1);
             }
+            dbg!(1);
 
             if points_2d[2][1] < points_2d[3][1] {
                 points_2d_ltr.swap(2, 3);
             }
+            dbg!(1);
 
             self.entities.push((
                 (
@@ -141,8 +155,11 @@ impl Esp {
                 info.name,
             );
 
-            //weapon
-            let weapon_name = player.get_weapon().get_print_name();
+            let weapon_name = {
+                player
+                    .get_weapon()
+                    .map_or("none".to_owned(), |x| x.get_print_name())
+            };
             let text_size = ui.calc_text_size(&weapon_name);
             draw_list.add_text(
                 [
