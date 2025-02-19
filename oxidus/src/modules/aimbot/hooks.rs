@@ -59,7 +59,10 @@ pub unsafe extern "C" fn create_move(
     let org_cmd = *cmd;
     let local_eyes = local_player.get_eye_position();
 
-    for entry in &Interfaces::get().entity_list.cache {
+    let forward = org_cmd.viewangles.forward();
+    let fov = 30.0;
+
+    'ent_loop: for entry in &Interfaces::get().entity_list.cache {
         if entry.networkable.is_null() {
             continue;
         }
@@ -81,51 +84,48 @@ pub unsafe extern "C" fn create_move(
             continue;
         }
 
-        let hitbox_id: i32 = mdbg_input!("hitbox id: ", 0i32);
-        if !(0..=17).contains(&hitbox_id) {
-            continue;
-        }
-        let hitbox = player.as_renderable().get_hitboxes().get_hitbox(hitbox_id);
-
         let bones = player.as_renderable().get_hitbox_bones();
 
-        let bone = bones[hitbox.bone as usize];
-        let mut pos = bone.position();
+        let hitboxes = player.as_renderable().get_hitboxes();
 
-        let rotation = bone.rotation();
+        for i in 0..=17 {
+            let hitbox = hitboxes.get_hitbox(i);
 
-        pos += ((hitbox.max + hitbox.min) / 2.0).rotate(&rotation);
+            let bone = bones[hitbox.bone as usize];
 
-        let diff = pos - local_eyes;
+            let mut pos = bone.position();
 
-        let Some(diff_normalized) = diff.normalized() else{
-            continue
-        };
+            let rotation = bone.rotation();
 
-        let forward = org_cmd.viewangles.forward();
+            pos += ((hitbox.max + hitbox.min) / 2.0).rotate(&rotation);
 
-        let fov = 30.0;
+            let diff = pos - local_eyes;
 
-        let dot = forward.dot(&diff_normalized);
-        let fov_threshold = dtr(fov / 2.0).cos();
+            let Some(diff_normalized) = diff.normalized() else{
+                continue
+            };
 
-        let trace = Interfaces::get().engine_trace.trace(
-            local_player,
-            local_eyes,
-            pos,
-            MASK_SHOT | CONTENTS_GRATE,
-        );
-        if trace.entity != ent {
-            continue;
+            let dot = forward.dot(&diff_normalized);
+            let fov_threshold = dtr(fov / 2.0).cos();
+
+            let trace = Interfaces::get().engine_trace.trace(
+                local_player,
+                local_eyes,
+                pos,
+                MASK_SHOT | CONTENTS_GRATE,
+            );
+            if trace.entity != ent {
+                continue;
+            }
+            if dot < fov_threshold {
+                continue;
+            }
+            cmd.buttons.set(ButtonFlags::InAttack, true);
+            let angle = diff.angle();
+            cmd.viewangles = angle;
+
+            break 'ent_loop;
         }
-        if dot < fov_threshold {
-            continue;
-        }
-        cmd.buttons.set(ButtonFlags::InAttack, true);
-        let angle = diff.angle();
-        cmd.viewangles = angle;
-
-        break;
     }
 
     #[allow(clippy::float_cmp)]
