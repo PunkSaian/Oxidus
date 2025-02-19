@@ -1,9 +1,6 @@
 use std::ptr;
 
-use crate::{
-    hook::{detour::install_detour, vmt::install_vmt},
-    sdk::interface::interfaces::Interfaces,
-};
+use crate::{hook::vmt::install_vmt, sdk::interface::interfaces::Interfaces};
 
 pub mod hooks;
 

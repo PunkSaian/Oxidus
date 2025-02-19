@@ -8,6 +8,6 @@ pub mod networkable;
 pub mod unknown;
 pub mod vmts;
 
-#[allow(clippy::all,non_snake_case, non_camel_case_types)]
+#[allow(clippy::all,non_snake_case, non_camel_case_types, clippy::pub_underscore_fields)]
 #[rustfmt::skip]
 pub mod bindings;

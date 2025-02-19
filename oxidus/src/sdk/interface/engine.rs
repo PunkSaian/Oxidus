@@ -65,6 +65,7 @@ impl From<PlayerInfoUnparsed> for PlayerInfo {
     }
 }
 
+//INFO: FIXED
 #[vmt]
 pub struct Engine {
     #[offset(5)]

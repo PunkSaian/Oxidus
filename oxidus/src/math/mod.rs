@@ -17,6 +17,16 @@ impl From<[f32; 3]> for Vector3 {
 }
 
 impl Vector3 {
+    pub fn new(x: f32, y: f32, z: f32) -> Self {
+        Vector3 { x, y, z }
+    }
+    pub fn empty() -> Self {
+        Vector3 {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        }
+    }
     pub fn dot(&self, other: &Vector3) -> f32 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
@@ -40,6 +50,67 @@ impl Vector3 {
             roll: 0.0,
         }
     }
+    pub fn corners(&self, mins: &Vector3, maxs: &Vector3) -> [Vector3; 8] {
+        *(0..8)
+            .map(|i| {
+                let mut pos = *self;
+                if i & 1 == 0 {
+                    pos.x += mins.x;
+                } else {
+                    pos.x += maxs.x;
+                }
+                if i & 2 == 0 {
+                    pos.y += mins.y;
+                } else {
+                    pos.y += maxs.y;
+                }
+                if i & 4 == 0 {
+                    pos.z += mins.z;
+                } else {
+                    pos.z += maxs.z;
+                }
+                pos
+            })
+            .collect::<Vec<_>>()
+            .as_array()
+            .unwrap()
+    }
+    pub fn rotate(&self, rotation: &RotationVectors) -> Vector3 {
+        Vector3 {
+            x: self.dot(&rotation.forward),
+            y: self.dot(&rotation.right),
+            z: self.dot(&rotation.up),
+        }
+    }
+    pub fn normalized(&self) -> Option<Vector3> {
+        let len = self.len();
+        if len == 0.0 {
+            return None;
+        }
+        Some(*self / len)
+    }
+}
+
+impl std::ops::Div<f32> for Vector3 {
+    type Output = Vector3;
+
+    fn div(mut self, rhs: f32) -> Self::Output {
+        self.x /= rhs;
+        self.y /= rhs;
+        self.z /= rhs;
+        self
+    }
+}
+
+impl std::ops::Mul<f32> for Vector3 {
+    type Output = Vector3;
+
+    fn mul(mut self, rhs: f32) -> Self::Output {
+        self.x *= rhs;
+        self.y *= rhs;
+        self.z *= rhs;
+        self
+    }
 }
 
 impl std::ops::Add for Vector3 {
@@ -50,6 +121,12 @@ impl std::ops::Add for Vector3 {
         self.y += rhs.y;
         self.z += rhs.z;
         self
+    }
+}
+
+impl std::ops::AddAssign for Vector3 {
+    fn add_assign(&mut self, rhs: Self) {
+        *self = *self + rhs;
     }
 }
 
@@ -86,6 +163,18 @@ pub struct Angles {
     pub roll: f32,
 }
 
+impl Angles {
+    pub fn forward(&self) -> Vector3 {
+        let p = -self.pitch.to_radians();
+        let y = self.yaw.to_radians() + 2.0 * std::f32::consts::PI;
+        Vector3 {
+            x: (p.cos() * y.cos()),
+            y: (p.cos() * y.sin()),
+            z: p.sin(),
+        }
+    }
+}
+
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct VMatrixRow {
@@ -103,14 +192,25 @@ pub struct VMatrix {
 }
 
 impl VMatrix {
-    pub fn transform_vector(&self, vec: &Vector3) -> (Vector3, f32) {
-        (
-            Vector3 {
-                x: self.right.vec.dot(vec) + self.right.w,
-                y: self.up.vec.dot(vec) + self.up.w,
-                z: self.forward.vec.dot(vec) + self.forward.w,
-            },
-            self.origin.vec.dot(vec) + self.origin.w,
-        )
+    pub fn transform_vector(&self, vec: &Vector3) -> Option<[f32; 2]> {
+        let x = self.right.vec.dot(vec) + self.right.w;
+        let y = self.up.vec.dot(vec) + self.up.w;
+        let w = self.origin.vec.dot(vec) + self.origin.w;
+
+        if w < 0.01 {
+            return None;
+        }
+
+        let x = 1.0 + (x / w);
+        let y = 1.0 - (y / w);
+        Some([x, y])
     }
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct RotationVectors {
+    pub forward: Vector3,
+    pub right: Vector3,
+    pub up: Vector3,
 }

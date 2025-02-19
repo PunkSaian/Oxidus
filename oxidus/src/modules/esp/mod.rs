@@ -1,19 +1,16 @@
 use core::f32;
-use std::{cmp::Ordering, mem::MaybeUninit, sync::RwLock};
+use std::{cmp::Ordering, sync::RwLock};
 
-pub use crate::prelude::*;
-
-use crate::{
-    math::VMatrix,
-    sdk::{
-        bindings::{BaseEntity, TFPlayer},
-        class_id::ClassId,
-        interface::interfaces::Interfaces,
-        vmts::Team,
-    },
+use crate::sdk::{
+    bindings::{BaseEntity, TFPlayer},
+    class_id::ClassId,
+    interface::interfaces::Interfaces,
+    vmts::Team,
 };
 
 pub static ESP: RwLock<Option<Esp>> = const { RwLock::new(None) };
+
+const HP_BAR_PAD: f32 = 5.0;
 
 pub struct Esp {
     //TODO(oxy): store different entities, a enum or something
@@ -23,16 +20,15 @@ pub struct Esp {
 
 impl Esp {
     //TODO(oxy):refactor this
-    #[allow(clippy::too_many_lines, clippy::similar_names)]
     pub fn store_entities(&mut self) {
-        let interfaces = INTERFACES.get().unwrap();
+        let interfaces = Interfaces::get();
 
         self.entities.clear();
-        if !Interfaces::get().engine.is_in_game() {
+        if !interfaces.engine.is_in_game() {
             return;
         }
 
-        let local_player = Interfaces::get().engine.get_local_player();
+        let local_player = interfaces.engine.get_local_player();
         let local_eyes = local_player.get_eye_position();
 
         'ent_lop: for entry in &interfaces.entity_list.cache {
@@ -40,7 +36,7 @@ impl Esp {
                 continue;
             }
             if !matches!(
-                unsafe { &*(*entry.networkable).get_client_class() }.class_id,
+                (unsafe{&*entry.networkable}).get_client_class().class_id,
                 ClassId::CTFPlayer
             ) {
                 continue;
@@ -57,43 +53,9 @@ impl Esp {
             let mins = collidable.obb_mins();
             let maxs = collidable.obb_maxs();
 
-            let mut view_setup = unsafe { MaybeUninit::zeroed().assume_init() };
-            interfaces.client.get_player_view(&mut view_setup);
+            let w2s = interfaces.client.get_w2s_matrix();
 
-            let mut w2v: VMatrix = unsafe { MaybeUninit::zeroed().assume_init() };
-            let mut v2pr: VMatrix = unsafe { MaybeUninit::zeroed().assume_init() };
-
-            let mut w2s: VMatrix = unsafe { MaybeUninit::zeroed().assume_init() };
-            let mut w2px: VMatrix = unsafe { MaybeUninit::zeroed().assume_init() };
-            interfaces.engine_render_view.get_marices_for_view(
-                &view_setup,
-                &mut w2v,
-                &mut v2pr,
-                &mut w2s,
-                &mut w2px,
-            );
-
-            let mut points = (0..8)
-                .map(|i| {
-                    let mut pos = pos;
-                    if i & 1 == 0 {
-                        pos.x += mins.x;
-                    } else {
-                        pos.x += maxs.x;
-                    }
-                    if i & 2 == 0 {
-                        pos.y += mins.y;
-                    } else {
-                        pos.y += maxs.y;
-                    }
-                    if i & 4 == 0 {
-                        pos.z += mins.z;
-                    } else {
-                        pos.z += maxs.z;
-                    }
-                    pos
-                })
-                .collect::<Vec<_>>();
+            let mut points = pos.corners(mins, maxs);
 
             points.sort_by(|a, b| {
                 (*a - local_eyes)
@@ -105,15 +67,11 @@ impl Esp {
             let mut points_2d = Vec::with_capacity(4);
 
             for point in points.iter().skip(2).take(4) {
-                let (screen_pos, w) = w2s.transform_vector(point);
-
-                if w < 0.01 {
+                let Some(point) = w2s.transform_vector(point) else {
                     continue 'ent_lop;
-                }
+                };
 
-                let x = 1.0 + (screen_pos.x / w);
-                let y = 1.0 - (screen_pos.y / w);
-                points_2d.push([x, y]);
+                points_2d.push(point);
             }
 
             let mut points_2d_ltr = points_2d.clone();
@@ -122,6 +80,7 @@ impl Esp {
             if points_2d_ltr[0][1] < points_2d_ltr[1][1] {
                 points_2d_ltr.swap(0, 1);
             }
+
             if points_2d[2][1] < points_2d[3][1] {
                 points_2d_ltr.swap(2, 3);
             }
@@ -140,17 +99,19 @@ impl Esp {
 
     #[allow(clippy::similar_names)]
     pub fn draw(&mut self, ui: &mut imgui::Ui) {
-        const PAD: f32 = 5.0;
+        if !Interfaces::get().engine.is_in_game() {
+            return;
+        }
         let draw_list = ui.get_background_draw_list();
 
         let viewport = unsafe { imgui::sys::igGetMainViewport().read() };
         let window_size = [viewport.Size.x, viewport.Size.y];
+        let scale = (window_size[0] as f32 / 2f32, window_size[1] as f32 / 2f32);
 
         for (mut pos, player) in &self.entities {
             if !player.is_alive() {
                 continue;
             }
-            let scale = (window_size[0] as f32 / 2f32, window_size[1] as f32 / 2f32);
 
             pos.0[0] *= scale.0;
             pos.0[1] *= scale.1;
@@ -193,7 +154,10 @@ impl Esp {
             );
 
             //hp bar
-            let hp_bar_pos = ([pos.0[0] - 2.0 * PAD, pos.0[1]], [pos.0[0] - PAD, pos.2[1]]);
+            let hp_bar_pos = (
+                [pos.0[0] - 2.0 * HP_BAR_PAD, pos.0[1]],
+                [pos.0[0] - HP_BAR_PAD, pos.2[1]],
+            );
 
             let hp = player.m_iHealth as f32;
             let max_hp = player.get_max_health() as f32;

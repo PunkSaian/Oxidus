@@ -33,7 +33,7 @@ run_inject_gdb() {
     local pid="$1"
     local lib_path="$2"
     local mode="$3"
-    local continue_exec="${4:-false}"
+    local continue_exec="${4:false}"
     
     local gdb_cmds=(
         -ex "attach $pid"

@@ -1,4 +1,4 @@
-use std::{ffi::CStr, mem::transmute, ops::Deref};
+use std::ops::Deref;
 
 use macros::vmt;
 
@@ -34,7 +34,7 @@ impl Deref for PlayerHitboxId {
     type Target = i32;
 
     fn deref(&self) -> &Self::Target {
-        unsafe { transmute(self) }
+        unsafe { &*std::ptr::from_ref::<PlayerHitboxId>(self).cast::<i32>() }
     }
 }
 
@@ -49,6 +49,7 @@ pub struct Hitbox {
     unused: [i32; 8],
 }
 
+#[allow(clippy::struct_field_names)]
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct Bone {
@@ -119,7 +120,7 @@ impl StudioHdr {
             return None;
         }
 
-        Some(&*(((self as *const _ as i32) + self.boneindex + i) as *const Bone))
+        Some(&*(((std::ptr::from_ref(self) as i32) + self.boneindex + i) as *const Bone))
     }
 
     pub fn get_hitbox_set(&self, i: i32) -> Option<&HitboxSet> {
@@ -129,9 +130,9 @@ impl StudioHdr {
             }
 
             Some(
-                &*((self as *const _ as i64
-                    + self.hitboxsetindex as i64
-                    + i as i64 * size_of::<HitboxSet>() as i64)
+                &*((std::ptr::from_ref(self) as i64
+                    + i64::from(self.hitboxsetindex)
+                    + i64::from(i) * size_of::<HitboxSet>() as i64)
                     as *const HitboxSet),
             )
         }

@@ -1,13 +1,9 @@
-use std::{mem::transmute, sync::OnceLock, usize};
-
-use macros::sig;
+use std::sync::OnceLock;
 
 use crate::{sdk::module_names, util::create_interface};
 
 use super::{
-    client::Client, client_entity_list::ClientEntityList, client_mode::ClientMode, engine::Engine,
-    engine_render_view::EngineRenderView, global_vars::GlobalVars, gui_surface::GuiSurface,
-    interface_names, model_info::ModelInfo,
+    client::Client, client_entity_list::ClientEntityList, client_mode::ClientMode, engine::Engine, engine_render_view::EngineRenderView, engine_trace::EngineTrace, global_vars::GlobalVars, gui_surface::GuiSurface, interface_names, model_info::ModelInfo
 };
 
 pub struct Interfaces {
@@ -19,12 +15,13 @@ pub struct Interfaces {
     pub client_mode: &'static ClientMode,
     pub global_vars: &'static GlobalVars,
     pub model_info: &'static ModelInfo,
+    pub engine_trace: &'static EngineTrace,
 }
 
 unsafe impl Sync for Interfaces {}
 unsafe impl Send for Interfaces {}
 
-pub static INTERFACES: OnceLock<Interfaces> = OnceLock::new();
+static INTERFACES: OnceLock<Interfaces> = OnceLock::new();
 
 impl Interfaces {
     pub fn init() {
@@ -64,6 +61,10 @@ impl Interfaces {
                     interface_names::MODEL_INFO,
                 )
                 .unwrap(),
+                engine_trace: create_interface::<EngineTrace>(
+                    module_names::ENGINE,
+                    interface_names::ENGINE_TRACE,
+                ).unwrap()
             }
         });
     }

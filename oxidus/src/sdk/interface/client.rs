@@ -1,6 +1,10 @@
+use std::mem::MaybeUninit;
+
 use macros::vmt;
 
 use crate::{prelude::*, sdk::client_class::UnparsedClientClass};
+
+use super::interfaces::Interfaces;
 
 pub struct Client;
 
@@ -55,6 +59,7 @@ pub enum FrameStage {
     RenderEnd,
 }
 
+//INFO: FIXED
 #[vmt]
 pub struct Client {
     #[offset(6)]
@@ -67,4 +72,26 @@ pub struct Client {
     pub fram_stage_notify: extern "C" fn(stage: FrameStage),
     #[offset(59)]
     pub get_player_view: extern "C" fn(view: &mut ViewSetup) -> bool,
+}
+
+impl Client {
+    #[allow(clippy::similar_names)]
+    pub fn get_w2s_matrix(&self) -> VMatrix {
+        let mut view_setup = unsafe { MaybeUninit::zeroed().assume_init() };
+        self.get_player_view(&mut view_setup);
+
+        let mut w2v: VMatrix = unsafe { MaybeUninit::zeroed().assume_init() };
+        let mut v2pr: VMatrix = unsafe { MaybeUninit::zeroed().assume_init() };
+
+        let mut w2s: VMatrix = unsafe { MaybeUninit::zeroed().assume_init() };
+        let mut w2px: VMatrix = unsafe { MaybeUninit::zeroed().assume_init() };
+        Interfaces::get().engine_render_view.get_marices_for_view(
+            &view_setup,
+            &mut w2v,
+            &mut v2pr,
+            &mut w2s,
+            &mut w2px,
+        );
+        w2s
+    }
 }

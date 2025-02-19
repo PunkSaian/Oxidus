@@ -1,24 +1,20 @@
 use std::{
     ffi::CStr,
     mem::{transmute, MaybeUninit},
-    ops::{Deref, DerefMut},
     ptr,
 };
 
-use crate::math::Vector3;
+use crate::math::{RotationVectors, Vector3};
 
 use super::{
     bindings::{BaseEntity, BasePlayer, TFPlayer, TFWeaponBase},
     collidable::Collidable,
-    interface::{
-        engine::PlayerInfo,
-        interfaces::Interfaces,
-        model_info::{HitboxSet, PlayerHitboxId},
-    },
+    interface::{engine::PlayerInfo, interfaces::Interfaces, model_info::HitboxSet},
     networkable::Networkable,
 };
 use macros::vmt;
 
+//INFO: FIXED
 #[vmt]
 pub struct BaseEntity {
     #[offset(4)]
@@ -27,10 +23,12 @@ pub struct BaseEntity {
     pub get_entindex: extern "C" fn() -> i32,
     #[offset(153)]
     pub get_max_health: extern "C" fn() -> i32,
-    #[offset(183)]
+    #[offset(184)]
     pub is_alive: extern "C" fn() -> bool,
-    #[offset(194)]
+    #[offset(195)]
     pub get_eye_position: extern "C" fn() -> Vector3,
+    #[offset(196)]
+    pub get_view_vector: extern "C" fn() -> Vector3,
 }
 
 #[repr(C)]
@@ -45,6 +43,35 @@ pub const MAX_STUDIO_BONES: usize = 128;
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct BoneMatrix(pub [[f32; 4]; 3]);
+
+impl BoneMatrix {
+    pub fn rotation(&self) -> RotationVectors {
+        RotationVectors {
+            forward: Vector3 {
+                x: self.0[0][0],
+                y: self.0[0][1],
+                z: self.0[0][2],
+            },
+            right: Vector3 {
+                x: self.0[1][0],
+                y: self.0[1][1],
+                z: self.0[1][2],
+            },
+            up: Vector3 {
+                x: self.0[2][0],
+                y: self.0[2][1],
+                z: self.0[2][2],
+            },
+        }
+    }
+    pub fn position(&self) -> Vector3 {
+        Vector3 {
+            x: self.0[0][3],
+            y: self.0[1][3],
+            z: self.0[2][3],
+        }
+    }
+}
 
 #[repr(C)]
 #[derive(Debug, Clone)]
@@ -82,6 +109,7 @@ pub struct Model {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Renderable {}
 
+//INFO: FIXED
 #[vmt]
 struct Renderable {
     #[offset(9)]
@@ -138,9 +166,10 @@ impl<'a> From<&'a mut TFPlayer> for &'a mut BasePlayer {
     }
 }
 
+//INFO: FIXED
 #[vmt]
 pub struct TFPlayer {
-    #[offset(291)]
+    #[offset(292)]
     pub get_weapon: extern "c" fn() -> &TFWeaponBase,
 }
 
@@ -152,6 +181,7 @@ impl TFPlayer {
     }
 }
 
+//INFO: FIXED
 #[vmt]
 pub struct TFWeaponBase {
     #[offset(401)]

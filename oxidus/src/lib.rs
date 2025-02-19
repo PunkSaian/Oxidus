@@ -11,7 +11,7 @@
     incomplete_features,
     dead_code
 )]
-#![feature(inherent_associated_types, generic_const_exprs)]
+#![feature(inherent_associated_types, generic_const_exprs, slice_as_array)]
 
 extern crate thiserror;
 
@@ -41,6 +41,7 @@ mod modules;
 
 mod netvar_dumper;
 mod overlay;
+#[allow(unused)]
 mod prelude;
 mod sdk;
 mod util;
@@ -73,14 +74,12 @@ pub fn main() -> OxidusResult {
     }
     Interfaces::init();
 
-    //let sig: Signature =
-    //    sig!("55 48 89 E5 41 57 41 56 41 55 41 54 53 48 83 EC ?? 0f b7 ?? ?? ?? ?? ?? 81 FB FF FF");
-    //let res = sig.scan_module(module_names::CLIENT);
-
     init_overlay()?;
 
+    info!("Initializing modules");
     init_modules();
 
+    info!("Initializing hooks");
     hooks::init();
 
     Ok(())

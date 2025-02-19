@@ -130,7 +130,7 @@ impl UnparsedClientClass {
             network_name,
             next: self.next,
             recv_table: self.recv_table,
-            class_id: ClassId::CSun,
+            class_id: self.class_id,
         }
     }
 }

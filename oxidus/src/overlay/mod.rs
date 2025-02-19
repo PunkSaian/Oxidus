@@ -5,6 +5,7 @@ use std::{
     time::Instant,
 };
 
+use fov::show_fov;
 use hooks::{lock_cursor, poll_event, set_cursor, swap_window};
 use imgui::{Key, MouseButton};
 use menu::windows::{debug::show_debug_window, watermark::show_watermark};
@@ -20,6 +21,7 @@ use styles::set_styles;
 use crate::{
     hook::{detour::install_detour_from_symbol, vmt::install_vmt},
     modules::esp::ESP,
+    sdk::interface::interfaces::Interfaces,
     util::consts::{self, OXIDE_LOGO_BMP_48},
 };
 
@@ -28,6 +30,7 @@ pub mod menu;
 pub mod scan_code_map;
 pub mod sdl_renderer;
 pub mod styles;
+pub mod fov;
 
 pub use crate::prelude::*;
 
@@ -124,6 +127,7 @@ impl Overlay {
             SDL_SetWindowTitle(window, c_title.as_ptr());
         }
     }
+
     pub fn run(&mut self, window: *mut SDL_Window) {
         unsafe {
             sdl2_sys::SDL_GL_MakeCurrent(window, self.oxidus_gl_ctx);
@@ -154,7 +158,7 @@ impl Overlay {
 
         if ui.is_key_pressed(Key::Insert) {
             self.visible = !self.visible;
-            let interfaces = INTERFACES.get().unwrap();
+            let interfaces = Interfaces::get();
             interfaces
                 .gui_surface
                 .set_cursor_always_visible(self.visible);
@@ -165,9 +169,11 @@ impl Overlay {
         }
         show_debug_window(ui, self.visible);
         let mut esp = ESP.write().unwrap();
-        let esp = esp.as_mut().unwrap();
-        esp.draw(ui);
+        if let Some(esp) = esp.as_mut() {
+            esp.draw(ui);
+        }
         show_watermark(ui);
+        show_fov(ui);
     }
 
     pub fn poll_event(&mut self, event: &mut SDL_Event) {
@@ -246,7 +252,7 @@ pub fn init() -> OxidusResult {
         "SDL_GL_SwapWindow",
         swap_window as *mut (),
     )?;
-    let interfaces = INTERFACES.get().unwrap();
+    let interfaces = Interfaces::get();
     unsafe {
         install_vmt(
             *(ptr::from_ref(interfaces.gui_surface).cast()),
@@ -264,8 +270,9 @@ pub fn init() -> OxidusResult {
 
 pub fn unload() {
     let mut state = OVERLAY.write().unwrap();
-    let interfaces = INTERFACES.get().unwrap();
-    interfaces.gui_surface.set_cursor_always_visible(false);
+    Interfaces::get()
+        .gui_surface
+        .set_cursor_always_visible(false);
 
     *state = None;
 }
