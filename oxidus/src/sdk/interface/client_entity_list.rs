@@ -57,7 +57,27 @@ pub struct ClientEntityList {
 #[vmt]
 pub struct ClientEntityList {
     #[offset(3)]
-    pub get_client_entity_from_index: extern "C" fn(entindex: i32) -> &'static BaseEntity,
+    pub _get_client_entity_from_index: extern "C" fn(entindex: i32) -> *const BaseEntity,
     #[offset(4)]
-    pub get_client_entity_from_handle: extern "C" fn(handle: i32) -> &'static BaseEntity,
+    pub _get_client_entity_from_handle: extern "C" fn(handle: i32) -> &'static BaseEntity,
+}
+
+impl ClientEntityList {
+    pub fn get_client_entity_from_index(&self, entindex: i32) -> Option<&'static BaseEntity> {
+        let ent_ptr = self._get_client_entity_from_index(entindex);
+        if ent_ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { &*ent_ptr })
+        }
+    }
+
+    pub fn get_client_entity_from_handle(&self, handle: i32) -> Option<&'static BaseEntity> {
+        let ent_ptr = self._get_client_entity_from_index(handle);
+        if ent_ptr.is_null() {
+            None
+        } else {
+            Some(unsafe { &*ent_ptr })
+        }
+    }
 }

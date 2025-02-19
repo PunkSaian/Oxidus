@@ -86,14 +86,11 @@ impl Engine {
             info.into()
         }
     }
-    pub fn get_local_player(&self) -> &'static TFPlayer {
-        unsafe {
-            &*std::ptr::from_ref::<BaseEntity>(
-                Interfaces::get()
-                    .entity_list
-                    .get_client_entity_from_index(self.get_loacl_player_entindex()),
-            )
-            .cast::<TFPlayer>()
-        }
+    pub fn get_local_player(&self) -> Option<&'static TFPlayer> {
+        let ent = Interfaces::get()
+            .entity_list
+            .get_client_entity_from_index(self.get_loacl_player_entindex())?;
+
+        Some(unsafe { &*std::ptr::from_ref::<BaseEntity>(ent).cast::<TFPlayer>() })
     }
 }

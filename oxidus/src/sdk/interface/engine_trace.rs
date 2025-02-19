@@ -130,11 +130,10 @@ pub struct EngineTrace {
 }
 
 impl EngineTrace {
-    pub fn trace(&self, start: Vector3, end: Vector3, mask: u32) -> Trace {
-        let local_player = Interfaces::get().engine.get_local_player();
+    pub fn trace(&self, owner: &'static TFPlayer, start: Vector3, end: Vector3, mask: u32) -> Trace {
 
         let ray = Ray::new(start, end);
-        let filter = TraceFilter::new(local_player);
+        let filter = TraceFilter::new(owner);
         let mut trace = unsafe { MaybeUninit::zeroed().assume_init() };
 
         self.trace_ray(&ray, mask, &filter, &mut trace);

@@ -27,8 +27,12 @@ use netvar_dumper::dump_netvars;
 use overlay::init as init_overlay;
 use overlay::unload as unload_overlay;
 use prelude::*;
+use sdk::interface::client::Client;
+use sdk::interface::client_mode::ClientMode;
+use sdk::interface::interface_names;
 use sdk::interface::interfaces::Interfaces;
 use sdk::module_names;
+use util::create_interface;
 
 #[macro_use]
 extern crate log;
@@ -46,12 +50,21 @@ mod prelude;
 mod sdk;
 mod util;
 
-pub fn wait_for_client() {
+pub fn wait_for_load() {
     let mut logged = false;
     loop {
         let module = CString::new(module_names::CLIENT).unwrap();
         let handle = unsafe { dlopen(module.as_ptr(), RTLD_NOLOAD | RTLD_NOW) };
         if !handle.is_null() {
+            let client =
+                create_interface::<Client>(module_names::CLIENT, interface_names::CLIENT).unwrap();
+            loop {
+                if std::ptr::from_ref::<ClientMode>(Interfaces::get_client_mode(client)).is_null() {
+                    thread::sleep(std::time::Duration::from_secs(1));
+                    continue;
+                }
+                break;
+            }
             break;
         }
         if !logged {
@@ -66,7 +79,7 @@ pub fn wait_for_client() {
 }
 
 pub fn main() -> OxidusResult {
-    wait_for_client();
+    wait_for_load();
     if cfg!(feature = "dump-netvars") {
         info!("Dumping netvars");
         dump_netvars()?;

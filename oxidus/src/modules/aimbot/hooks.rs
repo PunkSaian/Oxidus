@@ -44,13 +44,13 @@ pub unsafe extern "C" fn create_move(
 ) -> bool {
     let org_res = original_function(client_mode, input_sample_time, cmd);
 
-    dbg!("b");
     if !AIMBOT {
         return org_res;
     }
-    dbg!("a");
 
-    let local_player = Interfaces::get().engine.get_local_player();
+    let Some(local_player) = Interfaces::get().engine.get_local_player() else {
+        return org_res;
+    };
 
     if !local_player.is_alive() {
         return org_res;
@@ -109,10 +109,12 @@ pub unsafe extern "C" fn create_move(
         let dot = forward.dot(&diff_normalized);
         let fov_threshold = dtr(fov / 2.0).cos();
 
-        let trace =
-            Interfaces::get()
-                .engine_trace
-                .trace(local_eyes, pos, MASK_SHOT | CONTENTS_GRATE);
+        let trace = Interfaces::get().engine_trace.trace(
+            local_player,
+            local_eyes,
+            pos,
+            MASK_SHOT | CONTENTS_GRATE,
+        );
         if trace.entity != ent {
             continue;
         }
