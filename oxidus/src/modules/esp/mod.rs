@@ -45,7 +45,8 @@ impl Esp {
             }
 
             let networkable = unsafe { &*entry.networkable };
-            if networkable.get_index() == local_player.get_entindex() {
+
+            if networkable.get_index() == local_player.get_entindex() || networkable.is_dormant() {
                 continue;
             }
 

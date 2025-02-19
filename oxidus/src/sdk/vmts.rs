@@ -182,7 +182,6 @@ impl TFPlayer {
     pub fn get_weapon(&self) -> Option<&TFWeaponBase> {
         let weapon = self._get_weapon();
         if weapon.is_null() {
-            warn!("weapon is null");
             return None;
         }
         unsafe { Some(&*self._get_weapon()) }
