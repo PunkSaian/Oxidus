@@ -16,7 +16,6 @@
 extern crate thiserror;
 
 use std::ffi::CString;
-use std::path::Path;
 use std::ptr;
 use std::thread;
 
@@ -64,6 +63,7 @@ pub fn wait_for_load() {
             let client =
                 create_interface::<Client>(module_names::CLIENT, interface_names::CLIENT).unwrap();
             loop {
+                #[allow(useless_ptr_null_checks)]
                 if ptr::from_ref::<ClientMode>(Interfaces::get_client_mode(client)).is_null() {
                     thread::sleep(std::time::Duration::from_secs(1));
                     continue;
@@ -84,7 +84,6 @@ pub fn wait_for_load() {
 }
 
 pub fn main() -> OxidusResult {
-
     init_settings();
 
     wait_for_load();
@@ -111,6 +110,11 @@ pub fn cleanup() -> OxidusResult {
     restore_hooks();
 
     unload_overlay();
+
+    let settings = Settings::get();
+    let settings = settings.read().unwrap();
+    settings.save_config().unwrap();
+
     Ok(())
 }
 

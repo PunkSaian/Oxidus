@@ -2,7 +2,7 @@ use core::f32;
 use std::{cmp::Ordering, sync::RwLock};
 
 use crate::sdk::{
-    bindings::{BaseEntity, TFPlayer},
+    bindings::{BaseEntity, TFPlayer, TFWeaponBase},
     class_id::ClassId,
     interface::interfaces::Interfaces,
     vmts::Team,
@@ -152,7 +152,7 @@ impl Esp {
             let weapon_name = {
                 player
                     .get_weapon()
-                    .map_or("none".to_owned(), |x| x.get_print_name())
+                    .map_or("none".to_owned(), TFWeaponBase::get_print_name)
             };
             let text_size = ui.calc_text_size(&weapon_name);
             draw_list.add_text(

@@ -6,6 +6,7 @@ use std::{
 };
 
 use macros::settings;
+use serde::{Deserialize, Serialize};
 use toml::{Table, Value};
 
 use crate::overlay::OxidusResult;
@@ -27,29 +28,44 @@ pub enum Entry {
     Group(HashMap<String, Entry>),
 }
 
-pub fn config_dir() -> PathBuf {
-    let home = std::env::var("HOME").unwrap();
-    let home_dir = Path::new(&home);
-    home_dir.join(".config/").join("oxidus/")
+#[derive(Debug, Serialize, Deserialize)]
+pub struct MetaData {
+    pub current_config: PathBuf,
 }
 
-pub fn meta_config_file() -> PathBuf {
-    config_dir().join("meta.toml")
-}
+impl MetaData {
+    pub fn meta_config_file() -> PathBuf {
+        Settings::config_dir().join("meta.toml")
+    }
 
-// config files, selected one
+    pub fn load() -> OxidusResult<MetaData> {
+        let contents = fs::read_to_string(Self::meta_config_file())?;
+        let loaded = contents.parse::<Table>()?;
+        let current_config = loaded
+            .get("current_config")
+            .map_or_else(Settings::default_settings_file, |v| {
+                PathBuf::from(v.as_str().unwrap())
+            });
+        Ok(MetaData { current_config })
+    }
+    pub fn save(&self) -> OxidusResult<()> {
+        let toml = toml::to_string_pretty(&self)?;
+        fs::write(Self::meta_config_file(), toml)?;
+        Ok(())
+    }
+}
 
 #[derive(Debug)]
 pub struct Settings {
     /// value, default
     pub entries: HashMap<String, Entry>,
-    pub file_path: PathBuf,
+    pub meta: MetaData,
 }
 
+
 impl Settings {
-    pub fn init() {
-        let mut settings = Settings {
-            entries: settings! {
+    pub fn get_default_entries() -> HashMap<String, Entry> {
+            settings! {
                 aimbot {
                     enabled: Bool, false,
                     fov: F32, 30.0
@@ -57,37 +73,59 @@ impl Settings {
                 esp {
                     enabled: Bool, false
                 }
-            },
-            file_path: Self::default_settings_file(),
+            }
+    }
+    pub fn init() {
+        fs::create_dir_all(Self::settings_dir()).unwrap();
+        let meta = if MetaData::meta_config_file().exists() {
+            MetaData::load().unwrap()
+        } else {
+            let meta = MetaData {
+                current_config: Self::default_settings_file(),
+            };
+            meta.save().unwrap();
+            meta
         };
 
-        fs::create_dir_all(Self::settings_dir()).unwrap();
+        let mut settings = Settings {
+            entries: Self::get_default_entries(),
+            meta,
+        };
 
-        if !settings.file_path.exists() {
-            settings.save().unwrap();
+        if !settings.meta.current_config.exists() {
+            settings.save_config().unwrap();
         }
 
-        settings.load().unwrap();
+        settings.load_config().unwrap();
 
         unsafe {
             SETTINGS = Some(Arc::new(RwLock::new(settings)));
         }
     }
-    #[allow(static_mut_refs)]
+
     pub fn get() -> Arc<RwLock<Settings>> {
         unsafe { SETTINGS.clone().unwrap() }
     }
-    pub fn save(&self) -> OxidusResult<()> {
+    pub fn save_config(&self) -> OxidusResult<()> {
         let table = self.to_toml_table()?;
         let toml = toml::to_string_pretty(&table)?;
-        fs::write(&self.file_path, toml)?;
+        fs::write(&self.meta.current_config, toml)?;
         Ok(())
     }
 
-    pub fn load(&mut self) -> OxidusResult<()> {
-        let contents = fs::read_to_string(&self.file_path)?;
+    pub fn load_config(&mut self) -> OxidusResult<()> {
+        let contents = fs::read_to_string(&self.meta.current_config)?;
         let loaded = contents.parse::<Table>()?;
+        self.entries = Self::get_default_entries();
         self.merge_toml(&loaded);
+        Ok(())
+    }
+
+    pub fn switch_config(&mut self, file: &PathBuf) -> OxidusResult<()> {
+        self.save_config()?;
+        self.meta.current_config.clone_from(file);
+        self.load_config()?;
+        self.meta.save()?;
         Ok(())
     }
 
@@ -107,11 +145,29 @@ impl Settings {
             }
         }
     }
+
+    pub fn config_dir() -> PathBuf {
+        let home = std::env::var("HOME").unwrap();
+        let home_dir = Path::new(&home);
+        home_dir.join(".config/").join("oxidus/")
+    }
+
     pub fn settings_dir() -> PathBuf {
-        config_dir().join("settings/")
+        Self::config_dir().join("settings/")
     }
     pub fn default_settings_file() -> PathBuf {
         Self::settings_dir().join("config.toml")
+    }
+    pub fn get_config_files() -> OxidusResult<Vec<PathBuf>> {
+        let mut files = vec![];
+        for entry in fs::read_dir(Self::settings_dir())? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_file() {
+                files.push(path);
+            }
+        }
+        Ok(files)
     }
 }
 

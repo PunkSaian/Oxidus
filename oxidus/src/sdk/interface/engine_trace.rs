@@ -27,6 +27,7 @@ pub struct Plane {
 #[derive(Debug, Clone)]
 pub struct Surface {
     name: *const u8,
+    #[allow(clippy::struct_field_names)]
     surface_props: i16,
     flags: u16,
 }
@@ -62,6 +63,7 @@ impl std::fmt::Debug for TraceFilter {
         //print vmt
         f.debug_struct("TraceFilter")
             .field("vmt", &self.vmt)
+            .field("owner", &std::ptr::from_ref(self.owner))
             .finish()
     }
 }

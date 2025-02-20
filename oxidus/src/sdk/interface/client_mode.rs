@@ -1,4 +1,4 @@
-use std::mem::transmute;
+use std::{mem::transmute, ptr};
 
 use macros::vmt;
 
@@ -64,14 +64,14 @@ pub enum ButtonFlags {
 }
 
 impl Buttons {
-    pub fn get(&self, flag: ButtonFlags) -> bool {
+    pub fn get(self, flag: ButtonFlags) -> bool {
         let flag = flag as u8;
-        let b: u32 = *unsafe { transmute::<&Self, &u32>(self) };
+        let b: u32 = unsafe { transmute::<Self, u32>(self) };
         (b & (1 << flag)) != 0
     }
     pub fn set(&mut self, flag: ButtonFlags, val: bool) {
         let flag = flag as u8;
-        let b: &mut u32 = unsafe { transmute::<&mut Self, &mut u32>(self) };
+        let b: &mut u32 = unsafe { &mut *ptr::from_mut::<Buttons>(self).cast::<u32>() };
         if val {
             *b |= 1 << flag;
         } else {
