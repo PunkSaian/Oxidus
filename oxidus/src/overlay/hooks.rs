@@ -2,6 +2,7 @@ use macros::{detour_hook, vmt_hook};
 use sdl2_sys::{SDL_Event, SDL_Window};
 
 use crate::{
+    mdbg,
     overlay::Overlay,
     sdk::interface::gui_surface::{EMouseCursor, GuiSurface},
 };
@@ -49,6 +50,7 @@ pub unsafe extern "C" fn lock_cursor(this: &GuiSurface) {
     let state = OVERLAY.read().unwrap();
     if let Some(state) = state.as_ref() {
         if state.visible {
+            mdbg!("force unlock");
             this.unlock_cursor();
         }
     }
@@ -60,10 +62,17 @@ pub unsafe extern "C" fn set_cursor(this: *const (), cursor: EMouseCursor) {
     if let Ok(state) = OVERLAY.read() {
         if let Some(state) = state.as_ref() {
             if state.visible {
+                mdbg!(cursor);
                 original_function(this, EMouseCursor::dc_arrow);
                 return;
             }
         }
     }
     original_function(this, cursor);
+}
+
+#[vmt_hook]
+pub unsafe extern "C" fn set_cursor_always_visible(this: *const (), visible:bool) {
+    mdbg!(visible);
+    original_function(this, visible);
 }

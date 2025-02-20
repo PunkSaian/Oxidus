@@ -3,7 +3,9 @@ use std::sync::OnceLock;
 use crate::{sdk::module_names, util::create_interface};
 
 use super::{
-    client::Client, client_entity_list::ClientEntityList, client_mode::ClientMode, engine::Engine, engine_render_view::EngineRenderView, engine_trace::EngineTrace, global_vars::GlobalVars, gui_surface::GuiSurface, interface_names, model_info::ModelInfo
+    client::Client, client_entity_list::ClientEntityList, client_mode::ClientMode, engine::Engine,
+    engine_render_view::EngineRenderView, engine_trace::EngineTrace, global_vars::GlobalVars,
+    gui_surface::GuiSurface, interface_names, model_info::ModelInfo, 
 };
 
 pub struct Interfaces {
@@ -64,7 +66,8 @@ impl Interfaces {
                 engine_trace: create_interface::<EngineTrace>(
                     module_names::ENGINE,
                     interface_names::ENGINE_TRACE,
-                ).unwrap()
+                )
+                .unwrap(),
             }
         });
     }

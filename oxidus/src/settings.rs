@@ -58,22 +58,21 @@ impl MetaData {
 #[derive(Debug)]
 pub struct Settings {
     /// value, default
-    pub entries: HashMap<String, Entry>,
+    pub config: HashMap<String, Entry>,
     pub meta: MetaData,
 }
 
-
 impl Settings {
     pub fn get_default_entries() -> HashMap<String, Entry> {
-            settings! {
-                aimbot {
-                    enabled: Bool, false,
-                    fov: F32, 30.0
-                },
-                esp {
-                    enabled: Bool, false
-                }
+        settings! {
+            aimbot {
+                enabled: Bool, false,
+                fov: F32, 30.0
+            },
+            esp {
+                enabled: Bool, false
             }
+        }
     }
     pub fn init() {
         fs::create_dir_all(Self::configs_dir()).unwrap();
@@ -88,7 +87,7 @@ impl Settings {
         };
 
         let mut settings = Settings {
-            entries: Self::get_default_entries(),
+            config: Self::get_default_entries(),
             meta,
         };
 
@@ -117,7 +116,7 @@ impl Settings {
     pub fn load_config(&mut self) -> OxidusResult<()> {
         let contents = fs::read_to_string(&self.meta.current_config)?;
         let loaded = contents.parse::<Table>()?;
-        self.entries = Self::get_default_entries();
+        self.config = Self::get_default_entries();
         self.merge_toml(&loaded);
         Ok(())
     }
@@ -141,7 +140,7 @@ impl Settings {
         self.save_config()?;
         self.meta.current_config.clone_from(&file);
         if !copy {
-            self.entries = Self::get_default_entries();
+            self.config = Self::get_default_entries();
         }
         self.meta.save()?;
         self.save_config()?;
@@ -150,14 +149,14 @@ impl Settings {
 
     fn to_toml_table(&self) -> OxidusResult<Table> {
         let mut table = Table::new();
-        for (key, value) in &self.entries {
+        for (key, value) in &self.config {
             table.insert(key.clone(), value_to_toml(value)?);
         }
         Ok(table)
     }
 
     fn merge_toml(&mut self, loaded: &Table) {
-        for (key, value) in &mut self.entries {
+        for (key, value) in &mut self.config {
             if let Some(loaded_value) = loaded.get(key) {
                 let merged = merge_entry(value, loaded_value);
                 *value = merged;
@@ -248,4 +247,28 @@ fn merge_entry(current: &Entry, loaded: &Value) -> Entry {
 
 pub fn init_settings() {
     Settings::init();
+}
+
+#[macro_export]
+macro_rules! get_entry_mut {
+    ($map:expr, $key:expr => $variant:ident) => {{
+        let entry = $map.get_mut($key).unwrap();
+        let $crate::settings::Entry::Value($crate::settings::EntryValue::$variant(ref mut value), ..) = entry else {
+            panic!(
+                "Invalid entry: expected {} at key '{}'", 
+                stringify!($variant), 
+                $key
+            );
+        };
+        value
+    }};
+    
+    ($map:expr, $key:expr, $($rest:tt)*) => {{
+        let entry = $map.get_mut($key).unwrap();
+        let $crate::settings::Entry::Group(ref mut next_map) = entry else {
+            panic!("Invalid entry: expected Group at key '{}'", $key);
+        };
+        get_entry_mut!(next_map, $($rest)*)
+    }};
+
 }

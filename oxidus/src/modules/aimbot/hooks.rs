@@ -1,11 +1,13 @@
 use std::f32;
 
 use crate::{
+    get_entry_mut, mdbg,
     overlay::AIMBOT,
     sdk::interface::{
         client_mode::ButtonFlags,
         engine_trace::{CONTENTS_GRATE, MASK_SHOT},
     },
+    settings::Settings,
 };
 use macros::vmt_hook;
 
@@ -42,6 +44,9 @@ pub unsafe extern "C" fn create_move(
     cmd: &mut UserCmd,
 ) -> bool {
     let org_res = original_function(client_mode, input_sample_time, cmd);
+    if cmd.tick_count == 0 {
+        return org_res;
+    }
 
     if !AIMBOT {
         return org_res;
@@ -59,7 +64,10 @@ pub unsafe extern "C" fn create_move(
     let local_eyes = local_player.get_eye_position();
 
     let forward = org_cmd.viewangles.forward();
-    let fov = 30.0;
+
+    let settings = Settings::get();
+    let mut settings = settings.write().unwrap();
+    let fov = get_entry_mut!(&mut settings.config, "aimbot", "fov" => F32);
 
     'ent_loop: for entry in &Interfaces::get().entity_list.cache {
         if entry.networkable.is_null() {
@@ -105,7 +113,7 @@ pub unsafe extern "C" fn create_move(
             };
 
             let dot = forward.dot(&diff_normalized);
-            let fov_threshold = dtr(fov / 2.0).cos();
+            let fov_threshold = dtr(*fov).cos();
 
             let trace = Interfaces::get().engine_trace.trace(
                 local_player,

@@ -1,13 +1,14 @@
 use std::{
     ffi::{c_void, CStr, CString},
+    mem::MaybeUninit,
     ptr,
     sync::RwLock,
     time::Instant,
 };
 
 use fov::show_fov;
-use hooks::{lock_cursor, poll_event, set_cursor, swap_window};
-use imgui::{Key, MouseButton};
+use hooks::{lock_cursor, poll_event, set_cursor, set_cursor_always_visible, swap_window};
+use imgui::{Key, MouseButton, MouseCursor};
 use menu::windows::{debug::show_debug_window, watermark::show_watermark};
 use scan_code_map::sdl_scancode_to_imgui_key;
 use sdl2_sys::{
@@ -19,7 +20,11 @@ use sdl_renderer::{SdlRenderer, Textures};
 use styles::set_styles;
 
 use crate::{
-    hook::{detour::install_detour_from_symbol, vmt::install_vmt}, modules::esp::ESP, sdk::interface::interfaces::Interfaces, settings::Settings, util::consts::{self, OXIDUS_LOGO_BMP_48}
+    hook::{detour::install_detour_from_symbol, vmt::install_vmt},
+    modules::esp::ESP,
+    sdk::interface::interfaces::Interfaces,
+    settings::Settings,
+    util::consts::{self, OXIDUS_LOGO_BMP_48},
 };
 
 pub mod fov;
@@ -154,23 +159,40 @@ impl Overlay {
     pub fn show(&mut self) {
         let ui = self.context.new_frame();
 
+        let interfaces = Interfaces::get();
         if ui.is_key_pressed(Key::Insert) {
             self.visible = !self.visible;
-            let interfaces = Interfaces::get();
-            interfaces
-                .gui_surface
-                .set_cursor_always_visible(self.visible);
             if !self.visible {
                 let settings = Settings::get();
                 let settings = settings.read().unwrap();
                 settings.save_config().unwrap();
             }
+            interfaces
+                .gui_surface
+                .set_cursor_always_visible(self.visible);
+            interfaces.gui_surface.apply_changes();
+            mdbg!(interfaces.gui_surface.is_cursor_visible());
         }
+        mdbg!(interfaces.gui_surface.is_cursor_visible());
 
         unsafe { AIMBOT = ui.is_key_down(Key::LeftShift) };
 
         if self.visible {
             menu::show(ui);
+            let fg_list = ui.get_foreground_draw_list();
+            unsafe {
+                let mut cursor_pos = MaybeUninit::zeroed().assume_init();
+                imgui::sys::igGetMousePos(&mut cursor_pos);
+                mdbg!(cursor_pos);
+                fg_list
+                    .add_circle([cursor_pos.x, cursor_pos.y], 5.0, 0xFF_00_00_00)
+                    .filled(true)
+                    .build();
+                fg_list
+                    .add_circle([cursor_pos.x, cursor_pos.y], 3.0, 0xFF_FF_FF_FF)
+                    .filled(true)
+                    .build();
+            }
         }
         show_debug_window(ui, self.visible);
         let mut esp = ESP.write().unwrap();
@@ -263,6 +285,11 @@ pub fn init() -> OxidusResult {
             *(ptr::from_ref(interfaces.gui_surface).cast()),
             51,
             set_cursor as *mut (),
+        );
+        install_vmt(
+            *(ptr::from_ref(interfaces.gui_surface).cast()),
+            52,
+            set_cursor_always_visible as *mut (),
         );
         install_vmt(
             *(ptr::from_ref(interfaces.gui_surface).cast()),

@@ -10,6 +10,8 @@ pub struct GuiSurface {
     pub set_cursor: extern "C" fn(curosr: EMouseCursor),
     #[offset(52)]
     pub set_cursor_always_visible: extern "C" fn(visible: bool),
+    #[offset(53)]
+    pub is_cursor_visible: extern "C" fn() -> bool,
     #[offset(54)]
     pub apply_changes: extern "C" fn(),
     #[offset(61)]
