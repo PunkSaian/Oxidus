@@ -43,7 +43,7 @@ impl MetaData {
         let loaded = contents.parse::<Table>()?;
         let current_config = loaded
             .get("current_config")
-            .map_or_else(Settings::default_settings_file, |v| {
+            .map_or_else(Settings::default_config_file, |v| {
                 PathBuf::from(v.as_str().unwrap())
             });
         Ok(MetaData { current_config })
@@ -76,12 +76,12 @@ impl Settings {
             }
     }
     pub fn init() {
-        fs::create_dir_all(Self::settings_dir()).unwrap();
+        fs::create_dir_all(Self::configs_dir()).unwrap();
         let meta = if MetaData::meta_config_file().exists() {
             MetaData::load().unwrap()
         } else {
             let meta = MetaData {
-                current_config: Self::default_settings_file(),
+                current_config: Self::default_config_file(),
             };
             meta.save().unwrap();
             meta
@@ -129,6 +129,24 @@ impl Settings {
         Ok(())
     }
 
+    pub fn delete_config(&mut self, file: &PathBuf) -> OxidusResult<()> {
+        fs::remove_file(file)?;
+        Ok(())
+    }
+
+    pub fn create_new(&mut self, file_name: &str, copy: bool) -> OxidusResult<()> {
+        let file_name_with_ext = file_name.to_owned() + ".toml";
+        let file = Self::configs_dir().join(file_name_with_ext);
+        self.save_config()?;
+        self.meta.current_config.clone_from(&file);
+        if !copy {
+            self.entries = Self::get_default_entries();
+        }
+        self.meta.save()?;
+        self.save_config()?;
+        Ok(())
+    }
+
     fn to_toml_table(&self) -> OxidusResult<Table> {
         let mut table = Table::new();
         for (key, value) in &self.entries {
@@ -152,15 +170,15 @@ impl Settings {
         home_dir.join(".config/").join("oxidus/")
     }
 
-    pub fn settings_dir() -> PathBuf {
-        Self::config_dir().join("settings/")
+    pub fn configs_dir() -> PathBuf {
+        Self::config_dir().join("configs/")
     }
-    pub fn default_settings_file() -> PathBuf {
-        Self::settings_dir().join("config.toml")
+    pub fn default_config_file() -> PathBuf {
+        Self::configs_dir().join("config.toml")
     }
     pub fn get_config_files() -> OxidusResult<Vec<PathBuf>> {
         let mut files = vec![];
-        for entry in fs::read_dir(Self::settings_dir())? {
+        for entry in fs::read_dir(Self::configs_dir())? {
             let entry = entry?;
             let path = entry.path();
             if path.is_file() {
@@ -178,7 +196,7 @@ fn value_to_toml(entry: &Entry) -> OxidusResult<Value> {
             EntryValue::F32(v) => Ok(Value::Float(f64::from(*v))),
             EntryValue::String(v) => Ok(Value::String(v.clone())),
             EntryValue::Bool(v) => Ok(Value::Boolean(*v)),
-            EntryValue::Color(v) => Ok(Value::String(format!("#{:06X}", v))),
+            EntryValue::Color(v) => Ok(Value::String(format!("#{v:06X}"))),
         },
         Entry::Group(map) => {
             let mut table = Table::new();
