@@ -4,7 +4,7 @@ use std::{cmp::Ordering, sync::RwLock};
 use crate::sdk::{
     bindings::{BaseEntity, TFPlayer},
     class_id::ClassId,
-    interface::interfaces::{self, Interfaces},
+    interface::interfaces::Interfaces,
     vmts::Team,
 };
 

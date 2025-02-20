@@ -7,7 +7,6 @@ use macros::vmt;
 
 use crate::{
     math::Vector3,
-    prelude::Interfaces,
     sdk::{
         bindings::{BaseEntity, TFPlayer},
         class_id::ClassId,

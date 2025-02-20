@@ -2,7 +2,6 @@ use std::f32;
 
 use crate::{
     overlay::AIMBOT,
-    prelude::*,
     sdk::interface::{
         client_mode::ButtonFlags,
         engine_trace::{CONTENTS_GRATE, MASK_SHOT},

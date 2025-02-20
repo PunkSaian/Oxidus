@@ -13,6 +13,12 @@ pub enum OxidusError {
     Io(#[from] std::io::Error),
     #[error(transparent)]
     Image(#[from] ImageError),
+    #[error(transparent)]
+    TomlDeserialize(#[from] toml::de::Error),
+    #[error(transparent)]
+    TomlSerialize(#[from] toml::ser::Error),
+
+
 }
 
 pub type OxidusResult<T = (), E = OxidusError> = Result<T, E>;

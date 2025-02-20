@@ -145,7 +145,7 @@ pub fn show_debug_window(ui: &mut Ui, visible: bool) {
                 let viewport = unsafe { imgui::sys::igGetMainViewport().read() };
                 let window_size = [viewport.Size.x, viewport.Size.y];
                 let scale = (window_size[0] as f32 / 2f32, window_size[1] as f32 / 2f32);
-                for ((file, line, label), point3d) in &mut state.points {
+                for ((_, _, label), point3d) in &mut state.points {
                     let Some(mut point) = w2s.transform_vector(point3d) else {
                             continue;
                         };
@@ -158,7 +158,7 @@ pub fn show_debug_window(ui: &mut Ui, visible: bool) {
                         .build();
                     draw_list.add_text(point, 0xFF_FF_FF_FF, label);
                 }
-                for ((file, line, label), (point3d, angle)) in &mut state.angle {
+                for ((_, _, label), (point3d, angle)) in &mut state.angle {
                     let forward = angle.forward();
                     let point3d2 = *point3d + forward * 10.0;
                     let Some(mut point) = w2s.transform_vector(point3d) else {

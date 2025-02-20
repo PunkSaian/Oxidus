@@ -16,6 +16,8 @@
 extern crate thiserror;
 
 use std::ffi::CString;
+use std::path::Path;
+use std::ptr;
 use std::thread;
 
 use hook::restore_hooks;
@@ -32,6 +34,8 @@ use sdk::interface::client_mode::ClientMode;
 use sdk::interface::interface_names;
 use sdk::interface::interfaces::Interfaces;
 use sdk::module_names;
+use settings::init_settings;
+use settings::Settings;
 use util::create_interface;
 
 #[macro_use]
@@ -42,6 +46,7 @@ mod math;
 
 mod hooks;
 mod modules;
+mod settings;
 
 mod netvar_dumper;
 mod overlay;
@@ -59,7 +64,7 @@ pub fn wait_for_load() {
             let client =
                 create_interface::<Client>(module_names::CLIENT, interface_names::CLIENT).unwrap();
             loop {
-                if std::ptr::from_ref::<ClientMode>(Interfaces::get_client_mode(client)).is_null() {
+                if ptr::from_ref::<ClientMode>(Interfaces::get_client_mode(client)).is_null() {
                     thread::sleep(std::time::Duration::from_secs(1));
                     continue;
                 }
@@ -79,6 +84,9 @@ pub fn wait_for_load() {
 }
 
 pub fn main() -> OxidusResult {
+
+    init_settings();
+
     wait_for_load();
     if cfg!(feature = "dump-netvars") {
         info!("Dumping netvars");
