@@ -172,7 +172,7 @@ pub struct Ray {
     pub delta: VectorAligned,
     pub start_offset: VectorAligned,
     pub extents: VectorAligned,
-#[allow(clippy::struct_field_names)]
+    #[allow(clippy::struct_field_names)]
     pub is_ray: bool,
     pub is_swept: bool,
 }

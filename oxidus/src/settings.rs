@@ -175,7 +175,7 @@ impl Settings {
         Self::config_dir().join("configs/")
     }
     pub fn default_config_file() -> PathBuf {
-        Self::configs_dir().join("config.toml")
+        Self::configs_dir().join("default.toml")
     }
     pub fn get_config_files() -> OxidusResult<Vec<PathBuf>> {
         let mut files = vec![];
