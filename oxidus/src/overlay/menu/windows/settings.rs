@@ -1,43 +1,44 @@
-use std::{sync::OnceLock, thread};
+use std::thread;
 
-use imgui::WindowFlags;
+use imgui::{Id, WindowFlags};
 
 use crate::{
     oxidus_cleanup,
     settings::{Entry, EntryValue, Settings},
 };
 
+#[allow(static_mut_refs)]
 pub fn show_settings(ui: &mut imgui::Ui) {
     ui.window("Settings").menu_bar(true).flags(WindowFlags::NO_DOCKING| WindowFlags::MENU_BAR | WindowFlags::NO_COLLAPSE).build(|| {
 
         let settings = Settings::get();
         let mut settings = settings.write().unwrap();
         ui.modal_popup_config("new config").build(|| {
-            static mut new_config_name: String = const { String::new() };
+            static mut NEW_CONFIG_NAME: String = const { String::new() };
+            static mut COPY_CURRENT: bool = const { false };
 
-            ui.input_text("name", unsafe{&mut new_config_name}).build();
-            static mut copy_current: bool = const { false };
+            ui.input_text("name", unsafe{&mut NEW_CONFIG_NAME}).build();
 
-            ui.checkbox("copy current", unsafe{&mut copy_current});
+            ui.checkbox("copy current", unsafe{&mut COPY_CURRENT});
             ui.spacing();
             unsafe {
-                if ui.button("create") && !new_config_name.is_empty(){
-                    settings.create_new(&new_config_name, copy_current);
-                    new_config_name.clear();
-                    copy_current = false;
+                if ui.button("create") && !NEW_CONFIG_NAME.is_empty(){
+                    settings.create_new(&NEW_CONFIG_NAME, COPY_CURRENT).unwrap();
+                    NEW_CONFIG_NAME.clear();
+                    COPY_CURRENT = false;
                     ui.close_current_popup();
                 }
                 ui.same_line();
                 if ui.button("cancel") {
-                    new_config_name.clear();
-                    copy_current = false;
+                    NEW_CONFIG_NAME.clear();
+                    COPY_CURRENT = false;
                     ui.close_current_popup();
                 }
             }
         });
         let popup_id = ui.new_id_str("new config");
         ui.menu_bar(||{
-            ui.menu("oxide", || {
+            ui.menu("oxidus", || {
             if ui.menu_item("unload") {
                 thread::spawn(|| {
                     oxidus_cleanup();
@@ -47,7 +48,7 @@ pub fn show_settings(ui: &mut imgui::Ui) {
             ui.menu("config", || {
                 if ui.menu_item("new") {
                     unsafe{
-                        imgui::sys::igOpenPopup_ID(std::mem::transmute(popup_id), 0);
+                        imgui::sys::igOpenPopup_ID(std::mem::transmute::<Id, u32>(popup_id), 0);
                     }
                 }
                 ui.separator();
@@ -64,7 +65,7 @@ pub fn show_settings(ui: &mut imgui::Ui) {
                             settings.meta.current_config.clone_from(&entry);
                         }
                         if ui.menu_item_config("delete").enabled(settings.meta.current_config != entry).build(){
-                            settings.delete_config(&entry).unwrap();
+                            Settings::delete_config(&entry).unwrap();
                         }
                     });
                     //if ui.menu_item_config().selected(current_config == entry).build() {

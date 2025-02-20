@@ -6,7 +6,7 @@ use imgui::{Context, DrawCmd};
 
 use std::io::Cursor;
 
-use crate::util::consts::{OXIDE_LOGO_PNG, OXIDE_LOGO_TRANS_OUTLINED_PNG, OXIDE_LOGO_TRANS_PNG};
+use crate::util::consts::{OXIDUS_LOGO_PNG, OXIDUS_LOGO_TRANS_OUTLINED_PNG, OXIDUS_LOGO_TRANS_PNG};
 
 use super::OxidusResult;
 
@@ -23,10 +23,10 @@ pub struct Textures {
 
 impl Textures {
     pub fn new(renderer: &mut SdlRenderer) -> OxidusResult<Self> {
-        let logo = renderer.create_texture_from_bytes(OXIDE_LOGO_PNG)?;
-        let logo_trans = renderer.create_texture_from_bytes(OXIDE_LOGO_TRANS_PNG)?;
+        let logo = renderer.create_texture_from_bytes(OXIDUS_LOGO_PNG)?;
+        let logo_trans = renderer.create_texture_from_bytes(OXIDUS_LOGO_TRANS_PNG)?;
         let logo_trans_outlined =
-            renderer.create_texture_from_bytes(OXIDE_LOGO_TRANS_OUTLINED_PNG)?;
+            renderer.create_texture_from_bytes(OXIDUS_LOGO_TRANS_OUTLINED_PNG)?;
 
         Ok(Self {
             logo,

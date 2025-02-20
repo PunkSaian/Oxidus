@@ -105,6 +105,7 @@ extern "C" fn get_trace_type(_: &'static TraceFilter) -> TraceType {
 
 impl TraceFilter {
     pub fn new(p_local: &'static TFPlayer) -> TraceFilter {
+        #[allow(clippy::cast_ptr_alignment)]
         let vmt = unsafe { alloc(Layout::new::<TraceFilterVMT>()).cast::<TraceFilterVMT>() };
 
         unsafe {
@@ -131,8 +132,13 @@ pub struct EngineTrace {
 }
 
 impl EngineTrace {
-    pub fn trace(&self, owner: &'static TFPlayer, start: Vector3, end: Vector3, mask: u32) -> Trace {
-
+    pub fn trace(
+        &self,
+        owner: &'static TFPlayer,
+        start: Vector3,
+        end: Vector3,
+        mask: u32,
+    ) -> Trace {
         let ray = Ray::new(start, end);
         let filter = TraceFilter::new(owner);
         let mut trace = unsafe { MaybeUninit::zeroed().assume_init() };
@@ -166,6 +172,7 @@ pub struct Ray {
     pub delta: VectorAligned,
     pub start_offset: VectorAligned,
     pub extents: VectorAligned,
+#[allow(clippy::struct_field_names)]
     pub is_ray: bool,
     pub is_swept: bool,
 }

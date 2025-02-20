@@ -103,6 +103,7 @@ impl Settings {
         }
     }
 
+    #[allow(static_mut_refs)]
     pub fn get() -> Arc<RwLock<Settings>> {
         unsafe { SETTINGS.clone().unwrap() }
     }
@@ -129,7 +130,7 @@ impl Settings {
         Ok(())
     }
 
-    pub fn delete_config(&mut self, file: &PathBuf) -> OxidusResult<()> {
+    pub fn delete_config(file: &PathBuf) -> OxidusResult<()> {
         fs::remove_file(file)?;
         Ok(())
     }

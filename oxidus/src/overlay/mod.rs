@@ -19,7 +19,7 @@ use sdl_renderer::{SdlRenderer, Textures};
 use styles::set_styles;
 
 use crate::{
-    hook::{detour::install_detour_from_symbol, vmt::install_vmt}, modules::esp::ESP, sdk::interface::interfaces::Interfaces, settings::Settings, util::consts::{self, OXIDE_LOGO_BMP_48}
+    hook::{detour::install_detour_from_symbol, vmt::install_vmt}, modules::esp::ESP, sdk::interface::interfaces::Interfaces, settings::Settings, util::consts::{self, OXIDUS_LOGO_BMP_48}
 };
 
 pub mod fov;
@@ -95,8 +95,8 @@ impl Overlay {
     pub fn set_icon(window: *mut SDL_Window) {
         let rw = unsafe {
             sdl2_sys::SDL_RWFromConstMem(
-                OXIDE_LOGO_BMP_48.as_ptr().cast(),
-                OXIDE_LOGO_BMP_48.len() as i32,
+                OXIDUS_LOGO_BMP_48.as_ptr().cast(),
+                OXIDUS_LOGO_BMP_48.len() as i32,
             )
         };
 
