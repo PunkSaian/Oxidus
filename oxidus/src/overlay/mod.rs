@@ -168,9 +168,7 @@ impl Overlay {
                 .gui_surface
                 .set_cursor_always_visible(self.visible);
             interfaces.gui_surface.apply_changes();
-            mdbg!(interfaces.gui_surface.is_cursor_visible());
         }
-        mdbg!(interfaces.gui_surface.is_cursor_visible());
 
         unsafe { AIMBOT = ui.is_key_down(Key::LeftShift) };
 
@@ -183,7 +181,6 @@ impl Overlay {
             unsafe {
                 let mut cursor_pos = MaybeUninit::zeroed().assume_init();
                 imgui::sys::igGetMousePos(&mut cursor_pos);
-                mdbg!(cursor_pos);
                 fg_list
                     .add_circle([cursor_pos.x, cursor_pos.y], 5.0, 0xFF_00_00_00)
                     .filled(true)

@@ -12,6 +12,37 @@ pub struct Bind {
     pub triggered: bool,
 }
 
+impl Bind {
+    pub fn apply_overwrite(&self, config: &mut Config) {
+        for (path, value) in &self.diff {
+            let mut entry = &mut config.settings;
+            for key in path {
+                match entry.get_mut(key).unwrap() {
+                    Entry::Group(group) => entry = group,
+                    Entry::Value(_, _, overwrite) => {
+                        *overwrite = Some(value.clone());
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    pub fn apply(&self, config: &mut Config) {
+        for (path, bind_value) in &self.diff {
+            let mut entry = &mut config.settings;
+            for key in path {
+                match entry.get_mut(key).unwrap() {
+                    Entry::Group(group) => entry = group,
+                    Entry::Value(value, _, _) => {
+                            *value = bind_value.clone();
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub fn run_binds(ui: &imgui::Ui) {
     let config = Config::get();
     let mut config = config.write().unwrap();
@@ -20,22 +51,7 @@ pub fn run_binds(ui: &imgui::Ui) {
         if triggered == bind.triggered {
             continue;
         }
-        for (path, value) in &bind.diff {
-            let mut entry = &mut config.settings;
-            for key in path {
-                match entry.get_mut(key).unwrap() {
-                    Entry::Group(group) => entry = group,
-                    Entry::Value(_, _, overwrite) => {
-                        if triggered {
-                            *overwrite = Some(value.clone());
-                        } else {
-                            *overwrite = None;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
+        bind.apply_overwrite(&mut config);
         config.binds[i].triggered = triggered;
     }
 }

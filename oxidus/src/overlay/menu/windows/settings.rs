@@ -2,7 +2,7 @@ use std::thread;
 
 use imgui::{Id, WindowFlags};
 
-use crate::{get_entry_mut, oxidus_cleanup, config::Config};
+use crate::{config::Config, get_entry_mut, oxidus_cleanup};
 
 #[allow(static_mut_refs)]
 pub fn show_settings(ui: &mut imgui::Ui) {

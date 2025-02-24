@@ -382,6 +382,7 @@ macro_rules! get_entry_mut {
                 $key
             );
         };
+        $crate::mdbg!(overwrite);
         if let Some(overwrite) = overwrite{
             let $crate::config::EntryValue::$variant(ref mut value) = overwrite else { unreachable!() };
             value

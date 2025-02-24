@@ -119,7 +119,7 @@ pub fn show_binds(ui: &mut imgui::Ui) {
                     ui.disabled(config.binding.is_some(), || {
                         if ui.button(format!("Edit###{i}")) {
                             config.binding = Some((i, config.settings.clone()));
-                            //save old settings state
+                            bind.apply(&mut config);
                         }
                     });
                     if let Some(binding) = config.binding.clone() {

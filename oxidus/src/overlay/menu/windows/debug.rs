@@ -204,7 +204,7 @@ macro_rules! mdbg {
             .unwrap();
         state
             .variables
-            .insert((file, line, name, Some($key.into())), value);
+            .insert((file, line, name.into(), Some($key.into())), value);
     }};
 }
 
