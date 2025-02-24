@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use imgui::{Id, Key, TableFlags, WindowFlags};
 
-use crate::config::{binds::Bind, diff_settings, Config};
+use crate::{
+    config::{binds::Bind, diff_settings, Config},
+    sdk::bindings,
+};
 
 #[allow(static_mut_refs, clippy::too_many_lines)]
 pub fn show_binds(ui: &mut imgui::Ui) {
@@ -114,21 +117,22 @@ pub fn show_binds(ui: &mut imgui::Ui) {
                     ui.text(&commands_string);
                     ui.table_next_column();
                     ui.disabled(config.binding.is_some(), || {
-                        if ui.button("Edit") {
+                        if ui.button(format!("Edit###{i}")) {
                             config.binding = Some((i, config.settings.clone()));
                             //save old settings state
                         }
                     });
-                    if config.binding.is_some() && ui.button(format!("Save##{i}")) {
+                    if let Some(binding) = config.binding.clone() {
+                        ui.same_line();
+                        if binding.0 == i && ui.button("Save") {
+                            let old_settings = config.binding.as_ref().unwrap().clone().1;
 
-                        let old_settings = config.binding.as_ref().unwrap().clone().1;
-                        
-                        let diff = diff_settings(&old_settings, &config.settings);
-                        //compare new settings state with saved one and save if different
-                        config.settings = old_settings;
-                        config.binding = None;
-                        config.binds[i].diff = diff;
-
+                            let diff = diff_settings(&old_settings, &config.settings);
+                            //compare new settings state with saved one and save if different
+                            config.settings = old_settings;
+                            config.binding = None;
+                            config.binds[i].diff = diff;
+                        }
                     }
                 }
             }
