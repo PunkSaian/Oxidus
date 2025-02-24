@@ -1,13 +1,15 @@
 use std::{
     collections::HashMap,
     fs,
+    mem::transmute,
     path::{Path, PathBuf},
     sync::{Arc, RwLock},
 };
 
+use imgui::Key;
 use macros::settings;
 use serde::{Deserialize, Serialize};
-use toml::{Table, Value};
+use toml::{value::Array, Table, Value};
 
 use crate::overlay::OxidusResult;
 
@@ -141,6 +143,7 @@ impl Config {
         let table = self.to_toml_table()?;
         let toml = toml::to_string_pretty(&table)?;
         fs::write(&self.meta.current_config, toml)?;
+
         Ok(())
     }
 
@@ -150,12 +153,46 @@ impl Config {
         self.settings = Self::get_default_entries();
         self.merge_toml(loaded.get("settings").unwrap().as_table().unwrap());
         //load binds
-        if let Some(binds) = loaded.get("binds") {
-            for (name, bind) in binds.as_table().unwrap() {
-                let mut diff: HashMap<Vec<String>, Value> = HashMap::new();
+        if let Some(Some(binds_table)) = loaded.get("binds").map(|x| x.as_table()) {
+            for (name, bind_table) in binds_table {
+                let mut keys = Vec::new();
+                let mut diff = HashMap::new();
+                let bind_table = bind_table.as_table().unwrap();
+                for (key, value) in bind_table {
+                    match key.as_str() {
+                        "diff" => {
+                            let diff_table = value.as_array().unwrap();
+                            for diff_entry in diff_table {
+                                let diff_entry = diff_entry.as_table().unwrap();
+                                let path = diff_entry
+                                    .get("path")
+                                    .unwrap()
+                                    .as_array()
+                                    .unwrap()
+                                    .iter()
+                                    .map(|x| x.as_str().unwrap().to_owned())
+                                    .collect();
+
+                                let value = diff_entry.get("value").unwrap();
+                                diff.insert(path, value_from_toml(value));
+                            }
+                        }
+                        "keys" => {
+                            keys = value
+                                .as_array()
+                                .unwrap()
+                                .iter()
+                                .map(|x| unsafe {
+                                    transmute::<u32, Key>(x.as_integer().unwrap() as u32)
+                                })
+                                .collect();
+                        }
+                        _ => {}
+                    }
+                }
                 self.binds.push(binds::Bind {
                     name: name.clone(),
-                    keys: vec![],
+                    keys,
                     diff,
                     triggered: false,
                 });
@@ -195,29 +232,37 @@ impl Config {
         for (key, value) in &self.settings {
             settings.insert(key.clone(), value_to_toml(value)?);
         }
-        let mut binds = Table::new();
+        let mut binds_table = Table::new();
         for bind in &self.binds {
-            let mut binds_table = Table::new();
+            let mut bind_table = Table::new();
+            let mut diffs_table = Array::new();
             for (path, value) in &bind.diff {
-                let mut bind_table = Table::new();
-                bind_table.insert(
+                let mut diff_table = Table::new();
+                diff_table.insert(
                     "path".to_owned(),
                     Value::Array(path.iter().map(|x| Value::String(x.clone())).collect()),
                 );
-                bind_table.insert(
+                diff_table.insert(
                     "value".to_owned(),
                     value_to_toml(&Entry::Value(value.clone(), value.clone(), None))?,
                 );
-                binds_table.insert(
-                    bind.name.clone(),
-                    Value::Table(bind_table),
-                );
+                diffs_table.push(Value::Table(diff_table));
             }
-            binds.insert(bind.name.clone(), Value::Table(binds_table));
+            bind_table.insert("diff".to_owned(), Value::Array(diffs_table));
+            bind_table.insert(
+                "keys".to_owned(),
+                Value::Array(
+                    bind.keys
+                        .iter()
+                        .map(|x| Value::Integer((*x as u32) as i64))
+                        .collect(),
+                ),
+            );
+            binds_table.insert(bind.name.clone(), Value::Table(bind_table));
         }
         let mut table = Table::new();
         table.insert("settings".to_owned(), Value::Table(settings));
-        table.insert("binds".to_owned(), Value::Table(binds));
+        table.insert("binds".to_owned(), Value::Table(binds_table));
         Ok(table)
     }
 
@@ -271,6 +316,16 @@ fn value_to_toml(entry: &Entry) -> OxidusResult<Value> {
             }
             Ok(Value::Table(table))
         }
+    }
+}
+
+fn value_from_toml(value: &Value) -> EntryValue {
+    match value {
+        Value::Integer(v) => EntryValue::I32(*v as i32),
+        Value::Float(v) => EntryValue::F32(*v as f32),
+        Value::String(v) => EntryValue::String(v.clone()),
+        Value::Boolean(v) => EntryValue::Bool(*v),
+        _ => unreachable!(),
     }
 }
 
