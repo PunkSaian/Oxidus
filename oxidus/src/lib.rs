@@ -33,8 +33,8 @@ use sdk::interface::client_mode::ClientMode;
 use sdk::interface::interface_names;
 use sdk::interface::interfaces::Interfaces;
 use sdk::module_names;
-use settings::init_settings;
-use settings::Settings;
+use config::init_settings;
+use config::Config;
 use util::create_interface;
 
 #[macro_use]
@@ -45,7 +45,7 @@ mod math;
 
 mod hooks;
 mod modules;
-mod settings;
+mod config;
 
 mod netvar_dumper;
 mod overlay;
@@ -111,7 +111,7 @@ pub fn cleanup() -> OxidusResult {
 
     unload_overlay();
 
-    let settings = Settings::get();
+    let settings = Config::get();
     let settings = settings.read().unwrap();
     settings.save_config().unwrap();
 

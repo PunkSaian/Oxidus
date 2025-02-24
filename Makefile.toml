@@ -44,9 +44,9 @@ run_inject_gdb() {
     )
     
     #if ${continue_exec}; then
-        sudo rust-gdb -q "${gdb_cmds[@]}" -ex "continue"
+    #    sudo  rust-gdb -q "${gdb_cmds[@]}" -ex "continue"
     #else
-    #    sudo rust-gdb -n -q -batch "${gdb_cmds[@]}" -ex "detach" -ex "quit"
+        sudo rust-gdb -n -q -batch "${gdb_cmds[@]}" -ex "detach" -ex "quit"
     #fi
 }
 '''

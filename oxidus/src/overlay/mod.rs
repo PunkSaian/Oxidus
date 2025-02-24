@@ -20,11 +20,7 @@ use sdl_renderer::{SdlRenderer, Textures};
 use styles::set_styles;
 
 use crate::{
-    hook::{detour::install_detour_from_symbol, vmt::install_vmt},
-    modules::esp::ESP,
-    sdk::interface::interfaces::Interfaces,
-    settings::Settings,
-    util::consts::{self, OXIDUS_LOGO_BMP_48},
+    config::{binds::run_binds, Config}, hook::{detour::install_detour_from_symbol, vmt::install_vmt}, modules::esp::ESP, sdk::interface::interfaces::Interfaces, util::consts::{self, OXIDUS_LOGO_BMP_48}
 };
 
 pub mod fov;
@@ -147,6 +143,7 @@ impl Overlay {
         self.context.io_mut().display_size = [window_width as f32, window_height as f32];
         self.context.io_mut().update_delta_time(delta);
 
+
         self.show();
 
         self.renderer.render(&mut self.context);
@@ -163,7 +160,7 @@ impl Overlay {
         if ui.is_key_pressed(Key::Insert) {
             self.visible = !self.visible;
             if !self.visible {
-                let settings = Settings::get();
+                let settings = Config::get();
                 let settings = settings.read().unwrap();
                 settings.save_config().unwrap();
             }
@@ -176,6 +173,9 @@ impl Overlay {
         mdbg!(interfaces.gui_surface.is_cursor_visible());
 
         unsafe { AIMBOT = ui.is_key_down(Key::LeftShift) };
+
+        run_binds(ui);
+
 
         if self.visible {
             menu::show(ui);

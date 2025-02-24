@@ -1,4 +1,4 @@
-use crate::{get_entry_mut, prelude::Interfaces, settings::Settings};
+use crate::{get_entry_mut, prelude::Interfaces, config::Config};
 
 pub fn show_fov(ui: &mut imgui::Ui) {
     if !Interfaces::get().engine.is_in_game() {
@@ -13,9 +13,9 @@ pub fn show_fov(ui: &mut imgui::Ui) {
         return;
     }
 
-    let settings = Settings::get();
+    let settings = Config::get();
     let mut settings = settings.write().unwrap();
-    let fov = get_entry_mut!(&mut settings.config, "aimbot", "fov" => F32);
+    let fov = get_entry_mut!(&mut settings.settings, "aimbot", "fov" => F32);
 
     let draw_list = ui.get_background_draw_list();
 
@@ -27,7 +27,7 @@ pub fn show_fov(ui: &mut imgui::Ui) {
 
     // Convert FOV to screen space radius
     let game_fov_rad = (game_fov * 0.5).to_radians();
-    let desired_fov_rad = (*fov * 0.5).to_radians();
+    let desired_fov_rad = (*fov).to_radians();
 
     // Calculate radius using perspective projection
     let radius_px = (window_size[0] * 0.5) * (desired_fov_rad.tan() / game_fov_rad.tan());

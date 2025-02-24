@@ -500,7 +500,8 @@ fn build_entries(entries: &[Entry]) -> Vec<proc_macro2::TokenStream> {
                         #key.to_string(),
                         Entry::Value(
                             EntryValue::#ty(#default),
-                            EntryValue::#ty(#default)
+                            EntryValue::#ty(#default),
+                            None
                         )
                     );
                 });
