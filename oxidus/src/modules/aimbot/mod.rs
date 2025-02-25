@@ -1,7 +1,6 @@
 use crate::{
     config::Config,
     get_setting, i,
-    math::Vector2,
     mdbg_angle, mdbg_point,
     prelude::Interfaces,
     sdk::{
@@ -15,15 +14,6 @@ use crate::{
 
 pub fn init() {}
 
-pub fn rotate_movement(yaw: f32, vec: &Vector2) -> Vector2 {
-    let alpha = yaw.to_radians();
-
-    [
-        vec.x * alpha.cos() - vec.y * alpha.sin(),
-        vec.y * alpha.cos() + vec.x * alpha.sin(),
-    ]
-    .into()
-}
 
 pub fn run(cmd: &mut UserCmd) -> bool {
     let mut config = Config::get();

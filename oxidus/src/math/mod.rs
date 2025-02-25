@@ -112,6 +112,11 @@ impl std::ops::Mul<f32> for Vector3 {
         self
     }
 }
+impl std::ops::MulAssign<f32> for Vector3 {
+    fn mul_assign(&mut self, rhs: f32) {
+        *self = *self * rhs;
+    }
+}
 
 impl std::ops::Add for Vector3 {
     type Output = Vector3;
@@ -141,11 +146,43 @@ impl std::ops::Sub for Vector3 {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct Vector2 {
     pub x: f32,
     pub y: f32,
 }
 
+impl Vector2 {
+    pub fn length(&self) -> f32 {
+        (self.x * self.x + self.y * self.y).sqrt()
+    }
+}
+
+impl std::ops::Mul<Vector2> for Vector2 {
+    type Output = Vector2;
+
+    fn mul(mut self, rhs: Vector2) -> Self::Output {
+        self.x *= rhs.x; 
+        self.y *= rhs.y;
+        self
+    }
+}
+
+impl std::ops::MulAssign<Vector2> for Vector2 {
+    fn mul_assign(&mut self, rhs: Vector2) {
+        *self = *self * rhs;
+    }
+}
+
+impl std::ops::Mul<f32> for Vector2 {
+    type Output = Vector2;
+
+    fn mul(mut self, rhs: f32) -> Self::Output {
+        self.x *= rhs;
+        self.y *= rhs;
+        self
+    }
+}
 impl From<[f32; 2]> for Vector2 {
     fn from(array: [f32; 2]) -> Self {
         Vector2 {

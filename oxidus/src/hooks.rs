@@ -3,13 +3,20 @@ use std::ptr;
 use macros::vmt_hook;
 
 use crate::{
-    config::Config, get_setting, hook::vmt::install_vmt, i, math::Vector2, modules::{
-        aimbot::{self, rotate_movement},
+    config::Config,
+    get_setting,
+    hook::vmt::install_vmt,
+    i,
+    math::Vector2,
+    modules::{
+        aimbot::{self},
         esp::ESP,
-    }, sdk::interface::{
+        movement::{self, rotate_movement},
+    },
+    sdk::interface::{
         client::{FrameStage, ViewSetup},
         interfaces::Interfaces,
-    }
+    },
 };
 
 use std::f32;
@@ -40,6 +47,8 @@ pub unsafe extern "C" fn create_move(
     }
     let org_cmd = *cmd;
     let overwrite_angels = !aimbot::run(cmd);
+
+    movement::run(cmd);
 
     #[allow(clippy::float_cmp)]
     if org_cmd.viewangles.yaw != cmd.viewangles.yaw {

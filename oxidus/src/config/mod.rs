@@ -59,7 +59,7 @@ impl Config {
     pub fn get_default_entries() -> HashMap<String, Entry> {
         settings! {
             aimbot {
-                enabled: Bool, false,
+                enabled: Bool, false
                 fov: F32, 30.0
             },
             esp {
@@ -67,6 +67,10 @@ impl Config {
             }
             visual {
                 fov: F32, 100.0
+            },
+            movement {
+                bhop: Bool, true
+                momentum_compensation: Bool, false 
             }
         }
     }

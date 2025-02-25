@@ -108,7 +108,7 @@ impl Interfaces {
 #[macro_export]
 macro_rules! i {
     () => {
-        Interfaces::get()
+        $crate::sdk::interface::interfaces::Interfaces::get()
     };
 }
 

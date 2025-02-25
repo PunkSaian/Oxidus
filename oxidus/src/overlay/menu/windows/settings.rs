@@ -102,5 +102,9 @@ pub fn show_settings(ui: &mut imgui::Ui) {
                 ui.input_float("visual fov", fov).step(1.0).build();
                 *fov = fov.clamp(1.0, 180.0);
             }
+            let momentum_compensation = get_setting_mut!(&mut config.settings, "movement", "momentum_compensation" => Bool);
+            ui.checkbox("momentum compensation", momentum_compensation);
+            let bhop = get_setting_mut!(&mut config.settings, "movement", "bhop" => Bool);
+            ui.checkbox("bhop", bhop);
         });
 }
