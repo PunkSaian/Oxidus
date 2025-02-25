@@ -4,6 +4,8 @@ use macros::vmt;
 
 use crate::math::Angles;
 
+use super::client::ViewSetup;
+
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct ClientMode;
@@ -82,6 +84,8 @@ impl Buttons {
 
 #[vmt]
 pub struct ClientMode {
+    #[offset(17)]
+    pub override_view: extern "C" fn(view_setup: &mut ViewSetup) -> bool,
     #[offset(22)]
     pub create_move: extern "C" fn(input_sample_time: f32, cmd: &mut UserCmd) -> bool,
 }

@@ -1,6 +1,6 @@
 use macros::{tf2_struct, vmt};
 
-use crate::sdk::{bindings::BaseEntity, networkable::Networkable};
+use crate::sdk::{bindings::BaseEntity,models::networkable::Networkable};
 
 #[repr(C)]
 #[derive(Debug)]

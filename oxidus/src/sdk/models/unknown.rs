@@ -1,6 +1,7 @@
 use macros::vmt;
 
-use super::bindings::BaseEntity;
+use crate::sdk::bindings::BaseEntity;
+
 
 #[vmt]
 pub struct Unknown {

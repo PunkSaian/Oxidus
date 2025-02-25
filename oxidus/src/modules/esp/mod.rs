@@ -2,10 +2,7 @@ use core::f32;
 use std::{cmp::Ordering, sync::RwLock};
 
 use crate::sdk::{
-    bindings::{BaseEntity, TFPlayer, TFWeaponBase},
-    class_id::ClassId,
-    interface::interfaces::Interfaces,
-    vmts::Team,
+    bindings::{BaseEntity, TFPlayer, TFWeaponBase}, class_id::ClassId, interface::interfaces::Interfaces, models::base_entity::Team,
 };
 
 pub static ESP: RwLock<Option<Esp>> = const { RwLock::new(None) };

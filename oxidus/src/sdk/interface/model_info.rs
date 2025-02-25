@@ -3,7 +3,7 @@ use std::ops::Deref;
 use macros::vmt;
 
 use crate::{
-    sdk::vmts::{BoneMatrix, Model},
+    sdk::models::{bone_matrix::BoneMatrix, model::Model},
     Vector3,
 };
 

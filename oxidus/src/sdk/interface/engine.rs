@@ -3,7 +3,7 @@ use std::mem::MaybeUninit;
 use imgui::sys::cty::c_char;
 use macros::vmt;
 
-use crate::sdk::bindings::{BaseEntity, TFPlayer};
+use crate::{i, sdk::bindings::{BaseEntity, TFPlayer}};
 
 use super::interfaces::Interfaces;
 
@@ -87,7 +87,7 @@ impl Engine {
         }
     }
     pub fn get_local_player(&self) -> Option<&'static TFPlayer> {
-        let ent = Interfaces::get()
+        let ent = i!() 
             .entity_list
             .get_client_entity_from_index(self.get_loacl_player_entindex())?;
 

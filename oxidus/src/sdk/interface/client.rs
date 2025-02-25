@@ -2,7 +2,7 @@ use std::mem::MaybeUninit;
 
 use macros::vmt;
 
-use crate::{prelude::*, sdk::client_class::UnparsedClientClass};
+use crate::{i, prelude::*, sdk::models::client_class::UnparsedClientClass};
 
 use super::interfaces::Interfaces;
 
@@ -85,7 +85,7 @@ impl Client {
 
         let mut w2s: VMatrix = unsafe { MaybeUninit::zeroed().assume_init() };
         let mut w2px: VMatrix = unsafe { MaybeUninit::zeroed().assume_init() };
-        Interfaces::get().engine_render_view.get_marices_for_view(
+        i!().engine_render_view.get_marices_for_view(
             &view_setup,
             &mut w2v,
             &mut v2pr,

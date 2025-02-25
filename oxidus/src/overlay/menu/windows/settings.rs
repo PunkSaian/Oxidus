@@ -97,5 +97,9 @@ pub fn show_settings(ui: &mut imgui::Ui) {
             ui.checkbox("enabled", enabled);
             let fov = get_setting_mut!(&mut config.settings, "aimbot", "fov" => F32);
             ui.slider_config("fov", 0.0, 180.0).build(fov);
+            {
+            let fov = get_setting_mut!(&mut config.settings, "visual", "fov" => F32);
+            ui.slider_config("visual fov", 0.0, 180.0).build(fov);
+            }
         });
 }

@@ -104,3 +104,11 @@ impl Interfaces {
         INTERFACES.get().expect("Interfaces not initialized")
     }
 }
+
+#[macro_export]
+macro_rules! i {
+    () => {
+        Interfaces::get()
+    };
+}
+

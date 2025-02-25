@@ -103,6 +103,9 @@ impl Config {
             esp {
                 enabled: Bool, false
             }
+            visual {
+                fov: F32, 100.0
+            }
         }
     }
     pub fn init() {

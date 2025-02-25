@@ -1,4 +1,4 @@
-use crate::sdk::client_class::{
+use crate::sdk::models::client_class::{
     ClientClass, Netvar, NetvarStruct, NetvarType, RecvTable, SendPropType,
 };
 use std::collections::HashSet;

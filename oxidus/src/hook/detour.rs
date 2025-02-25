@@ -185,7 +185,7 @@ impl DetourHook {
 impl Drop for DetourHook {
     fn drop(&mut self) {
         if let Err(e) = self.restore() {
-            warn!("Hook already restored when dropping: {e}");
+            return;
         }
 
         if let Some(proxy_ptr) = self.proxy {
