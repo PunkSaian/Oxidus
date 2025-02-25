@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use imgui::{Id, Key, WindowFlags};
 
-use crate::{config::{binds::Bind, diff_settings, Config}, mdbg};
+use crate::config::{binds::Bind, diff_settings, Config};
 
 #[allow(static_mut_refs, clippy::too_many_lines)]
 pub fn show_binds(ui: &mut imgui::Ui) {
@@ -80,13 +80,11 @@ pub fn show_binds(ui: &mut imgui::Ui) {
             WindowFlags::NO_DOCKING
                 | WindowFlags::NO_COLLAPSE
                 | WindowFlags::ALWAYS_AUTO_RESIZE
-                | WindowFlags::NO_RESIZE,
         )
         .build(|| {
-            if let Some(_) = ui.begin_table("binds", 4) {
+            if let Some(table) = ui.begin_table("binds", 3) {
                 ui.table_setup_column("Name");
                 ui.table_setup_column("Trigger");
-                ui.table_setup_column("Settings");
                 ui.table_setup_column("Options");
                 ui.table_headers_row();
 
@@ -103,30 +101,43 @@ pub fn show_binds(ui: &mut imgui::Ui) {
                             .join(" + "),
                     );
                     ui.table_next_column();
-                    let commands_string = bind
-                        .diff
-                        .iter()
-                        .map(|x| format!("{} = {:?}", x.0.join("->"), x.1))
-                        .collect::<Vec<String>>()
-                        .join("\n");
-                    ui.text(&commands_string);
-                    ui.table_next_column();
                     ui.disabled(config.binding.is_some(), || {
-                        if ui.button(format!("Edit###{i}")) {
+                        if ui.button(format!("Edit##{i}")) {
                             config.binding = Some((i, config.settings.clone()));
                             bind.apply(&mut config);
                         }
                         ui.same_line();
-                        if ui.button(format!("Delete###{i}")) {
-                            mdbg!("delete");
-                            dbg!("delete");
+                        if ui.button(format!("Delete##{i}")) {
                             config.binds.binds.remove(i);
                         }
                     });
                 }
+                table.end();
             }
 
             if let Some(binding) = config.binding.clone() {
+                if let Some(table) = ui.begin_table("settings", 3){
+                    ui.table_setup_column("Path");
+                    ui.table_setup_column("Value");
+                    ui.table_setup_column("Options");
+                    ui.table_next_row();
+                    for (i, (path, value)) in config.binds.binds[binding.0]
+                        .diff
+                        .clone()
+                        .iter()
+                        .enumerate()
+                    {
+                        ui.table_next_column();
+                        ui.text(path.join("->"));
+                        ui.table_next_column();
+                        ui.text(format!("{value:?}"));
+                        ui.table_next_column();
+                        if ui.button(format!("Delete##{i}")) {
+                            config.binds.binds[binding.0].diff.remove(path);
+                        }
+                    }
+                    table.end();
+                }
                 if ui.button("Save") {
                     let old_settings = config.binding.as_ref().unwrap().clone().1;
 
