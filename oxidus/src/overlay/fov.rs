@@ -1,6 +1,6 @@
 use core::f32;
 
-use crate::{config::Config, get_setting_mut, i, prelude::Interfaces};
+use crate::{config::Config, get_setting, i, prelude::Interfaces};
 
 const CUTOFF: i32 = 3000;
 
@@ -18,9 +18,9 @@ pub fn show_fov(ui: &mut imgui::Ui) {
     }
 
     let mut config = Config::get();
-    let fov = *get_setting_mut!(&mut config.settings, "aimbot", "fov" => F32);
+    let fov = get_setting!(&mut config.settings, "aimbot", "fov" => F32);
 
-    let visual_fov = *get_setting_mut!(&mut config.settings, "visual", "fov" => F32);
+    let visual_fov = get_setting!(&mut config.settings, "visual", "fov" => F32);
 
     if fov > visual_fov {
         return;

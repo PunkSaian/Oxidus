@@ -3,7 +3,7 @@ use std::ptr;
 use macros::vmt_hook;
 
 use crate::{
-    config::Config, get_setting, get_setting_mut, hook::vmt::install_vmt, i, math::Vector2, modules::{
+    config::Config, get_setting, hook::vmt::install_vmt, i, math::Vector2, modules::{
         aimbot::{self, rotate_movement},
         esp::ESP,
     }, sdk::interface::{
@@ -58,7 +58,7 @@ pub unsafe extern "C" fn create_move(
 pub unsafe extern "C" fn override_view(this: *const (), view_setup: &mut ViewSetup) -> bool {
     let mut config = Config::get();
     let fov = get_setting!(&mut config.settings, "visual", "fov" => F32);
-    view_setup.fov = *fov;
+    view_setup.fov = fov;
     original_function(this, view_setup)
 }
 

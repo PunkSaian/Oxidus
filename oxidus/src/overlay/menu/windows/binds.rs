@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use imgui::{Id, Key, WindowFlags};
 
-use crate::config::{binds::Bind, diff_settings, Config};
+use crate::{config::{binds::Bind, diff_settings, Config}, mdbg};
 
 #[allow(static_mut_refs, clippy::too_many_lines)]
 pub fn show_binds(ui: &mut imgui::Ui) {
@@ -116,22 +116,33 @@ pub fn show_binds(ui: &mut imgui::Ui) {
                             config.binding = Some((i, config.settings.clone()));
                             bind.apply(&mut config);
                         }
-                    });
-                    if let Some(binding) = config.binding.clone() {
                         ui.same_line();
-                        if binding.0 == i && ui.button("Save") {
-                            let old_settings = config.binding.as_ref().unwrap().clone().1;
-
-                            let diff = diff_settings(&old_settings, &config.settings);
-                            //compare new settings state with saved one and save if different
-                            config.settings = old_settings;
-                            config.binding = None;
-                            config.binds.binds[i].diff = diff;
+                        if ui.button(format!("Delete###{i}")) {
+                            mdbg!("delete");
+                            dbg!("delete");
+                            config.binds.binds.remove(i);
                         }
-                    }
+                    });
                 }
             }
 
+            if let Some(binding) = config.binding.clone() {
+                if ui.button("Save") {
+                    let old_settings = config.binding.as_ref().unwrap().clone().1;
+
+                    let diff = diff_settings(&old_settings, &config.settings);
+                    //compare new settings state with saved one and save if different
+                    config.settings = old_settings;
+                    config.binding = None;
+                    config.binds.binds[binding.0].diff = diff;
+                }
+                ui.same_line();
+                if ui.button("Cancel") {
+                    let old_settings = config.binding.as_ref().unwrap().clone().1;
+                    config.settings = old_settings;
+                    config.binding = None;
+                }
+            }
             if ui.button("New") {
                 open_popup();
             }

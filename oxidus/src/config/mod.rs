@@ -312,9 +312,9 @@ macro_rules! get_setting {
         };
         if let Some(overwrite) = overwrite{
             let $crate::config::entry::EntryValue::$variant(ref mut value) = overwrite else { unreachable!() };
-            value
+            *value
         } else {
-            value
+            *value
         }
     }};
 
@@ -323,7 +323,7 @@ macro_rules! get_setting {
         let $crate::config::entry::Entry::Group(ref mut next_map) = entry else {
             panic!("Invalid entry: expected Group at key '{}'", $key);
         };
-        get_setting_mut!(next_map, $($rest)*)
+        get_setting!(next_map, $($rest)*)
     }};
 
 }
