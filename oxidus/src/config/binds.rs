@@ -93,8 +93,7 @@ impl Bind {
 }
 
 pub fn run_binds(ui: &imgui::Ui) {
-    let config = Config::get();
-    let mut config = config.write().unwrap();
+    let mut config = Config::get();
     for (i, bind) in config.binds.binds.clone().iter().enumerate() {
         let triggered = bind.keys.iter().all(|x| ui.is_key_down(*x));
         if triggered == bind.triggered {

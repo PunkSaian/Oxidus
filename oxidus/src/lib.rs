@@ -111,9 +111,8 @@ pub fn cleanup() -> OxidusResult {
 
     unload_overlay();
 
-    let settings = Config::get();
-    let settings = settings.read().unwrap();
-    settings.save_config().unwrap();
+    let config = Config::get();
+    config.save().unwrap();
 
     Ok(())
 }

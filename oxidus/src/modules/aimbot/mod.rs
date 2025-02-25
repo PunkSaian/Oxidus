@@ -26,8 +26,7 @@ pub fn rotate_movement(yaw: f32, vec: &Vector2) -> Vector2 {
 }
 
 pub fn run(cmd: &mut UserCmd) -> bool {
-    let config = Config::get();
-    let mut config = config.write().unwrap();
+    let mut config = Config::get();
     if !*get_setting_mut!(&mut config.settings, "aimbot", "enabled" => Bool) {
         return false;
     }

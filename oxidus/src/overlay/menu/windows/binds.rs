@@ -9,8 +9,7 @@ pub fn show_binds(ui: &mut imgui::Ui) {
     pub static mut WAITING_FOR_KEYS: bool = false;
     pub static mut PRESED_KEYS: Vec<Key> = Vec::new();
     pub static mut NAME: String = String::new();
-    let config = Config::get();
-    let mut config = config.write().unwrap();
+    let mut config = Config::get();
     ui.modal_popup_config("new bind")
         .resizable(false)
         .movable(false)
@@ -51,7 +50,6 @@ pub fn show_binds(ui: &mut imgui::Ui) {
                 WAITING_FOR_KEYS = true;
             }
 
-            //----
             ui.disabled(PRESED_KEYS.is_empty() || NAME.is_empty(), || {
                 if ui.button("create") {
                     config.binds.binds.push(Bind {

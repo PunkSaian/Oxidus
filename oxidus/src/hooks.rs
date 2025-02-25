@@ -56,8 +56,7 @@ pub unsafe extern "C" fn create_move(
 
 #[vmt_hook]
 pub unsafe extern "C" fn override_view(this: *const (), view_setup: &mut ViewSetup) -> bool {
-    let config = Config::get();
-    let mut config = config.write().unwrap();
+    let mut config = Config::get();
     let fov = get_setting!(&mut config.settings, "visual", "fov" => F32);
     view_setup.fov = *fov;
     original_function(this, view_setup)

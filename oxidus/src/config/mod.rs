@@ -3,7 +3,7 @@ use std::{
     fs,
     mem::transmute,
     path::{Path, PathBuf},
-    sync::{Arc, RwLock},
+    sync::{OnceLock, RwLock, RwLockWriteGuard},
 };
 
 use binds::Binds;
@@ -19,8 +19,7 @@ pub mod binds;
 pub mod entry;
 pub mod metadata;
 
-static mut SETTINGS: Option<Arc<RwLock<Config>>> = None;
-
+static CONFIG: OnceLock<RwLock<Config>> = OnceLock::new();
 
 pub fn diff_settings(
     old: &HashMap<String, Entry>,
@@ -91,21 +90,20 @@ impl Config {
         };
 
         if !settings.meta.current_config.exists() {
-            settings.save_config().unwrap();
+            settings.save().unwrap();
         }
 
         settings.load_config().unwrap();
 
-        unsafe {
-            SETTINGS = Some(Arc::new(RwLock::new(settings)));
-        }
+        CONFIG.set(RwLock::new(settings)).unwrap();
     }
 
     #[allow(static_mut_refs)]
-    pub fn get() -> Arc<RwLock<Config>> {
-        unsafe { SETTINGS.clone().unwrap() }
+    pub fn get() -> RwLockWriteGuard<'static, Config> {
+        CONFIG.get().unwrap().write().unwrap()
     }
-    pub fn save_config(&self) -> OxidusResult<()> {
+
+    pub fn save(&self) -> OxidusResult<()> {
         let table = self.to_toml_table()?;
         let toml = toml::to_string_pretty(&table)?;
         fs::write(&self.meta.current_config, toml)?;
@@ -168,7 +166,7 @@ impl Config {
     }
 
     pub fn switch_config(&mut self, file: &PathBuf) -> OxidusResult<()> {
-        self.save_config()?;
+        self.save()?;
         self.meta.current_config.clone_from(file);
         self.load_config()?;
         self.meta.save()?;
@@ -183,13 +181,13 @@ impl Config {
     pub fn create_new(&mut self, file_name: &str, copy: bool) -> OxidusResult<()> {
         let file_name_with_ext = file_name.to_owned() + ".toml";
         let file = Self::configs_dir().join(file_name_with_ext);
-        self.save_config()?;
+        self.save()?;
         self.meta.current_config.clone_from(&file);
         if !copy {
             self.settings = Self::get_default_entries();
         }
         self.meta.save()?;
-        self.save_config()?;
+        self.save()?;
         Ok(())
     }
 
@@ -268,7 +266,6 @@ fn value_from_toml(value: &Value) -> EntryValue {
     }
 }
 
-
 pub fn init_settings() {
     Config::init();
 }
@@ -313,7 +310,7 @@ macro_rules! get_setting {
                 $key
             );
         };
-        *if let Some(overwrite) = overwrite{
+        if let Some(overwrite) = overwrite{
             let $crate::config::entry::EntryValue::$variant(ref mut value) = overwrite else { unreachable!() };
             value
         } else {

@@ -6,8 +6,7 @@ use crate::{config::Config, get_setting_mut, oxidus_cleanup};
 
 #[allow(static_mut_refs)]
 pub fn show_settings(ui: &mut imgui::Ui) {
-    let config = Config::get();
-    let mut config = config.write().unwrap();
+    let mut config = Config::get();
     ui.modal_popup_config("new config")
         .resizable(false)
         .movable(false)

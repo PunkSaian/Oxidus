@@ -17,8 +17,7 @@ pub fn show_fov(ui: &mut imgui::Ui) {
         return;
     }
 
-    let config = Config::get();
-    let mut config = config.write().unwrap();
+    let mut config = Config::get();
     let fov = *get_setting_mut!(&mut config.settings, "aimbot", "fov" => F32);
 
     let visual_fov = *get_setting_mut!(&mut config.settings, "visual", "fov" => F32);

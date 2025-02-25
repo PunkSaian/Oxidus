@@ -20,7 +20,12 @@ use sdl_renderer::{SdlRenderer, Textures};
 use styles::set_styles;
 
 use crate::{
-    config::{binds::run_binds, Config}, hook::{detour::install_detour_from_symbol, vmt::install_vmt}, i, modules::esp::ESP, sdk::interface::interfaces::Interfaces, util::consts::{self, OXIDUS_LOGO_BMP_48}
+    config::{binds::run_binds, Config},
+    hook::{detour::install_detour_from_symbol, vmt::install_vmt},
+    i,
+    modules::esp::ESP,
+    sdk::interface::interfaces::Interfaces,
+    util::consts::{self, OXIDUS_LOGO_BMP_48},
 };
 
 pub mod fov;
@@ -157,9 +162,8 @@ impl Overlay {
         if ui.is_key_pressed(Key::Insert) {
             self.visible = !self.visible;
             if !self.visible {
-                let settings = Config::get();
-                let settings = settings.read().unwrap();
-                settings.save_config().unwrap();
+                let config = Config::get();
+                config.save().unwrap();
             }
             i!().gui_surface.set_cursor_always_visible(self.visible);
             i!().gui_surface.apply_changes();
