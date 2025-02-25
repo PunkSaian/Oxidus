@@ -67,6 +67,7 @@ impl Config {
             }
             visual {
                 fov: F32, 100.0
+                third_person: Bool, false
             },
             movement {
                 bhop: Bool, true

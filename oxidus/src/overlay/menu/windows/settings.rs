@@ -3,8 +3,7 @@ use std::thread;
 use imgui::{Id, WindowFlags};
 
 use crate::{config::Config, get_setting_mut, oxidus_cleanup};
-
-#[allow(static_mut_refs)]
+#[allow(static_mut_refs, clippy::too_many_lines)]
 pub fn show_settings(ui: &mut imgui::Ui) {
     let mut config = Config::get();
     ui.modal_popup_config("new config")
@@ -101,12 +100,17 @@ pub fn show_settings(ui: &mut imgui::Ui) {
                 let fov = get_setting_mut!(&mut config.settings, "visual", "fov" => F32);
                 ui.input_float("visual fov", fov).step(1.0).build();
                 *fov = fov.clamp(1.0, 180.0);
+                let third_person =
+                    get_setting_mut!(&mut config.settings, "visual", "third_person" => Bool);
+                ui.checkbox("third person", third_person);
             }
-            let momentum_compensation = get_setting_mut!(&mut config.settings, "movement", "momentum_compensation" => Bool);
+            let momentum_compensation =
+                get_setting_mut!(&mut config.settings, "movement", "momentum_compensation" => Bool);
             ui.checkbox("momentum compensation", momentum_compensation);
             let bhop = get_setting_mut!(&mut config.settings, "movement", "bhop" => Bool);
             ui.checkbox("bhop", bhop);
-            let auto_strafe = get_setting_mut!(&mut config.settings, "movement", "auto_strafe" => Bool);
+            let auto_strafe =
+                get_setting_mut!(&mut config.settings, "movement", "auto_strafe" => Bool);
             ui.checkbox("auto strafe", auto_strafe);
         });
 }
