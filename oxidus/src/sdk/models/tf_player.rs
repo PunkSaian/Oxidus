@@ -70,6 +70,24 @@ pub enum Flag {
     UnblockableByPlayer,
 }
 
+#[repr(u32)]
+#[derive(Debug, Clone, Copy)]
+pub enum PlayerClass {
+    Undefined = 0,
+    Scout,
+    Sniper,
+    Soldier,
+    Demoman,
+    Medic,
+    Hwguy,
+    Pyro,
+    Spy,
+    Engineer,
+    Civilian,
+    Random,
+    Observer,
+}
+
 #[vmt]
 pub struct TFPlayer {
     #[offset(292)]
@@ -89,6 +107,9 @@ impl TFPlayer {
     }
     pub fn get_flags(&mut self) -> &mut Flags {
         unsafe { &mut *(&raw mut self.m_fFlags).cast::<Flags>() }
+    }
+    pub fn get_class(&mut self) -> &mut PlayerClass {
+        unsafe { &mut *(&raw mut self.m_PlayerClass.m_iClass).cast::<PlayerClass>() }
     }
 }
 

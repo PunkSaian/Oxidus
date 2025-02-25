@@ -50,7 +50,8 @@ pub fn run(cmd: &mut UserCmd) -> bool {
 
         let hitboxes = player.as_renderable().get_hitboxes();
 
-        for i in 0..=17 {
+        //INFO: temp till peropper hitbox choing
+        for i in 1..=17 {
             let hitbox = hitboxes.get_hitbox(i);
 
             let bone = bones[hitbox.bone as usize];

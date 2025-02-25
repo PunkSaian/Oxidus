@@ -7,7 +7,7 @@ use crate::{
     sdk::{
         bindings::{LocalPlayerExclusive, TFPlayer},
         interface::client_mode::{ButtonFlags, UserCmd},
-        models::tf_player::Flag,
+        models::tf_player::{Flag, PlayerClass},
     },
 };
 
@@ -24,9 +24,33 @@ pub fn rotate_movement(yaw: f32, vec: Vector2) -> Vector2 {
 }
 
 pub fn run(cmd: &mut UserCmd) {
-    static mut DOUBLE_JUMPED: bool = false;
-    bhop(cmd);
-    auto_strafe(cmd);
+    static mut JUMPED_LAST: bool = false;
+    static mut DOUBLLE_JUMPED: bool = false;
+    let Some(local_player) = i!().engine.get_local_player() else {
+        return;
+    };
+
+    if !local_player.is_alive() || local_player.get_flags().get(Flag::Swim) {
+        return;
+    }
+
+    let jumping = cmd.buttons.get(ButtonFlags::InJump);
+    unsafe {
+        if local_player.get_flags().get(Flag::Onground) {
+            DOUBLLE_JUMPED = false;
+        } else if matches!(*local_player.get_class(), PlayerClass::Scout)
+            && jumping
+            && !DOUBLLE_JUMPED
+            && !JUMPED_LAST
+        {
+            DOUBLLE_JUMPED = true;
+        } else {
+            bhop(cmd);
+            auto_strafe(cmd);
+        }
+        JUMPED_LAST = jumping;
+    }
+
     momentum_compensation(cmd);
 }
 
@@ -40,9 +64,6 @@ pub fn momentum_compensation(cmd: &mut UserCmd) {
         return;
     };
 
-    if !local_player.is_alive() {
-        return;
-    }
     let local_data =
         unsafe { &*ptr::from_ref::<TFPlayer>(local_player).cast::<LocalPlayerExclusive>() };
     let vel = Vector3::from(local_data.m_vecVelocity);
@@ -67,9 +88,6 @@ pub fn bhop(cmd: &mut UserCmd) {
         return;
     };
 
-    if !local_player.is_alive() {
-        return;
-    }
     let on_ground = local_player.get_flags().get(Flag::Onground);
     cmd.buttons.set(
         ButtonFlags::InJump,

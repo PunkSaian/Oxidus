@@ -1,7 +1,7 @@
 [package]
 name = "oxidus"
 edition = "2021"
-version = "1.0.0"
+version = "1.1.0"
 authors = ["Divine Oxy"]
 description = "An internal tf2 cheat"
 license = "MIT+"
