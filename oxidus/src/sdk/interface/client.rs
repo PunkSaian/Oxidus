@@ -4,8 +4,6 @@ use macros::vmt;
 
 use crate::{i, prelude::*, sdk::models::client_class::UnparsedClientClass};
 
-use super::interfaces::Interfaces;
-
 pub struct Client;
 
 #[repr(C)]

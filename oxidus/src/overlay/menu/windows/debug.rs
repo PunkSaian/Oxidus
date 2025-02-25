@@ -4,7 +4,6 @@ use std::sync::{Mutex, OnceLock};
 
 use crate::i;
 use crate::math::{Angles, Vector3};
-use crate::sdk::interface::interfaces::Interfaces;
 
 // Debug state structure
 pub struct DebugState {

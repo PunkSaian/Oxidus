@@ -24,7 +24,6 @@ use crate::{
     hook::{detour::install_detour_from_symbol, vmt::install_vmt},
     i,
     modules::esp::ESP,
-    sdk::interface::interfaces::Interfaces,
     util::consts::{self, OXIDUS_LOGO_BMP_48},
 };
 

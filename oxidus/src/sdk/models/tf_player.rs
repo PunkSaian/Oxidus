@@ -88,7 +88,7 @@ impl TFPlayer {
         unsafe { Some(&*self._get_weapon()) }
     }
     pub fn get_flags(&mut self) -> &mut Flags {
-        unsafe { transmute::<&mut i32, &mut Flags>(&mut self.m_fFlags) }
+        unsafe { &mut *(&raw mut self.m_fFlags).cast::<Flags>() }
     }
 }
 

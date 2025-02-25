@@ -2,7 +2,7 @@ use std::mem::MaybeUninit;
 
 use macros::vmt;
 
-use crate::{i, prelude::Interfaces, sdk::interface::model_info::HitboxSet};
+use crate::{i, sdk::interface::model_info::HitboxSet};
 
 use super::{bone_matrix::BoneMatrix, model::Model};
 

@@ -1,10 +1,9 @@
-use std::{mem::transmute, ptr};
+use std::ptr;
 
 use crate::{
     config::Config,
     get_setting, i,
     math::{Vector2, Vector3},
-    mdbg,
     sdk::{
         bindings::{LocalPlayerExclusive, TFPlayer},
         interface::client_mode::{ButtonFlags, UserCmd},
@@ -14,7 +13,7 @@ use crate::{
 
 pub fn init() {}
 
-pub fn rotate_movement(yaw: f32, vec: &Vector2) -> Vector2 {
+pub fn rotate_movement(yaw: f32, vec: Vector2) -> Vector2 {
     let alpha = yaw.to_radians();
 
     [
@@ -47,7 +46,7 @@ pub fn momentum_compensation(cmd: &mut UserCmd) {
     let local_data =
         unsafe { &*ptr::from_ref::<TFPlayer>(local_player).cast::<LocalPlayerExclusive>() };
     let vel = Vector3::from(local_data.m_vecVelocity);
-    let rotate_vel = rotate_movement(180.0 - cmd.viewangles.yaw, &Vector2::from([vel.x, vel.y]));
+    let rotate_vel = rotate_movement(180.0 - cmd.viewangles.yaw, Vector2::from([vel.x, vel.y]));
     let friction = local_data.m_flFriction;
     let drop = rotate_vel * friction * i!().global_vars.frametime;
 
@@ -101,7 +100,6 @@ pub fn auto_strafe(cmd: &mut UserCmd) {
         return;
     }
 
-
     let local_data =
         unsafe { &*ptr::from_ref::<TFPlayer>(local_player).cast::<LocalPlayerExclusive>() };
 
@@ -109,7 +107,6 @@ pub fn auto_strafe(cmd: &mut UserCmd) {
     let speed = velocity.len_2d();
 
     let air_accelerate = i!().engine_cvar.get_cvar("sv_airaccelerate").float_value;
-
 
     let term = WISH_SPEED / air_accelerate / SPEED_VAR * 100.0 / speed;
 

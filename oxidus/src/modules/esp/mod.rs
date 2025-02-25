@@ -6,7 +6,6 @@ use crate::{
     sdk::{
         bindings::{BaseEntity, TFPlayer, TFWeaponBase},
         class_id::ClassId,
-        interface::interfaces::Interfaces,
         models::base_entity::Team,
     },
 };

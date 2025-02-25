@@ -2,7 +2,6 @@ use crate::{
     config::Config,
     get_setting, i,
     mdbg_angle, mdbg_point,
-    prelude::Interfaces,
     sdk::{
         class_id::ClassId,
         interface::{

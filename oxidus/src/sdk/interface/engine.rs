@@ -5,8 +5,6 @@ use macros::vmt;
 
 use crate::{i, sdk::bindings::{BaseEntity, TFPlayer}};
 
-use super::interfaces::Interfaces;
-
 pub struct Engine;
 
 const MAX_PLAYER_NAME_LENGTH: usize = 32;

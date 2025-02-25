@@ -13,10 +13,7 @@ use crate::{
         esp::ESP,
         movement::{self, rotate_movement},
     },
-    sdk::interface::{
-        client::{FrameStage, ViewSetup},
-        interfaces::Interfaces,
-    },
+    sdk::interface::client::{FrameStage, ViewSetup},
 };
 
 use std::f32;
@@ -54,7 +51,7 @@ pub unsafe extern "C" fn create_move(
     if org_cmd.viewangles.yaw != cmd.viewangles.yaw {
         let Vector2 { x, y } = rotate_movement(
             cmd.viewangles.yaw - org_cmd.viewangles.yaw,
-            &[cmd.forwardmove, cmd.sidemove].into(),
+            [cmd.forwardmove, cmd.sidemove].into(),
         );
         cmd.forwardmove = x;
         cmd.sidemove = y;

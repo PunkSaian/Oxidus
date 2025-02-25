@@ -153,7 +153,7 @@ pub struct Vector2 {
 }
 
 impl Vector2 {
-    pub fn length(&self) -> f32 {
+    pub fn length(self) -> f32 {
         (self.x * self.x + self.y * self.y).sqrt()
     }
 }

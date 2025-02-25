@@ -1,6 +1,6 @@
 use core::f32;
 
-use crate::{config::Config, get_setting, i, prelude::Interfaces};
+use crate::{config::Config, get_setting, i};
 
 const CUTOFF: i32 = 3000;
 
