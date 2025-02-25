@@ -76,11 +76,7 @@ pub fn show_binds(ui: &mut imgui::Ui) {
     };
     #[allow(clippy::redundant_pattern_matching)]
     ui.window("Binds")
-        .flags(
-            WindowFlags::NO_DOCKING
-                | WindowFlags::NO_COLLAPSE
-                | WindowFlags::ALWAYS_AUTO_RESIZE
-        )
+        .flags(WindowFlags::NO_DOCKING | WindowFlags::NO_COLLAPSE | WindowFlags::ALWAYS_AUTO_RESIZE)
         .build(|| {
             if let Some(table) = ui.begin_table("binds", 3) {
                 ui.table_setup_column("Name");
@@ -116,7 +112,7 @@ pub fn show_binds(ui: &mut imgui::Ui) {
             }
 
             if let Some(binding) = config.binding.clone() {
-                if let Some(table) = ui.begin_table("settings", 3){
+                if let Some(table) = ui.begin_table("settings", 3) {
                     ui.table_setup_column("Path");
                     ui.table_setup_column("Value");
                     ui.table_setup_column("Options");
