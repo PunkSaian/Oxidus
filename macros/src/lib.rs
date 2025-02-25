@@ -96,7 +96,9 @@ pub fn vmt(_: TokenStream, item: TokenStream) -> TokenStream {
 
             fields_with_offsets
         }
-        syn::Fields::Unnamed(_) => panic!("Unnamed fields are not supported"),
+        syn::Fields::Unnamed(unnamed) => {
+            panic!("Unnamed fields are not supported")
+        },
         syn::Fields::Unit => {
             vec![]
         }

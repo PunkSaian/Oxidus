@@ -106,5 +106,7 @@ pub fn show_settings(ui: &mut imgui::Ui) {
             ui.checkbox("momentum compensation", momentum_compensation);
             let bhop = get_setting_mut!(&mut config.settings, "movement", "bhop" => Bool);
             ui.checkbox("bhop", bhop);
+            let auto_strafe = get_setting_mut!(&mut config.settings, "movement", "auto_strafe" => Bool);
+            ui.checkbox("auto strafe", auto_strafe);
         });
 }

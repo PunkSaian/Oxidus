@@ -71,6 +71,7 @@ impl Config {
             movement {
                 bhop: Bool, true
                 momentum_compensation: Bool, false 
+                auto_strafe: Bool, false 
             }
         }
     }

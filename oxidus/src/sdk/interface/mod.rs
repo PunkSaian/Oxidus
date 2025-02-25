@@ -9,5 +9,6 @@ pub mod global_vars;
 pub mod gui_surface;
 pub mod engine_trace;
 pub mod model_info;
+pub mod engine_cvar;
 
 pub mod interfaces;

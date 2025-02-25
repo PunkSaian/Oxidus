@@ -4,8 +4,8 @@ use crate::{sdk::module_names, util::create_interface};
 
 use super::{
     client::Client, client_entity_list::ClientEntityList, client_mode::ClientMode, engine::Engine,
-    engine_render_view::EngineRenderView, engine_trace::EngineTrace, global_vars::GlobalVars,
-    gui_surface::GuiSurface, interface_names, model_info::ModelInfo, 
+    engine_cvar::CVar, engine_render_view::EngineRenderView, engine_trace::EngineTrace,
+    global_vars::GlobalVars, gui_surface::GuiSurface, interface_names, model_info::ModelInfo,
 };
 
 pub struct Interfaces {
@@ -18,6 +18,7 @@ pub struct Interfaces {
     pub global_vars: &'static GlobalVars,
     pub model_info: &'static ModelInfo,
     pub engine_trace: &'static EngineTrace,
+    pub engine_cvar: &'static CVar,
 }
 
 unsafe impl Sync for Interfaces {}
@@ -68,6 +69,11 @@ impl Interfaces {
                     interface_names::ENGINE_TRACE,
                 )
                 .unwrap(),
+                engine_cvar: create_interface::<CVar>(
+                    module_names::VSTDLIB,
+                    interface_names::ENGINE_CVAR,
+                )
+                .unwrap(),
             }
         });
     }
@@ -111,4 +117,3 @@ macro_rules! i {
         $crate::sdk::interface::interfaces::Interfaces::get()
     };
 }
-
