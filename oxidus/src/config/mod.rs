@@ -313,11 +313,11 @@ macro_rules! get_setting {
                 $key
             );
         };
-        if let Some(overwrite) = overwrite{
+        *if let Some(overwrite) = overwrite{
             let $crate::config::entry::EntryValue::$variant(ref mut value) = overwrite else { unreachable!() };
-            *value
+            value
         } else {
-            *value
+            value
         }
     }};
 

@@ -1,15 +1,15 @@
 use core::f32;
 
-use crate::{config::Config, get_setting_mut, prelude::Interfaces};
+use crate::{config::Config, get_setting_mut, i, prelude::Interfaces};
 
 const CUTOFF: i32 = 3000;
 
 pub fn show_fov(ui: &mut imgui::Ui) {
-    if !Interfaces::get().engine.is_in_game() {
+    if !i!().engine.is_in_game() {
         return;
     }
 
-    let Some(local_player) = Interfaces::get().engine.get_local_player() else {
+    let Some(local_player) = i!().engine.get_local_player() else {
         return;
     };
 

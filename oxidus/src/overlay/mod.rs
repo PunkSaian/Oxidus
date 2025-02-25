@@ -20,7 +20,7 @@ use sdl_renderer::{SdlRenderer, Textures};
 use styles::set_styles;
 
 use crate::{
-    config::{binds::run_binds, Config}, hook::{detour::install_detour_from_symbol, vmt::install_vmt}, modules::esp::ESP, sdk::interface::interfaces::Interfaces, util::consts::{self, OXIDUS_LOGO_BMP_48}
+    config::{binds::run_binds, Config}, hook::{detour::install_detour_from_symbol, vmt::install_vmt}, i, modules::esp::ESP, sdk::interface::interfaces::Interfaces, util::consts::{self, OXIDUS_LOGO_BMP_48}
 };
 
 pub mod fov;
@@ -142,7 +142,6 @@ impl Overlay {
         self.context.io_mut().display_size = [window_width as f32, window_height as f32];
         self.context.io_mut().update_delta_time(delta);
 
-
         self.show();
 
         self.renderer.render(&mut self.context);
@@ -155,7 +154,6 @@ impl Overlay {
     pub fn show(&mut self) {
         let ui = self.context.new_frame();
 
-        let interfaces = Interfaces::get();
         if ui.is_key_pressed(Key::Insert) {
             self.visible = !self.visible;
             if !self.visible {
@@ -163,15 +161,11 @@ impl Overlay {
                 let settings = settings.read().unwrap();
                 settings.save_config().unwrap();
             }
-            interfaces
-                .gui_surface
-                .set_cursor_always_visible(self.visible);
-            interfaces.gui_surface.apply_changes();
+            i!().gui_surface.set_cursor_always_visible(self.visible);
+            i!().gui_surface.apply_changes();
         }
 
-
         run_binds(ui);
-
 
         if self.visible {
             menu::show(ui);
@@ -274,20 +268,19 @@ pub fn init() -> OxidusResult {
         "SDL_GL_SwapWindow",
         swap_window as *mut (),
     )?;
-    let interfaces = Interfaces::get();
     unsafe {
         install_vmt(
-            *(ptr::from_ref(interfaces.gui_surface).cast()),
+            *(ptr::from_ref(i!().gui_surface).cast()),
             51,
             set_cursor as *mut (),
         );
         install_vmt(
-            *(ptr::from_ref(interfaces.gui_surface).cast()),
+            *(ptr::from_ref(i!().gui_surface).cast()),
             52,
             set_cursor_always_visible as *mut (),
         );
         install_vmt(
-            *(ptr::from_ref(interfaces.gui_surface).cast()),
+            *(ptr::from_ref(i!().gui_surface).cast()),
             62,
             lock_cursor as *mut (),
         );
@@ -297,9 +290,7 @@ pub fn init() -> OxidusResult {
 
 pub fn unload() {
     let mut state = OVERLAY.write().unwrap();
-    Interfaces::get()
-        .gui_surface
-        .set_cursor_always_visible(false);
+    i!().gui_surface.set_cursor_always_visible(false);
 
     *state = None;
 }

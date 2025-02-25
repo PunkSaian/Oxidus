@@ -1,9 +1,8 @@
 use crate::{
-    prelude::Interfaces,
-    sdk::{
+    i, prelude::Interfaces, sdk::{
         bindings::{BasePlayer, TFPlayer, TFWeaponBase},
         interface::engine::PlayerInfo,
-    },
+    }
 };
 use macros::vmt;
 
@@ -15,7 +14,7 @@ pub struct TFPlayer {
 
 impl TFPlayer {
     pub fn get_info(&self) -> PlayerInfo {
-        Interfaces::get()
+        i!()
             .engine
             .get_player_info(self.get_entindex())
     }

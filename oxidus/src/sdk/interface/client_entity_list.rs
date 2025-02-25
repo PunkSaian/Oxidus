@@ -1,6 +1,6 @@
 use macros::{tf2_struct, vmt};
 
-use crate::sdk::{bindings::BaseEntity,models::networkable::Networkable};
+use crate::sdk::{bindings::BaseEntity, class_id::ClassId, models::networkable::Networkable};
 
 #[repr(C)]
 #[derive(Debug)]
@@ -79,5 +79,22 @@ impl ClientEntityList {
         } else {
             Some(unsafe { &*ent_ptr })
         }
+    }
+    pub fn iterate_valid_entities<'a, 'b>(
+        &'a self,
+        types: &'b [ClassId],
+    ) -> impl Iterator<Item = &'static BaseEntity > + use<'a, 'b>{
+        self.cache.iter().filter_map(move |entry| {
+            if entry.networkable.is_null() {
+                return None;
+            }
+            let networkable = unsafe { &*entry.networkable };
+            if !types.contains(&networkable.get_client_class().class_id) || networkable.is_dormant()
+            {
+                return None;
+            }
+
+            Some(unsafe { &*(*networkable.get_client_unknown()).get_base_entity() })
+        })
     }
 }

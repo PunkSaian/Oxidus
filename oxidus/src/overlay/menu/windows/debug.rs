@@ -2,6 +2,7 @@ use imgui::{Ui, WindowFlags};
 use std::collections::HashMap;
 use std::sync::{Mutex, OnceLock};
 
+use crate::i;
 use crate::math::{Angles, Vector3};
 use crate::sdk::interface::interfaces::Interfaces;
 
@@ -138,9 +139,8 @@ pub fn show_debug_window(ui: &mut Ui, visible: bool) {
 
             // Display and manage inputs
 
-            let interfaces = Interfaces::get();
-            if interfaces.engine.is_in_game() {
-                let w2s = interfaces.client.get_w2s_matrix();
+            if i!().engine.is_in_game() {
+                let w2s = i!().client.get_w2s_matrix();
                 let draw_list = ui.get_background_draw_list();
                 let viewport = unsafe { imgui::sys::igGetMainViewport().read() };
                 let window_size = [viewport.Size.x, viewport.Size.y];

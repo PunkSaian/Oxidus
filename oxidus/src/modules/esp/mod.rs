@@ -1,8 +1,14 @@
 use core::f32;
 use std::{cmp::Ordering, sync::RwLock};
 
-use crate::sdk::{
-    bindings::{BaseEntity, TFPlayer, TFWeaponBase}, class_id::ClassId, interface::interfaces::Interfaces, models::base_entity::Team,
+use crate::{
+    i,
+    sdk::{
+        bindings::{BaseEntity, TFPlayer, TFWeaponBase},
+        class_id::ClassId,
+        interface::interfaces::Interfaces,
+        models::base_entity::Team,
+    },
 };
 
 pub static ESP: RwLock<Option<Esp>> = const { RwLock::new(None) };
@@ -18,42 +24,30 @@ pub struct Esp {
 impl Esp {
     //TODO(oxy):refactor this
     pub fn store_entities(&mut self) {
-        let interfaces = Interfaces::get();
-
-        if !interfaces.engine.is_in_game() {
+        if !i!().engine.is_in_game() {
             return;
         }
 
-        let Some(local_player) = interfaces.engine.get_local_player() else {
+        let Some(local_player) = i!().engine.get_local_player() else {
             return;
         };
         self.entities.clear();
         let local_eyes = local_player.get_eye_position();
 
-        'ent_lop: for entry in &interfaces.entity_list.cache {
-            if entry.networkable.is_null() {
-                continue;
-            }
-            if !matches!(
-                (unsafe { &*entry.networkable }).get_client_class().class_id,
-                ClassId::CTFPlayer
-            ) {
+        'ent_lop: for player in i!()
+            .entity_list
+            .iterate_valid_entities(&[ClassId::CTFPlayer])
+        {
+            if player.get_entindex() == local_player.get_entindex() {
                 continue;
             }
 
-            let networkable = unsafe { &*entry.networkable };
-
-            if networkable.get_index() == local_player.get_entindex() || networkable.is_dormant() {
-                continue;
-            }
-
-            let player = unsafe { &*(*(networkable).get_client_unknown()).get_base_entity() };
             let pos = player.m_vecOrigin;
             let collidable = player.get_collidable();
             let mins = collidable.obb_mins();
             let maxs = collidable.obb_maxs();
 
-            let w2s = interfaces.client.get_w2s_matrix();
+            let w2s = i!().client.get_w2s_matrix();
 
             let mut points = pos.corners(mins, maxs);
 
@@ -99,7 +93,7 @@ impl Esp {
 
     #[allow(clippy::similar_names)]
     pub fn draw(&mut self, ui: &mut imgui::Ui) {
-        if !Interfaces::get().engine.is_in_game() {
+        if !i!().engine.is_in_game() {
             return;
         }
         let draw_list = ui.get_background_draw_list();
@@ -109,7 +103,7 @@ impl Esp {
         let scale = (window_size[0] as f32 / 2f32, window_size[1] as f32 / 2f32);
 
         for (mut corners, entindex) in &self.entities {
-            let Some(ent) = Interfaces::get().entity_list.get_client_entity_from_index(*entindex) else {
+            let Some(ent) = i!().entity_list.get_client_entity_from_index(*entindex) else {
                 continue;
             };
 

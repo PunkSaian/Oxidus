@@ -2,7 +2,7 @@ use std::mem::MaybeUninit;
 
 use macros::vmt;
 
-use crate::{prelude::Interfaces, sdk::interface::model_info::HitboxSet};
+use crate::{i, prelude::Interfaces, sdk::interface::model_info::HitboxSet};
 
 use super::{bone_matrix::BoneMatrix, model::Model};
 
@@ -51,13 +51,13 @@ impl Renderable {
             &mut bones,
             MAX_STUDIO_BONES as i32,
             BoneMask::Hitbox as i32,
-            Interfaces::get().global_vars.now(),
+            i!().global_vars.now(),
         );
         bones
     }
     pub fn get_hitboxes(&self) -> &'static HitboxSet {
         let model = self.get_model();
-        let hdr = Interfaces::get().model_info.get_studio_model(model);
+        let hdr = i!().model_info.get_studio_model(model);
         hdr.get_hitbox_set(0).expect("could not get hitbox set")
     }
 }
