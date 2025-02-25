@@ -372,7 +372,7 @@ pub fn init_settings() {
 }
 
 #[macro_export]
-macro_rules! get_entry_mut {
+macro_rules! get_setting_mut {
     ($map:expr, $key:expr => $variant:ident) => {{
         let entry = $map.get_mut($key).unwrap();
         let $crate::config::Entry::Value($crate::config::EntryValue::$variant(ref mut value), .., overwrite) = entry else {
@@ -395,7 +395,7 @@ macro_rules! get_entry_mut {
         let $crate::config::Entry::Group(ref mut next_map) = entry else {
             panic!("Invalid entry: expected Group at key '{}'", $key);
         };
-        get_entry_mut!(next_map, $($rest)*)
+        get_setting_mut!(next_map, $($rest)*)
     }};
 
 }

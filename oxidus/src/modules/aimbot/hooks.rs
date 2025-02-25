@@ -1,13 +1,12 @@
 use std::f32;
 
 use crate::{
-    get_entry_mut, mdbg, mdbg_angle, mdbg_point,
-    overlay::AIMBOT,
+    config::Config,
+    get_setting_mut, mdbg, mdbg_angle, mdbg_point,
     sdk::interface::{
         client_mode::ButtonFlags,
         engine_trace::{CONTENTS_GRATE, MASK_SHOT},
     },
-    config::Config,
 };
 use macros::vmt_hook;
 
@@ -48,7 +47,9 @@ pub unsafe extern "C" fn create_move(
         return org_res;
     }
 
-    if !AIMBOT {
+    let config = Config::get();
+    let mut config = config.write().unwrap();
+    if !*get_setting_mut!(&mut config.settings, "aimbot", "enabled" => Bool) {
         return org_res;
     }
 
@@ -65,9 +66,7 @@ pub unsafe extern "C" fn create_move(
 
     let forward = org_cmd.viewangles.forward();
 
-    let settings = Config::get();
-    let mut settings = settings.write().unwrap();
-    let fov = get_entry_mut!(&mut settings.settings, "aimbot", "fov" => F32);
+    let fov = get_setting_mut!(&mut config.settings, "aimbot", "fov" => F32);
 
     'ent_loop: for entry in &Interfaces::get().entity_list.cache {
         if entry.networkable.is_null() {

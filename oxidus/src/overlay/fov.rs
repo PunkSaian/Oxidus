@@ -1,7 +1,7 @@
 use core::f32;
 use std::time::Instant;
 
-use crate::{config::Config, get_entry_mut, mdbg, prelude::Interfaces};
+use crate::{config::Config, get_setting_mut, mdbg, prelude::Interfaces};
 
 use super::{mdbg_input, mdbg_point};
 
@@ -20,7 +20,7 @@ pub fn show_fov(ui: &mut imgui::Ui) {
 
     let settings = Config::get();
     let mut settings = settings.write().unwrap();
-    let fov = get_entry_mut!(&mut settings.settings, "aimbot", "fov" => F32);
+    let fov = get_setting_mut!(&mut settings.settings, "aimbot", "fov" => F32);
 
     //TODO: get this propperly
     let game_fov = 90.0f32;
@@ -95,7 +95,6 @@ pub fn show_fov(ui: &mut imgui::Ui) {
             center[0] - triangle_size * angle.cos(),
             center[1] - triangle_size * angle.sin(),
         ];
-        draw_list
         draw_list
             .add_triangle(point_1, point_2, point_3, 0x55_FF_FF_FF)
             .filled(true)

@@ -31,7 +31,6 @@ pub mod sdl_renderer;
 pub mod styles;
 
 pub use crate::prelude::*;
-pub static mut AIMBOT: bool = false;
 
 pub struct Overlay {
     context: imgui::Context,
@@ -170,7 +169,6 @@ impl Overlay {
             interfaces.gui_surface.apply_changes();
         }
 
-        unsafe { AIMBOT = ui.is_key_down(Key::LeftShift) };
 
         run_binds(ui);
 

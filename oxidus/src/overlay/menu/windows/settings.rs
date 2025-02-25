@@ -2,7 +2,7 @@ use std::thread;
 
 use imgui::{Id, WindowFlags};
 
-use crate::{config::Config, get_entry_mut, oxidus_cleanup};
+use crate::{config::Config, get_setting_mut, oxidus_cleanup};
 
 #[allow(static_mut_refs)]
 pub fn show_settings(ui: &mut imgui::Ui) {
@@ -93,7 +93,9 @@ pub fn show_settings(ui: &mut imgui::Ui) {
                 });
             });
 
-            let fov = get_entry_mut!(&mut config.settings, "aimbot", "fov" => F32);
+            let enabled = get_setting_mut!(&mut config.settings, "aimbot", "enabled" => Bool);
+            ui.checkbox("enabled", enabled);
+            let fov = get_setting_mut!(&mut config.settings, "aimbot", "fov" => F32);
             ui.slider_config("fov", 0.0, 180.0).build(fov);
         });
 }
