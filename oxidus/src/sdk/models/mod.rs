@@ -1,8 +1,8 @@
 pub mod base_entity;
 pub mod renderable;
 pub mod model;
-pub mod TFPlayer;
-pub mod TFWeaponBase;
+pub mod tf_player;
+pub mod tf_weapon_base;
 pub mod bone_matrix;
 pub mod networkable;
 pub mod unknown;

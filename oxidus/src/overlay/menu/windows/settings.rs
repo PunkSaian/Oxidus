@@ -38,7 +38,7 @@ pub fn show_settings(ui: &mut imgui::Ui) {
         });
     let popup_id = ui.new_id_str("new config");
     let title = if let Some((bind_index, _)) = config.binding {
-        let bind = config.binds.get(bind_index).unwrap();
+        let bind = config.binds.binds.get(bind_index).unwrap();
         format!("Settings [binding \"{}\"]###Settings", bind.name)
     } else {
         "Settings###Settings".to_owned()

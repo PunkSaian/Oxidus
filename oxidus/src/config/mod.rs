@@ -6,58 +6,21 @@ use std::{
     sync::{Arc, RwLock},
 };
 
+use binds::Binds;
+use entry::{Entry, EntryValue};
 use imgui::Key;
 use macros::settings;
-use serde::{Deserialize, Serialize};
-use toml::{value::Array, Table, Value};
+use metadata::MetaData;
+use toml::{Table, Value};
 
 use crate::overlay::OxidusResult;
 
 pub mod binds;
+pub mod entry;
+pub mod metadata;
 
 static mut SETTINGS: Option<Arc<RwLock<Config>>> = None;
 
-#[derive(Debug, Clone, PartialEq)]
-pub enum EntryValue {
-    I32(i32),
-    F32(f32),
-    String(String),
-    Bool(bool),
-    Color(i32),
-}
-
-#[derive(Debug, Clone)]
-pub enum Entry {
-    Value(EntryValue, EntryValue, Option<EntryValue>),
-    Group(HashMap<String, Entry>),
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct MetaData {
-    pub current_config: PathBuf,
-}
-
-impl MetaData {
-    pub fn meta_config_file() -> PathBuf {
-        Config::config_dir().join("meta.toml")
-    }
-
-    pub fn load() -> OxidusResult<MetaData> {
-        let contents = fs::read_to_string(Self::meta_config_file())?;
-        let loaded = contents.parse::<Table>()?;
-        let current_config = loaded
-            .get("current_config")
-            .map_or_else(Config::default_config_file, |v| {
-                PathBuf::from(v.as_str().unwrap())
-            });
-        Ok(MetaData { current_config })
-    }
-    pub fn save(&self) -> OxidusResult<()> {
-        let toml = toml::to_string_pretty(&self)?;
-        fs::write(Self::meta_config_file(), toml)?;
-        Ok(())
-    }
-}
 
 pub fn diff_settings(
     old: &HashMap<String, Entry>,
@@ -88,7 +51,7 @@ pub fn diff_settings(
 #[derive(Debug)]
 pub struct Config {
     pub settings: HashMap<String, Entry>,
-    pub binds: Vec<binds::Bind>,
+    pub binds: Binds,
     pub meta: MetaData,
     pub binding: Option<(usize, HashMap<String, Entry>)>,
 }
@@ -121,7 +84,7 @@ impl Config {
         };
 
         let mut settings = Config {
-            binds: Vec::new(),
+            binds: Binds::new(),
             settings: Self::get_default_entries(),
             meta,
             binding: None,
@@ -193,7 +156,7 @@ impl Config {
                         _ => {}
                     }
                 }
-                self.binds.push(binds::Bind {
+                self.binds.binds.push(binds::Bind {
                     name: name.clone(),
                     keys,
                     diff,
@@ -235,44 +198,17 @@ impl Config {
         for (key, value) in &self.settings {
             settings.insert(key.clone(), value_to_toml(value)?);
         }
-        let mut binds_table = Table::new();
-        for bind in &self.binds {
-            let mut bind_table = Table::new();
-            let mut diffs_table = Array::new();
-            for (path, value) in &bind.diff {
-                let mut diff_table = Table::new();
-                diff_table.insert(
-                    "path".to_owned(),
-                    Value::Array(path.iter().map(|x| Value::String(x.clone())).collect()),
-                );
-                diff_table.insert(
-                    "value".to_owned(),
-                    value_to_toml(&Entry::Value(value.clone(), value.clone(), None))?,
-                );
-                diffs_table.push(Value::Table(diff_table));
-            }
-            bind_table.insert("diff".to_owned(), Value::Array(diffs_table));
-            bind_table.insert(
-                "keys".to_owned(),
-                Value::Array(
-                    bind.keys
-                        .iter()
-                        .map(|x| Value::Integer((*x as u32) as i64))
-                        .collect(),
-                ),
-            );
-            binds_table.insert(bind.name.clone(), Value::Table(bind_table));
-        }
         let mut table = Table::new();
         table.insert("settings".to_owned(), Value::Table(settings));
-        table.insert("binds".to_owned(), Value::Table(binds_table));
+        let binds = self.binds.to_toml_table();
+        table.insert("binds".to_owned(), Value::Table(binds));
         Ok(table)
     }
 
     fn merge_toml(&mut self, loaded: &Table) {
         for (key, value) in &mut self.settings {
             if let Some(loaded_value) = loaded.get(key) {
-                let merged = merge_entry(value, loaded_value);
+                let merged = value.clone().merge(loaded_value);
                 *value = merged;
             }
         }
@@ -332,43 +268,6 @@ fn value_from_toml(value: &Value) -> EntryValue {
     }
 }
 
-fn merge_entry(current: &Entry, loaded: &Value) -> Entry {
-    match (current, loaded) {
-        (Entry::Value(EntryValue::I32(_), def, _), Value::Integer(v)) => {
-            Entry::Value(EntryValue::I32(*v as i32), def.clone(), None)
-        }
-        (Entry::Value(EntryValue::F32(_), def, _), Value::Float(v)) => {
-            Entry::Value(EntryValue::F32(*v as f32), def.clone(), None)
-        }
-        (Entry::Value(EntryValue::String(_), def, _), Value::String(v)) => {
-            Entry::Value(EntryValue::String(v.clone()), def.clone(), None)
-        }
-        (Entry::Value(EntryValue::Bool(_), def, _), Value::Boolean(v)) => {
-            Entry::Value(EntryValue::Bool(*v), def.clone(), None)
-        }
-        (Entry::Value(EntryValue::Color(_), def, _), Value::String(v)) => {
-            let hex = v.trim_start_matches('#');
-            Entry::Value(
-                EntryValue::Color(i32::from_str_radix(hex, 16).unwrap()),
-                def.clone(),
-                None,
-            )
-        }
-        (Entry::Group(cur_map), Value::Table(loaded_table)) => {
-            let mut merged_map = HashMap::new();
-            for (key, value) in cur_map {
-                if let Some(loaded_val) = loaded_table.get(key) {
-                    let merged = merge_entry(value, loaded_val);
-                    merged_map.insert(key.clone(), merged);
-                } else {
-                    merged_map.insert(key.clone(), value.clone());
-                }
-            }
-            Entry::Group(merged_map)
-        }
-        _ => current.clone(),
-    }
-}
 
 pub fn init_settings() {
     Config::init();
@@ -378,7 +277,7 @@ pub fn init_settings() {
 macro_rules! get_setting_mut {
     ($map:expr, $key:expr => $variant:ident) => {{
         let entry = $map.get_mut($key).unwrap();
-        let $crate::config::Entry::Value($crate::config::EntryValue::$variant(ref mut value), .., overwrite) = entry else {
+        let $crate::config::entry::Entry::Value($crate::config::entry::EntryValue::$variant(ref mut value), .., overwrite) = entry else {
             panic!(
                 "Invalid entry: expected {} at key '{}'",
                 stringify!($variant),
@@ -386,7 +285,7 @@ macro_rules! get_setting_mut {
             );
         };
         if let Some(overwrite) = overwrite{
-            let $crate::config::EntryValue::$variant(ref mut value) = overwrite else { unreachable!() };
+            let $crate::config::entry::EntryValue::$variant(ref mut value) = overwrite else { unreachable!() };
             value
         } else {
             value
@@ -395,7 +294,36 @@ macro_rules! get_setting_mut {
 
     ($map:expr, $key:expr, $($rest:tt)*) => {{
         let entry = $map.get_mut($key).unwrap();
-        let $crate::config::Entry::Group(ref mut next_map) = entry else {
+        let $crate::config::entry::Entry::Group(ref mut next_map) = entry else {
+            panic!("Invalid entry: expected Group at key '{}'", $key);
+        };
+        get_setting_mut!(next_map, $($rest)*)
+    }};
+
+}
+
+#[macro_export]
+macro_rules! get_setting {
+    ($map:expr, $key:expr => $variant:ident) => {{
+        let entry = $map.get_mut($key).unwrap();
+        let $crate::config::entry::Entry::Value($crate::config::entry::EntryValue::$variant(ref mut value), .., overwrite) = entry else {
+            panic!(
+                "Invalid entry: expected {} at key '{}'",
+                stringify!($variant),
+                $key
+            );
+        };
+        if let Some(overwrite) = overwrite{
+            let $crate::config::entry::EntryValue::$variant(ref mut value) = overwrite else { unreachable!() };
+            *value
+        } else {
+            *value
+        }
+    }};
+
+    ($map:expr, $key:expr, $($rest:tt)*) => {{
+        let entry = $map.get_mut($key).unwrap();
+        let $crate::config::entry::Entry::Group(ref mut next_map) = entry else {
             panic!("Invalid entry: expected Group at key '{}'", $key);
         };
         get_setting_mut!(next_map, $($rest)*)

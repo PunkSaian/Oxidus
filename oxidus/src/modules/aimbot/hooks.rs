@@ -2,7 +2,7 @@ use std::f32;
 
 use crate::{
     config::Config,
-    get_setting_mut, mdbg, mdbg_angle, mdbg_point,
+    get_setting_mut, mdbg_angle, mdbg_point,
     sdk::interface::{
         client_mode::ButtonFlags,
         engine_trace::{CONTENTS_GRATE, MASK_SHOT},

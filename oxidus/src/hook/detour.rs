@@ -184,7 +184,7 @@ impl DetourHook {
 
 impl Drop for DetourHook {
     fn drop(&mut self) {
-        if let Err(e) = self.restore() {
+        if self.restore().is_err() {
             return;
         }
 

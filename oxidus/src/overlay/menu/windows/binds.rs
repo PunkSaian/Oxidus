@@ -1,19 +1,16 @@
 use std::collections::HashMap;
 
-use imgui::{Id, Key, TableFlags, WindowFlags};
+use imgui::{Id, Key, WindowFlags};
 
-use crate::{
-    config::{binds::Bind, diff_settings, Config},
-    sdk::bindings,
-};
+use crate::config::{binds::Bind, diff_settings, Config};
 
 #[allow(static_mut_refs, clippy::too_many_lines)]
 pub fn show_binds(ui: &mut imgui::Ui) {
-    let config = Config::get();
-    let mut config = config.write().unwrap();
     pub static mut WAITING_FOR_KEYS: bool = false;
     pub static mut PRESED_KEYS: Vec<Key> = Vec::new();
     pub static mut NAME: String = String::new();
+    let config = Config::get();
+    let mut config = config.write().unwrap();
     ui.modal_popup_config("new bind")
         .resizable(false)
         .movable(false)
@@ -57,7 +54,7 @@ pub fn show_binds(ui: &mut imgui::Ui) {
             //----
             ui.disabled(PRESED_KEYS.is_empty() || NAME.is_empty(), || {
                 if ui.button("create") {
-                    config.binds.push(Bind {
+                    config.binds.binds.push(Bind {
                         name: NAME.clone(),
                         keys: PRESED_KEYS.clone(),
                         diff: HashMap::new(),
@@ -95,7 +92,7 @@ pub fn show_binds(ui: &mut imgui::Ui) {
                 ui.table_setup_column("Options");
                 ui.table_headers_row();
 
-                for (i, bind) in config.binds.clone().iter().enumerate() {
+                for (i, bind) in config.binds.binds.clone().iter().enumerate() {
                     ui.table_next_row();
                     ui.table_next_column();
                     ui.text(&bind.name);
@@ -131,7 +128,7 @@ pub fn show_binds(ui: &mut imgui::Ui) {
                             //compare new settings state with saved one and save if different
                             config.settings = old_settings;
                             config.binding = None;
-                            config.binds[i].diff = diff;
+                            config.binds.binds[i].diff = diff;
                         }
                     }
                 }

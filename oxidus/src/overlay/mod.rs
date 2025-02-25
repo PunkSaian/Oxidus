@@ -8,7 +8,7 @@ use std::{
 
 use fov::show_fov;
 use hooks::{lock_cursor, poll_event, set_cursor, set_cursor_always_visible, swap_window};
-use imgui::{Key, MouseButton, MouseCursor};
+use imgui::{Key, MouseButton};
 use menu::windows::{debug::show_debug_window, watermark::show_watermark};
 use scan_code_map::sdl_scancode_to_imgui_key;
 use sdl2_sys::{

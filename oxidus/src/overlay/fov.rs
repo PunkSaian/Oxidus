@@ -1,9 +1,8 @@
 use core::f32;
-use std::time::Instant;
 
-use crate::{config::Config, get_setting_mut, mdbg, prelude::Interfaces};
+use crate::{config::Config, get_setting_mut, prelude::Interfaces};
 
-use super::{mdbg_input, mdbg_point};
+const CUTOFF: i32 = 3000;
 
 pub fn show_fov(ui: &mut imgui::Ui) {
     if !Interfaces::get().engine.is_in_game() {
@@ -22,7 +21,6 @@ pub fn show_fov(ui: &mut imgui::Ui) {
     let mut config = config.write().unwrap();
     let fov = *get_setting_mut!(&mut config.settings, "aimbot", "fov" => F32);
 
-    //TODO: get this propperly
     let visual_fov = *get_setting_mut!(&mut config.settings, "visual", "fov" => F32);
 
     if fov > visual_fov {
@@ -48,7 +46,6 @@ pub fn show_fov(ui: &mut imgui::Ui) {
     let triangle_size: f32 = outline_scale / 3.0;
 
     let triangle_count = (fov as usize * 5 + 10).min(100);
-    const CUTOFF: i32 = 3000;
 
     for i in 0..triangle_count {
         let time_offset = (((std::time::UNIX_EPOCH.elapsed().unwrap().as_millis())
