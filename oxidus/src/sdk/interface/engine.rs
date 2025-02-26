@@ -71,7 +71,7 @@ pub struct Engine {
     #[offset(8)]
     pub _get_player_info: extern "C" fn(index: i32, info: &mut PlayerInfoUnparsed),
     #[offset(12)]
-    pub get_loacl_player_entindex: extern "C" fn() -> i32,
+    pub get_local_player_entindex: extern "C" fn() -> i32,
     #[offset(26)]
     pub is_in_game: extern "C" fn() -> bool,
 }
@@ -87,7 +87,7 @@ impl Engine {
     pub fn get_local_player(&self) -> Option<&'static mut TFPlayer> {
         let ent = i!() 
             .entity_list
-            .get_client_entity_from_index(self.get_loacl_player_entindex())?;
+            .get_client_entity_from_index(self.get_local_player_entindex())?;
 
         Some(unsafe { &mut *std::ptr::from_mut::<BaseEntity>(ent).cast::<TFPlayer>() })
     }
