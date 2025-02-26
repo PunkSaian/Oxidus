@@ -4,7 +4,6 @@ use macros::vmt_hook;
 
 use crate::{
     config::Config,
-    get_setting,
     hook::vmt::install_vmt,
     i,
     math::Vector2,
@@ -62,14 +61,11 @@ pub unsafe extern "C" fn create_move(
 
 #[vmt_hook]
 pub unsafe extern "C" fn override_view(this: *const (), view_setup: &mut ViewSetup) -> bool {
-    let mut config = Config::get_write();
-    let fov = get_setting!(&mut config.settings_old, "visual", "fov" => F32);
-    view_setup.fov = fov;
+    let visual_settings = &Config::get_read().settings.visual;
+    view_setup.fov = *visual_settings.fov.get();
     if let Some(local_player) = i!().engine.get_local_player() {
         if local_player.is_alive() {
-            let third_person =
-                get_setting!(&mut config.settings_old, "visual", "third_person" => Bool);
-            local_player.m_nForceTauntCam = i32::from(third_person);
+            local_player.m_nForceTauntCam = i32::from(*visual_settings.third_person.get());
         }
     }
 

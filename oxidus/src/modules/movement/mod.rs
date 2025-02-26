@@ -2,7 +2,7 @@ use std::ptr;
 
 use crate::{
     config::Config,
-    get_setting, i,
+    i,
     math::{Vector2, Vector3},
     sdk::{
         bindings::{LocalPlayerExclusive, TFPlayer},
@@ -55,8 +55,8 @@ pub fn run(cmd: &mut UserCmd) {
 }
 
 pub fn momentum_compensation(cmd: &mut UserCmd) {
-    let mut config = Config::get_write();
-    if !get_setting!(&mut config.settings_old, "movement", "momentum_compensation" => Bool) {
+    let movement_settings = &Config::get_read().settings.movement;
+    if !movement_settings.momentum_compensation.get() {
         return;
     }
 
@@ -79,8 +79,8 @@ pub fn momentum_compensation(cmd: &mut UserCmd) {
     }
 }
 pub fn bhop(cmd: &mut UserCmd) {
-    let mut config = Config::get_write();
-    if !get_setting!(&mut config.settings_old, "movement", "bhop" => Bool) {
+    let movement_settings = &Config::get_read().settings.movement;
+    if !movement_settings.bhop.get() {
         return;
     }
 
@@ -98,8 +98,8 @@ pub fn bhop(cmd: &mut UserCmd) {
 pub fn auto_strafe(cmd: &mut UserCmd) {
     const SPEED_VAR: f32 = 6062.0;
     const WISH_SPEED: f32 = 30.0;
-    let mut config = Config::get_write();
-    if !get_setting!(&mut config.settings_old, "movement", "auto_strafe" => Bool) {
+    let movement_settings = &Config::get_read().settings.movement;
+    if !movement_settings.auto_strafe.get() {
         return;
     }
 

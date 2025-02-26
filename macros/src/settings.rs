@@ -32,7 +32,6 @@ impl Parse for SettingsMacro {
 
         while !input.is_empty() {
             groups.push(Group::parse(input)?);
-            // Optional comma between top-level groups
             if input.peek(Token![,]) {
                 input.parse::<Token![,]>()?;
             }
@@ -62,7 +61,6 @@ impl Parse for GroupItem {
         let lookahead = input.lookahead1();
 
         if lookahead.peek(Token![:]) {
-            // Parse field definition
             input.parse::<Token![:]>()?;
             let field_type = input.parse()?;
             input.parse::<Token![,]>()?;
@@ -72,9 +70,7 @@ impl Parse for GroupItem {
                 field_type,
                 default_value,
             }))
-
         } else if lookahead.peek(syn::token::Brace) {
-            // Parse subgroup
             let subgroup = Group::parse_subgroup(input, ident)?;
             Ok(GroupItem::Group(subgroup))
         } else {
@@ -112,6 +108,41 @@ pub fn settings(input: TokenStream) -> TokenStream {
         quote! { #group_name: #struct_name::default() }
     });
 
+    let settings_impl = {
+        let merge_statements = config.groups.iter().map(|group| {
+            let group_name = &group.name;
+            quote! {
+                self.#group_name.merge(&old.#group_name);
+            }
+        });
+        let apply_overwrites_statements = config.groups.iter().map(|group| {
+            let group_name = &group.name;
+            quote! {
+                self.#group_name.apply_overwrites(&bind.#group_name);
+            }
+        });
+        let clear_overwrites_statements = config.groups.iter().map(|group| {
+            let group_name = &group.name;
+            quote! {
+                self.#group_name.clear_overwrites();
+            }
+        });
+
+        quote! {
+            impl Settings {
+                pub fn merge(&mut self, old: &Self) {
+                    #(#merge_statements)*
+                }
+                pub fn apply_overwrites(&mut self, bind: &Self) {
+                    #(#apply_overwrites_statements)*
+                }
+                pub fn clear_overwrites(&mut self) {
+                    #(#clear_overwrites_statements)*
+                }
+            }
+        }
+    };
+
     let expanded = quote! {
         #(#group_code)*
 
@@ -127,11 +158,14 @@ pub fn settings(input: TokenStream) -> TokenStream {
                 }
             }
         }
+
+        #settings_impl
     };
 
     TokenStream::from(expanded)
 }
 
+#[allow(clippy::too_many_lines)]
 fn generate_group_code(group: &Group) -> TokenStream2 {
     let subgroup_code = group.items.iter().filter_map(|item| {
         if let GroupItem::Group(subgroup) = item {
@@ -162,8 +196,9 @@ fn generate_group_code(group: &Group) -> TokenStream2 {
             let default_value = &field.default_value;
             quote! {
                 #field_name: SettingsField {
-                    value: #default_value,
-                    default: #default_value,
+                    value: #default_value.clone(),
+                    default: #default_value.clone(),
+                    overwrite: None,
                 }
             }
         }
@@ -173,6 +208,76 @@ fn generate_group_code(group: &Group) -> TokenStream2 {
             quote! { #subgroup_name: #subgroup_struct::default() }
         }
     });
+
+    let struct_impl = {
+        let merge_statements = group.items.iter().map(|item| {
+            match item {
+                GroupItem::Field(field) => {
+                    let field_name = &field.field_name;
+                    quote! {
+                        self.#field_name.merge(&old.#field_name);
+                    }
+                }
+                GroupItem::Group(subgroup) => {
+                    let subgroup_name = &subgroup.name;
+                    quote! {
+                        self.#subgroup_name.merge(&old.#subgroup_name);
+                    }
+                }
+            }
+        });
+
+        let clear_overwrites_statements = group.items.iter().map(|item| {
+            match item {
+                GroupItem::Field(field) => {
+                    let field_name = &field.field_name;
+                    quote! {
+                        self.#field_name.overwrite = None;
+                    }
+                }
+                GroupItem::Group(subgroup) => {
+                    let subgroup_name = &subgroup.name;
+                    quote! {
+                        self.#subgroup_name.clear_overwrites();
+                    }
+                }
+            }
+        });
+
+        let apply_overwrites_statements = group.items.iter().map(|item| {
+            match item {
+                GroupItem::Field(field) => {
+                    let field_name = &field.field_name;
+                    quote! {
+                        if let Some(overwrite) = bind.#field_name.overwrite.as_ref() {
+                            crate::mdbg!(stringify!(#field_name));
+                            self.#field_name.overwrite = Some(overwrite.clone());
+                        }
+                    }
+                }
+                GroupItem::Group(subgroup) => {
+                    let subgroup_name = &subgroup.name;
+                    quote! {
+                        self.#subgroup_name.apply_overwrites();
+                    }
+                }
+            }
+        });
+
+        quote! {
+            impl #struct_name {
+                pub fn merge(&mut self, old: &Self) {
+                    #(#merge_statements)*
+                }
+                pub fn apply_overwrites(&mut self, bind: &Self) {
+                    #(#apply_overwrites_statements)*
+                }
+                pub fn clear_overwrites(&mut self) {
+                    #(#clear_overwrites_statements)*
+                }
+            }
+        }
+    };
 
     quote! {
         #(#subgroup_code)*
@@ -189,6 +294,8 @@ fn generate_group_code(group: &Group) -> TokenStream2 {
                 }
             }
         }
+
+        #struct_impl
     }
 }
 

@@ -6,6 +6,7 @@ use proc_macro::TokenStream;
 
 mod detour_hook;
 mod settings;
+mod settings_field;
 mod sig;
 mod tf2_struct;
 mod vmt;
@@ -39,4 +40,10 @@ pub fn vmt_hook(attr: TokenStream, item: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn settings(input: TokenStream) -> TokenStream {
     settings::settings(input)
+}
+
+
+#[proc_macro_attribute]
+pub fn settings_field(attr: TokenStream, item: TokenStream) -> TokenStream {
+    settings_field::settings_field(attr, item)
 }

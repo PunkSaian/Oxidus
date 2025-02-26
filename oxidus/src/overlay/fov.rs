@@ -1,6 +1,6 @@
 use core::f32;
 
-use crate::{config::Config, get_setting, i};
+use crate::{config::Config, i};
 
 const CUTOFF: i32 = 3000;
 
@@ -17,15 +17,12 @@ pub fn show_fov(ui: &mut imgui::Ui) {
         return;
     }
 
-    let mut config = Config::get_write();
-    if get_setting!(&mut config.settings_old, "visual", "third_person" => Bool) {
+    let settings = &Config::get_read().settings;
+    if *settings.aimbot.enabled.get() {
         return;
     }
-    let fov = get_setting!(&mut config.settings_old, "aimbot", "fov" => F32);
 
-    let visual_fov = get_setting!(&mut config.settings_old, "visual", "fov" => F32);
-
-    if fov > visual_fov {
+    if settings.aimbot.fov.get() > settings.visual.fov.get() {
         return;
     }
 
@@ -36,8 +33,8 @@ pub fn show_fov(ui: &mut imgui::Ui) {
 
     let aspect_ratio = window_size[0] / window_size[1];
 
-    let game_fov_rad = (visual_fov * 0.5).to_radians();
-    let desired_fov_rad = (fov).to_radians();
+    let game_fov_rad = (settings.visual.fov.get() * 0.5).to_radians();
+    let desired_fov_rad = (settings.aimbot.fov.get()).to_radians();
 
     let radius_px = (window_size[0] * 0.5) * (desired_fov_rad.tan() / game_fov_rad.tan());
 
@@ -47,11 +44,11 @@ pub fn show_fov(ui: &mut imgui::Ui) {
 
     let triangle_size: f32 = outline_scale / 3.0;
 
-    let triangle_count = (fov as usize * 5 + 10).min(100);
+    let triangle_count = (*settings.aimbot.fov.get() as usize * 5 + 10).min(100);
 
     for i in 0..triangle_count {
         let time_offset = (((std::time::UNIX_EPOCH.elapsed().unwrap().as_millis())
-            / (fov).max(1.0) as u128)
+            / (settings.aimbot.fov.get()).max(1.0) as u128)
             % CUTOFF as u128) as f32
             / CUTOFF as f32;
 

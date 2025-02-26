@@ -1,8 +1,9 @@
 use std::thread;
 
 use imgui::{Id, WindowFlags};
+use macros::settings_field;
 
-use crate::{config::Config, get_setting_mut, oxidus_cleanup};
+use crate::{config::Config, oxidus_cleanup};
 #[allow(static_mut_refs, clippy::too_many_lines)]
 pub fn show_settings(ui: &mut imgui::Ui) {
     let mut config = Config::get_write();
@@ -91,26 +92,40 @@ pub fn show_settings(ui: &mut imgui::Ui) {
                 });
             });
 
-            let enabled = get_setting_mut!(&mut config.settings_old, "aimbot", "enabled" => Bool);
-            ui.checkbox("enabled", enabled);
-            let fov = get_setting_mut!(&mut config.settings_old, "aimbot", "fov" => F32);
-            ui.input_float("fov", fov).step(1.0).build();
-            *fov = fov.clamp(1.0, 180.0);
+            //aimbot
             {
-                let fov = get_setting_mut!(&mut config.settings_old, "visual", "fov" => F32);
-                ui.input_float("visual fov", fov).step(1.0).build();
-                *fov = fov.clamp(1.0, 180.0);
-                let third_person =
-                    get_setting_mut!(&mut config.settings_old, "visual", "third_person" => Bool);
-                ui.checkbox("third person", third_person);
+                #[settings_field(config.settings.aimbot.enabled)]
+                {
+                    ui.checkbox("enabled", enabled);
+                }
+                #[settings_field(config.settings.aimbot.fov)]
+                {
+                    ui.input_float("fov", fov).step(1.0).build();
+                    *fov = fov.clamp(1.0, 180.0);
+                }
             }
-            let momentum_compensation =
-                get_setting_mut!(&mut config.settings_old, "movement", "momentum_compensation" => Bool);
-            ui.checkbox("momentum compensation", momentum_compensation);
-            let bhop = get_setting_mut!(&mut config.settings_old, "movement", "bhop" => Bool);
-            ui.checkbox("bhop", bhop);
-            let auto_strafe =
-                get_setting_mut!(&mut config.settings_old, "movement", "auto_strafe" => Bool);
-            ui.checkbox("auto strafe", auto_strafe);
+            //visual
+            {
+                #[settings_field(config.settings.visual.fov)]
+                {
+                    ui.input_float("fov", fov).step(1.0).build();
+                    *fov = fov.clamp(1.0, 180.0);
+                }
+                #[settings_field(config.settings.visual.third_person)]
+                {
+                    ui.checkbox("third person", third_person);
+                }
+            }
+            //movement
+            {
+                #[settings_field(config.settings.movement.auto_strafe)]
+                {
+                    ui.checkbox("auto strafe", auto_strafe);
+                }
+                #[settings_field(config.settings.movement.momentum_compensation)]
+                {
+                    ui.checkbox("momentum compensation", momentum_compensation);
+                }
+            }
         });
 }

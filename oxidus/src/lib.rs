@@ -11,7 +11,13 @@
     incomplete_features,
     dead_code
 )]
-#![feature(inherent_associated_types, generic_const_exprs, slice_as_array)]
+#![feature(
+    inherent_associated_types,
+    generic_const_exprs,
+    slice_as_array,
+    stmt_expr_attributes,
+    proc_macro_hygiene
+)]
 
 extern crate thiserror;
 
