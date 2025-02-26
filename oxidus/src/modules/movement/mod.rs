@@ -55,8 +55,8 @@ pub fn run(cmd: &mut UserCmd) {
 }
 
 pub fn momentum_compensation(cmd: &mut UserCmd) {
-    let mut config = Config::get();
-    if !get_setting!(&mut config.settings, "movement", "momentum_compensation" => Bool) {
+    let mut config = Config::get_write();
+    if !get_setting!(&mut config.settings_old, "movement", "momentum_compensation" => Bool) {
         return;
     }
 
@@ -79,8 +79,8 @@ pub fn momentum_compensation(cmd: &mut UserCmd) {
     }
 }
 pub fn bhop(cmd: &mut UserCmd) {
-    let mut config = Config::get();
-    if !get_setting!(&mut config.settings, "movement", "bhop" => Bool) {
+    let mut config = Config::get_write();
+    if !get_setting!(&mut config.settings_old, "movement", "bhop" => Bool) {
         return;
     }
 
@@ -98,8 +98,8 @@ pub fn bhop(cmd: &mut UserCmd) {
 pub fn auto_strafe(cmd: &mut UserCmd) {
     const SPEED_VAR: f32 = 6062.0;
     const WISH_SPEED: f32 = 30.0;
-    let mut config = Config::get();
-    if !get_setting!(&mut config.settings, "movement", "auto_strafe" => Bool) {
+    let mut config = Config::get_write();
+    if !get_setting!(&mut config.settings_old, "movement", "auto_strafe" => Bool) {
         return;
     }
 

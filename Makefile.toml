@@ -150,3 +150,7 @@ args = ["build"]
 
 [tasks.default]
 dependencies = ["build"]
+
+[tasks.pre-commit-checks]
+workspace = false
+dependencies = [{ path = "oxidus" }]

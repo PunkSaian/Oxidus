@@ -3,7 +3,10 @@ use std::mem::MaybeUninit;
 use imgui::sys::cty::c_char;
 use macros::vmt;
 
-use crate::{i, sdk::bindings::{BaseEntity, TFPlayer}};
+use crate::{
+    i,
+    sdk::bindings::{BaseEntity, TFPlayer},
+};
 
 pub struct Engine;
 
@@ -63,7 +66,6 @@ impl From<PlayerInfoUnparsed> for PlayerInfo {
     }
 }
 
-//INFO: FIXED
 #[vmt]
 pub struct Engine {
     #[offset(5)]
@@ -85,7 +87,7 @@ impl Engine {
         }
     }
     pub fn get_local_player(&self) -> Option<&'static mut TFPlayer> {
-        let ent = i!() 
+        let ent = i!()
             .entity_list
             .get_client_entity_from_index(self.get_local_player_entindex())?;
 

@@ -83,7 +83,7 @@ impl ClientEntityList {
     pub fn iterate_valid_entities<'a, 'b>(
         &'a self,
         types: &'b [ClassId],
-    ) -> impl Iterator<Item = &'static BaseEntity > + use<'a, 'b>{
+    ) -> impl Iterator<Item = &'static BaseEntity> + use<'a, 'b> {
         self.cache.iter().filter_map(move |entry| {
             if entry.networkable.is_null() {
                 return None;

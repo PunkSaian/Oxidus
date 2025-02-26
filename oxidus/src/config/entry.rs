@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
 use toml::{Table, Value};
 
-
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum EntryValue {
     I32(i32),
     F32(f32),

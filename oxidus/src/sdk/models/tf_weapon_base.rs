@@ -1,7 +1,7 @@
 use std::ffi::CStr;
 
-use macros::vmt;
 use super::super::bindings::TFWeaponBase;
+use macros::vmt;
 
 #[vmt]
 pub struct TFWeaponBase {

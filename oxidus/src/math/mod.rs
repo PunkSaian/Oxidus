@@ -162,7 +162,7 @@ impl std::ops::Mul<Vector2> for Vector2 {
     type Output = Vector2;
 
     fn mul(mut self, rhs: Vector2) -> Self::Output {
-        self.x *= rhs.x; 
+        self.x *= rhs.x;
         self.y *= rhs.y;
         self
     }

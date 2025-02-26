@@ -1,7 +1,6 @@
 use crate::{
     config::Config,
-    get_setting, i,
-    mdbg_angle, mdbg_point,
+    get_setting, i, mdbg_angle, mdbg_point,
     sdk::{
         class_id::ClassId,
         interface::{
@@ -13,10 +12,12 @@ use crate::{
 
 pub fn init() {}
 
-
 pub fn run(cmd: &mut UserCmd) -> bool {
-    let mut config = Config::get();
-    if !get_setting!(&mut config.settings, "aimbot", "enabled" => Bool) {
+    let mut config = Config::get_write();
+    if !config.settings.aimbot.enabled.value {
+        return false;
+    }
+    if !get_setting!(&mut config.settings_old, "aimbot", "enabled" => Bool) {
         return false;
     }
 
@@ -32,7 +33,7 @@ pub fn run(cmd: &mut UserCmd) -> bool {
 
     let forward = cmd.viewangles.forward();
 
-    let fov = get_setting!(&mut config.settings, "aimbot", "fov" => F32);
+    let fov = get_setting!(&mut config.settings_old, "aimbot", "fov" => F32);
 
     for player in i!()
         .entity_list
@@ -64,8 +65,8 @@ pub fn run(cmd: &mut UserCmd) -> bool {
 
             let diff = pos - local_eyes;
 
-            let Some(diff_normalized) = diff.normalized() else{
-                continue
+            let Some(diff_normalized) = diff.normalized() else {
+                continue;
             };
 
             let dot = forward.dot(&diff_normalized);

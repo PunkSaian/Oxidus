@@ -23,6 +23,8 @@ use hook::restore_hooks;
 use libc::{dlopen, RTLD_NOLOAD, RTLD_NOW};
 use log::{error, info};
 
+use config::init_settings;
+use config::Config;
 use modules::init_modules;
 use netvar_dumper::dump_netvars;
 use overlay::init as init_overlay;
@@ -33,8 +35,6 @@ use sdk::interface::client_mode::ClientMode;
 use sdk::interface::interface_names;
 use sdk::interface::interfaces::Interfaces;
 use sdk::module_names;
-use config::init_settings;
-use config::Config;
 use util::create_interface;
 
 #[macro_use]
@@ -43,9 +43,9 @@ extern crate log;
 mod hook;
 mod math;
 
+mod config;
 mod hooks;
 mod modules;
-mod config;
 
 mod netvar_dumper;
 mod overlay;
@@ -111,7 +111,7 @@ pub fn cleanup() -> OxidusResult {
 
     unload_overlay();
 
-    let config = Config::get();
+    let config = Config::get_read();
     config.save().unwrap();
 
     Ok(())

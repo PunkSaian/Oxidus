@@ -69,6 +69,6 @@ pub unsafe extern "C" fn set_cursor(this: *const (), cursor: EMouseCursor) {
 }
 
 #[vmt_hook]
-pub unsafe extern "C" fn set_cursor_always_visible(this: *const (), visible:bool) {
+pub unsafe extern "C" fn set_cursor_always_visible(this: *const (), visible: bool) {
     original_function(this, visible);
 }

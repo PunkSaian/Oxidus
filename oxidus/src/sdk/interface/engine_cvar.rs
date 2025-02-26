@@ -19,12 +19,11 @@ pub struct ConVar {
     pub comp_max_val: f32,
     pub competitive_restrictions: bool,
     pub change_callback: *const (),
-
 }
 
 pub struct CVar {}
 
-#[vmt] 
+#[vmt]
 pub struct CVar {
     #[offset(12)]
     pub find_var: extern "C" fn(name: *const i8) -> &'static ConVar,

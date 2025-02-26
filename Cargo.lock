@@ -596,6 +596,7 @@ dependencies = [
 name = "macros"
 version = "0.0.0"
 dependencies = [
+ "heck",
  "proc-macro2",
  "quote",
  "serde_plain",

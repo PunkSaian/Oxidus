@@ -1,7 +1,9 @@
 use macros::vmt;
 
-use super::{client_class::{ClientClass, UnparsedClientClass}, unknown::Unknown};
-
+use super::{
+    client_class::{ClientClass, UnparsedClientClass},
+    unknown::Unknown,
+};
 
 #[derive(Debug)]
 pub struct Networkable;

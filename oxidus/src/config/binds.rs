@@ -60,7 +60,7 @@ pub struct Bind {
 impl Bind {
     pub fn overwrite(&self, config: &mut Config, triggered: bool) {
         for (path, value) in &self.diff {
-            let mut entry = &mut config.settings;
+            let mut entry = &mut config.settings_old;
             for key in path {
                 match entry.get_mut(key).unwrap() {
                     Entry::Group(group) => entry = group,
@@ -78,7 +78,7 @@ impl Bind {
     }
     pub fn apply(&self, config: &mut Config) {
         for (path, bind_value) in &self.diff {
-            let mut entry = &mut config.settings;
+            let mut entry = &mut config.settings_old;
             for key in path {
                 match entry.get_mut(key).unwrap() {
                     Entry::Group(group) => entry = group,
@@ -93,7 +93,7 @@ impl Bind {
 }
 
 pub fn run_binds(ui: &imgui::Ui) {
-    let mut config = Config::get();
+    let mut config = Config::get_write();
     for (i, bind) in config.binds.binds.clone().iter().enumerate() {
         let triggered = bind.keys.iter().all(|x| ui.is_key_down(*x));
         if triggered == bind.triggered {
@@ -103,4 +103,3 @@ pub fn run_binds(ui: &imgui::Ui) {
         config.binds.binds[i].triggered = triggered;
     }
 }
-

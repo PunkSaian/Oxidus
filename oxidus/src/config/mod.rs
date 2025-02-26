@@ -1,16 +1,14 @@
 use std::{
     collections::HashMap,
     fs,
-    mem::transmute,
     path::{Path, PathBuf},
-    sync::{OnceLock, RwLock, RwLockWriteGuard},
+    sync::{OnceLock, RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
 
 use binds::Binds;
 use entry::{Entry, EntryValue};
-use imgui::Key;
-use macros::settings;
 use metadata::MetaData;
+use settings::Settings;
 use toml::{Table, Value};
 
 use crate::overlay::OxidusResult;
@@ -18,6 +16,7 @@ use crate::overlay::OxidusResult;
 pub mod binds;
 pub mod entry;
 pub mod metadata;
+pub mod settings;
 
 static CONFIG: OnceLock<RwLock<Config>> = OnceLock::new();
 
@@ -49,32 +48,17 @@ pub fn diff_settings(
 
 #[derive(Debug)]
 pub struct Config {
-    pub settings: HashMap<String, Entry>,
+    pub settings_old: HashMap<String, Entry>,
+    pub settings: Settings,
     pub binds: Binds,
     pub meta: MetaData,
     pub binding: Option<(usize, HashMap<String, Entry>)>,
 }
 
 impl Config {
+    #[deprecated]
     pub fn get_default_entries() -> HashMap<String, Entry> {
-        settings! {
-            aimbot {
-                enabled: Bool, false
-                fov: F32, 30.0
-            },
-            esp {
-                enabled: Bool, false
-            }
-            visual {
-                fov: F32, 100.0
-                third_person: Bool, false
-            },
-            movement {
-                bhop: Bool, true
-                momentum_compensation: Bool, false 
-                auto_strafe: Bool, false 
-            }
-        }
+        HashMap::new()
     }
     pub fn init() {
         fs::create_dir_all(Self::configs_dir()).unwrap();
@@ -88,129 +72,74 @@ impl Config {
             meta
         };
 
-        let mut settings = Config {
+        let mut config = Config {
             binds: Binds::new(),
-            settings: Self::get_default_entries(),
+            settings_old: Self::get_default_entries(),
+            #[deprecated]
+            settings: Settings::default(),
             meta,
             binding: None,
         };
 
-        if !settings.meta.current_config.exists() {
-            settings.save().unwrap();
+        if !config.meta.current_config.exists() {
+            config.save().unwrap();
         }
 
-        settings.load_config().unwrap();
+        config.load().unwrap();
+        dbg!(&config.settings);
 
-        CONFIG.set(RwLock::new(settings)).unwrap();
+        CONFIG.set(RwLock::new(config)).unwrap();
     }
 
-    #[allow(static_mut_refs)]
-    pub fn get() -> RwLockWriteGuard<'static, Config> {
+    pub fn get_read() -> RwLockReadGuard<'static, Config> {
+        CONFIG.get().unwrap().read().unwrap()
+    }
+    pub fn get_write() -> RwLockWriteGuard<'static, Config> {
         CONFIG.get().unwrap().write().unwrap()
     }
 
     pub fn save(&self) -> OxidusResult<()> {
-        let table = self.to_toml_table()?;
-        let toml = toml::to_string_pretty(&table)?;
+        let toml = toml::to_string_pretty(&self.settings)?;
         fs::write(&self.meta.current_config, toml)?;
 
         Ok(())
     }
 
-    pub fn load_config(&mut self) -> OxidusResult<()> {
+    pub fn load(&mut self) -> OxidusResult<()> {
         let contents = fs::read_to_string(&self.meta.current_config)?;
         let loaded = contents.parse::<Table>()?;
-        self.settings = Self::get_default_entries();
-        self.merge_toml(loaded.get("settings").unwrap().as_table().unwrap());
-        //load binds
-        if let Some(Some(binds_table)) = loaded.get("binds").map(|x| x.as_table()) {
-            for (name, bind_table) in binds_table {
-                let mut keys = Vec::new();
-                let mut diff = HashMap::new();
-                let bind_table = bind_table.as_table().unwrap();
-                for (key, value) in bind_table {
-                    match key.as_str() {
-                        "diff" => {
-                            let diff_table = value.as_array().unwrap();
-                            for diff_entry in diff_table {
-                                let diff_entry = diff_entry.as_table().unwrap();
-                                let path = diff_entry
-                                    .get("path")
-                                    .unwrap()
-                                    .as_array()
-                                    .unwrap()
-                                    .iter()
-                                    .map(|x| x.as_str().unwrap().to_owned())
-                                    .collect();
-
-                                let value = diff_entry.get("value").unwrap();
-                                diff.insert(path, value_from_toml(value));
-                            }
-                        }
-                        "keys" => {
-                            keys = value
-                                .as_array()
-                                .unwrap()
-                                .iter()
-                                .map(|x| unsafe {
-                                    transmute::<u32, Key>(x.as_integer().unwrap() as u32)
-                                })
-                                .collect();
-                        }
-                        _ => {}
-                    }
-                }
-                self.binds.binds.push(binds::Bind {
-                    name: name.clone(),
-                    keys,
-                    diff,
-                    triggered: false,
-                });
-            }
-        }
+        self.settings = loaded.get("settings").unwrap().clone().try_into()?;
         Ok(())
     }
 
     pub fn switch_config(&mut self, file: &PathBuf) -> OxidusResult<()> {
         self.save()?;
         self.meta.current_config.clone_from(file);
-        self.load_config()?;
+        self.load()?;
         self.meta.save()?;
         Ok(())
     }
 
-    pub fn delete_config(file: &PathBuf) -> OxidusResult<()> {
+    pub fn delete(file: &PathBuf) -> OxidusResult<()> {
         fs::remove_file(file)?;
         Ok(())
     }
 
-    pub fn create_new(&mut self, file_name: &str, copy: bool) -> OxidusResult<()> {
+    pub fn create(&mut self, file_name: &str, copy: bool) -> OxidusResult<()> {
         let file_name_with_ext = file_name.to_owned() + ".toml";
         let file = Self::configs_dir().join(file_name_with_ext);
         self.save()?;
         self.meta.current_config.clone_from(&file);
         if !copy {
-            self.settings = Self::get_default_entries();
+            self.settings_old = Self::get_default_entries();
         }
         self.meta.save()?;
         self.save()?;
         Ok(())
     }
 
-    fn to_toml_table(&self) -> OxidusResult<Table> {
-        let mut settings = Table::new();
-        for (key, value) in &self.settings {
-            settings.insert(key.clone(), value_to_toml(value)?);
-        }
-        let mut table = Table::new();
-        table.insert("settings".to_owned(), Value::Table(settings));
-        let binds = self.binds.to_toml_table();
-        table.insert("binds".to_owned(), Value::Table(binds));
-        Ok(table)
-    }
-
     fn merge_toml(&mut self, loaded: &Table) {
-        for (key, value) in &mut self.settings {
+        for (key, value) in &mut self.settings_old {
             if let Some(loaded_value) = loaded.get(key) {
                 let merged = value.clone().merge(loaded_value);
                 *value = merged;
@@ -275,7 +204,7 @@ fn value_from_toml(value: &Value) -> EntryValue {
 pub fn init_settings() {
     Config::init();
 }
-
+#[deprecated]
 #[macro_export]
 macro_rules! get_setting_mut {
     ($map:expr, $key:expr => $variant:ident) => {{
@@ -305,6 +234,7 @@ macro_rules! get_setting_mut {
 
 }
 
+#[deprecated]
 #[macro_export]
 macro_rules! get_setting {
     ($map:expr, $key:expr => $variant:ident) => {{

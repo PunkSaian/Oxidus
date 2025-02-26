@@ -9,7 +9,7 @@ pub fn show_binds(ui: &mut imgui::Ui) {
     pub static mut WAITING_FOR_KEYS: bool = false;
     pub static mut PRESED_KEYS: Vec<Key> = Vec::new();
     pub static mut NAME: String = String::new();
-    let mut config = Config::get();
+    let mut config = Config::get_write();
     ui.modal_popup_config("new bind")
         .resizable(false)
         .movable(false)
@@ -99,7 +99,7 @@ pub fn show_binds(ui: &mut imgui::Ui) {
                     ui.table_next_column();
                     ui.disabled(config.binding.is_some(), || {
                         if ui.button(format!("Edit##{i}")) {
-                            config.binding = Some((i, config.settings.clone()));
+                            config.binding = Some((i, config.settings_old.clone()));
                             bind.apply(&mut config);
                         }
                         ui.same_line();
@@ -137,16 +137,16 @@ pub fn show_binds(ui: &mut imgui::Ui) {
                 if ui.button("Save") {
                     let old_settings = config.binding.as_ref().unwrap().clone().1;
 
-                    let diff = diff_settings(&old_settings, &config.settings);
+                    let diff = diff_settings(&old_settings, &config.settings_old);
                     //compare new settings state with saved one and save if different
-                    config.settings = old_settings;
+                    config.settings_old = old_settings;
                     config.binding = None;
                     config.binds.binds[binding.0].diff = diff;
                 }
                 ui.same_line();
                 if ui.button("Cancel") {
                     let old_settings = config.binding.as_ref().unwrap().clone().1;
-                    config.settings = old_settings;
+                    config.settings_old = old_settings;
                     config.binding = None;
                 }
             }

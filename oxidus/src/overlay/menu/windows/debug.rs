@@ -146,8 +146,8 @@ pub fn show_debug_window(ui: &mut Ui, visible: bool) {
                 let scale = (window_size[0] as f32 / 2f32, window_size[1] as f32 / 2f32);
                 for ((_, _, label), point3d) in &mut state.points {
                     let Some(mut point) = w2s.transform_vector(point3d) else {
-                            continue;
-                        };
+                        continue;
+                    };
                     point[0] *= scale.0;
                     point[1] *= scale.1;
 
@@ -161,14 +161,14 @@ pub fn show_debug_window(ui: &mut Ui, visible: bool) {
                     let forward = angle.forward();
                     let point3d2 = *point3d + forward * 10.0;
                     let Some(mut point) = w2s.transform_vector(point3d) else {
-                            continue;
-                        };
+                        continue;
+                    };
                     point[0] *= scale.0;
                     point[1] *= scale.1;
 
                     let Some(mut point2) = w2s.transform_vector(&point3d2) else {
-                            continue;
-                        };
+                        continue;
+                    };
                     point2[0] *= scale.0;
                     point2[1] *= scale.1;
 

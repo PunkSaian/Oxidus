@@ -2,7 +2,6 @@ use macros::vmt;
 
 use crate::sdk::bindings::BaseEntity;
 
-
 #[vmt]
 pub struct Unknown {
     #[offset(7)]

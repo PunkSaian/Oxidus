@@ -17,13 +17,13 @@ pub fn show_fov(ui: &mut imgui::Ui) {
         return;
     }
 
-    let mut config = Config::get();
-    if get_setting!(&mut config.settings, "visual", "third_person" => Bool) {
+    let mut config = Config::get_write();
+    if get_setting!(&mut config.settings_old, "visual", "third_person" => Bool) {
         return;
     }
-    let fov = get_setting!(&mut config.settings, "aimbot", "fov" => F32);
+    let fov = get_setting!(&mut config.settings_old, "aimbot", "fov" => F32);
 
-    let visual_fov = get_setting!(&mut config.settings, "visual", "fov" => F32);
+    let visual_fov = get_setting!(&mut config.settings_old, "visual", "fov" => F32);
 
     if fov > visual_fov {
         return;

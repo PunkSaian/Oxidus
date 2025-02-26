@@ -3,9 +3,8 @@ use std::{mem::transmute, ptr};
 use super::{super::bindings::BaseEntity, renderable::Renderable};
 use macros::vmt;
 
-
-use crate::{math::Vector3, sdk::models::collidable::Collidable};
 use crate::sdk::models::networkable::Networkable;
+use crate::{math::Vector3, sdk::models::collidable::Collidable};
 
 #[repr(C)]
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -161,7 +161,7 @@ impl Overlay {
         if ui.is_key_pressed(Key::Insert) {
             self.visible = !self.visible;
             if !self.visible {
-                let config = Config::get();
+                let config = Config::get_read();
                 config.save().unwrap();
             }
             i!().gui_surface.set_cursor_always_visible(self.visible);

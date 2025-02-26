@@ -1,4 +1,4 @@
-pub mod debug;
-pub mod watermark;
-pub mod settings;
 pub mod binds;
+pub mod debug;
+pub mod settings;
+pub mod watermark;

@@ -62,12 +62,13 @@ pub unsafe extern "C" fn create_move(
 
 #[vmt_hook]
 pub unsafe extern "C" fn override_view(this: *const (), view_setup: &mut ViewSetup) -> bool {
-    let mut config = Config::get();
-    let fov = get_setting!(&mut config.settings, "visual", "fov" => F32);
+    let mut config = Config::get_write();
+    let fov = get_setting!(&mut config.settings_old, "visual", "fov" => F32);
     view_setup.fov = fov;
     if let Some(local_player) = i!().engine.get_local_player() {
         if local_player.is_alive() {
-            let third_person = get_setting!(&mut config.settings, "visual", "third_person" => Bool);
+            let third_person =
+                get_setting!(&mut config.settings_old, "visual", "third_person" => Bool);
             local_player.m_nForceTauntCam = i32::from(third_person);
         }
     }

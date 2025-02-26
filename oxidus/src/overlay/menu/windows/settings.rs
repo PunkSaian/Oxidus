@@ -5,7 +5,7 @@ use imgui::{Id, WindowFlags};
 use crate::{config::Config, get_setting_mut, oxidus_cleanup};
 #[allow(static_mut_refs, clippy::too_many_lines)]
 pub fn show_settings(ui: &mut imgui::Ui) {
-    let mut config = Config::get();
+    let mut config = Config::get_write();
     ui.modal_popup_config("new config")
         .resizable(false)
         .movable(false)
@@ -21,7 +21,7 @@ pub fn show_settings(ui: &mut imgui::Ui) {
             ui.spacing();
             unsafe {
                 if ui.button("create") && !NEW_CONFIG_NAME.is_empty() {
-                    config.create_new(&NEW_CONFIG_NAME, COPY_CURRENT).unwrap();
+                    config.create(&NEW_CONFIG_NAME, COPY_CURRENT).unwrap();
                     NEW_CONFIG_NAME.clear();
                     COPY_CURRENT = false;
                     ui.close_current_popup();
@@ -84,33 +84,33 @@ pub fn show_settings(ui: &mut imgui::Ui) {
                                 .enabled(config.meta.current_config != entry)
                                 .build()
                             {
-                                Config::delete_config(&entry).unwrap();
+                                Config::delete(&entry).unwrap();
                             }
                         });
                     }
                 });
             });
 
-            let enabled = get_setting_mut!(&mut config.settings, "aimbot", "enabled" => Bool);
+            let enabled = get_setting_mut!(&mut config.settings_old, "aimbot", "enabled" => Bool);
             ui.checkbox("enabled", enabled);
-            let fov = get_setting_mut!(&mut config.settings, "aimbot", "fov" => F32);
+            let fov = get_setting_mut!(&mut config.settings_old, "aimbot", "fov" => F32);
             ui.input_float("fov", fov).step(1.0).build();
             *fov = fov.clamp(1.0, 180.0);
             {
-                let fov = get_setting_mut!(&mut config.settings, "visual", "fov" => F32);
+                let fov = get_setting_mut!(&mut config.settings_old, "visual", "fov" => F32);
                 ui.input_float("visual fov", fov).step(1.0).build();
                 *fov = fov.clamp(1.0, 180.0);
                 let third_person =
-                    get_setting_mut!(&mut config.settings, "visual", "third_person" => Bool);
+                    get_setting_mut!(&mut config.settings_old, "visual", "third_person" => Bool);
                 ui.checkbox("third person", third_person);
             }
             let momentum_compensation =
-                get_setting_mut!(&mut config.settings, "movement", "momentum_compensation" => Bool);
+                get_setting_mut!(&mut config.settings_old, "movement", "momentum_compensation" => Bool);
             ui.checkbox("momentum compensation", momentum_compensation);
-            let bhop = get_setting_mut!(&mut config.settings, "movement", "bhop" => Bool);
+            let bhop = get_setting_mut!(&mut config.settings_old, "movement", "bhop" => Bool);
             ui.checkbox("bhop", bhop);
             let auto_strafe =
-                get_setting_mut!(&mut config.settings, "movement", "auto_strafe" => Bool);
+                get_setting_mut!(&mut config.settings_old, "movement", "auto_strafe" => Bool);
             ui.checkbox("auto strafe", auto_strafe);
         });
 }
