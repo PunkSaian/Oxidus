@@ -1,10 +1,10 @@
+use heck::ToPascalCase;
 use proc_macro::TokenStream;
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::{braced, parse_macro_input, Expr, Ident, Token, Type};
-use heck::ToPascalCase;
 
 struct SettingsMacro {
     groups: Vec<Group>,
@@ -121,10 +121,22 @@ pub fn settings(input: TokenStream) -> TokenStream {
                 self.#group_name.apply_overwrites(&bind.#group_name);
             }
         });
+        let apply_overwrites_permanent_statements = config.groups.iter().map(|group| {
+            let group_name = &group.name;
+            quote! {
+                self.#group_name.apply_overwrites_permanent(&bind.#group_name);
+            }
+        });
         let clear_overwrites_statements = config.groups.iter().map(|group| {
             let group_name = &group.name;
             quote! {
                 self.#group_name.clear_overwrites();
+            }
+        });
+        let generate_overwrites_statements = config.groups.iter().map(|group| {
+            let group_name = &group.name;
+            quote! {
+                self.#group_name.generate_overwrites(&new.#group_name);
             }
         });
 
@@ -136,9 +148,16 @@ pub fn settings(input: TokenStream) -> TokenStream {
                 pub fn apply_overwrites(&mut self, bind: &Self) {
                     #(#apply_overwrites_statements)*
                 }
+                pub fn apply_overwrites_permanent(&mut self, bind: &Self) {
+                    #(#apply_overwrites_permanent_statements)*
+                }
                 pub fn clear_overwrites(&mut self) {
                     #(#clear_overwrites_statements)*
                 }
+                pub fn generate_overwrites(&mut self, new: &Self) {
+                    #(#generate_overwrites_statements)*
+                }
+
             }
         }
     };
@@ -210,56 +229,76 @@ fn generate_group_code(group: &Group) -> TokenStream2 {
     });
 
     let struct_impl = {
-        let merge_statements = group.items.iter().map(|item| {
-            match item {
-                GroupItem::Field(field) => {
-                    let field_name = &field.field_name;
-                    quote! {
-                        self.#field_name.merge(&old.#field_name);
-                    }
+        let merge_statements = group.items.iter().map(|item| match item {
+            GroupItem::Field(field) => {
+                let field_name = &field.field_name;
+                quote! {
+                    self.#field_name.merge(&old.#field_name);
                 }
-                GroupItem::Group(subgroup) => {
-                    let subgroup_name = &subgroup.name;
-                    quote! {
-                        self.#subgroup_name.merge(&old.#subgroup_name);
-                    }
+            }
+            GroupItem::Group(subgroup) => {
+                let subgroup_name = &subgroup.name;
+                quote! {
+                    self.#subgroup_name.merge(&old.#subgroup_name);
                 }
             }
         });
 
-        let clear_overwrites_statements = group.items.iter().map(|item| {
-            match item {
-                GroupItem::Field(field) => {
-                    let field_name = &field.field_name;
-                    quote! {
-                        self.#field_name.overwrite = None;
-                    }
+        let clear_overwrites_statements = group.items.iter().map(|item| match item {
+            GroupItem::Field(field) => {
+                let field_name = &field.field_name;
+                quote! {
+                    self.#field_name.clear_overwrites();
                 }
-                GroupItem::Group(subgroup) => {
-                    let subgroup_name = &subgroup.name;
-                    quote! {
-                        self.#subgroup_name.clear_overwrites();
-                    }
+            }
+            GroupItem::Group(subgroup) => {
+                let subgroup_name = &subgroup.name;
+                quote! {
+                    self.#subgroup_name.clear_overwrites();
                 }
             }
         });
 
-        let apply_overwrites_statements = group.items.iter().map(|item| {
-            match item {
-                GroupItem::Field(field) => {
-                    let field_name = &field.field_name;
-                    quote! {
-                        if let Some(overwrite) = bind.#field_name.overwrite.as_ref() {
-                            crate::mdbg!(stringify!(#field_name));
-                            self.#field_name.overwrite = Some(overwrite.clone());
-                        }
-                    }
+        let apply_overwrites_statements = group.items.iter().map(|item| match item {
+            GroupItem::Field(field) => {
+                let field_name = &field.field_name;
+                quote! {
+                    self.#field_name.apply_overwrite(&bind.#field_name);
                 }
-                GroupItem::Group(subgroup) => {
-                    let subgroup_name = &subgroup.name;
-                    quote! {
-                        self.#subgroup_name.apply_overwrites();
-                    }
+            }
+            GroupItem::Group(subgroup) => {
+                let subgroup_name = &subgroup.name;
+                quote! {
+                    self.#subgroup_name.apply_overwrites();
+                }
+            }
+        });
+        let apply_overwrites_permanent_statements = group.items.iter().map(|item| match item {
+            GroupItem::Field(field) => {
+                let field_name = &field.field_name;
+                quote! {
+                    self.#field_name.apply_overwrite_permanent(&bind.#field_name);
+                }
+            }
+            GroupItem::Group(subgroup) => {
+                let subgroup_name = &subgroup.name;
+                quote! {
+                    self.#subgroup_name.apply_overwrites();
+                }
+            }
+        });
+
+        let generate_overwrites_statements = group.items.iter().map(|item| match item {
+            GroupItem::Field(field) => {
+                let field_name = &field.field_name;
+                quote! {
+                    self.#field_name.generate_overwrites(&new.#field_name);
+                }
+            }
+            GroupItem::Group(subgroup) => {
+                let subgroup_name = &subgroup.name;
+                quote! {
+                    self.#subgroup_name.generate_overwrites(&new.#subgroup_name);
                 }
             }
         });
@@ -272,8 +311,14 @@ fn generate_group_code(group: &Group) -> TokenStream2 {
                 pub fn apply_overwrites(&mut self, bind: &Self) {
                     #(#apply_overwrites_statements)*
                 }
+                pub fn apply_overwrites_permanent(&mut self, bind: &Self) {
+                    #(#apply_overwrites_permanent_statements)*
+                }
                 pub fn clear_overwrites(&mut self) {
                     #(#clear_overwrites_statements)*
+                }
+                pub fn generate_overwrites(&mut self, new: &Self) {
+                    #(#generate_overwrites_statements)*
                 }
             }
         }
@@ -300,5 +345,8 @@ fn generate_group_code(group: &Group) -> TokenStream2 {
 }
 
 fn group_struct_name(name: &Ident) -> Ident {
-    Ident::new(&format!("{}Settings", name.to_string().to_pascal_case()), Span::call_site())
+    Ident::new(
+        &format!("{}Settings", name.to_string().to_pascal_case()),
+        Span::call_site(),
+    )
 }

@@ -229,8 +229,6 @@ impl Overlay {
                     io.add_mouse_wheel_event([event.wheel.x as f32, event.wheel.y as f32]);
                 }
                 SDL_EventType::SDL_KEYDOWN | SDL_EventType::SDL_KEYUP => {
-                    //TODO: i think the modifiers arent handled propperly
-                    //let modifiers = sdl2_sys::SDL_GetModState(void);
                     let pressed = u32::from(event.key.state) == SDL_PRESSED;
 
                     if let Some(key) = sdl_scancode_to_imgui_key(event.key.keysym.scancode) {

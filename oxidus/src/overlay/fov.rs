@@ -18,7 +18,7 @@ pub fn show_fov(ui: &mut imgui::Ui) {
     }
 
     let settings = &Config::get_read().settings;
-    if *settings.aimbot.enabled.get() {
+    if !*settings.aimbot.draw_fov.get() {
         return;
     }
 

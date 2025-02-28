@@ -47,36 +47,32 @@ impl Config {
 
         let mut default = Settings::default();
         default.aimbot.enabled.overwrite = Some(true);
-        config
-            .binds
-            .binds
-            .push(binds::Bind::new("test", &[imgui::Key::Tab], default));
 
         if !config.meta.current_config.exists() {
             config.save().unwrap();
         }
 
-        config.load().unwrap();
+        if let Err(e) = config.load() {
+            warn!("Failed to load config: {e}");
+        }
 
         CONFIG.set(RwLock::new(config)).unwrap();
     }
 
     pub fn get_read() -> RwLockReadGuard<'static, Config> {
-        CONFIG.get().unwrap().try_read().unwrap()
+        CONFIG.get().unwrap().read().unwrap()
     }
     pub fn get_write() -> RwLockWriteGuard<'static, Config> {
-        CONFIG.get().unwrap().try_write().unwrap()
+        CONFIG.get().unwrap().write().unwrap()
     }
 
     pub fn save(&self) -> OxidusResult<()> {
         let mut toml = toml::Table::new();
-        //cast self.string NOT self.settings_old to toml table
-        let settings = Table::try_from(self.settings.clone())?;
+        let settings = Table::try_from(&self.settings)?;
 
         toml.insert("settings".to_string(), Value::Table(settings));
 
-        //TODO(oxy): save binds
-        toml.insert("binds".to_string(), Value::Table(toml::Table::new()));
+        toml.insert("binds".to_string(), self.binds.to_toml_array());
 
         fs::write(&self.meta.current_config, toml::to_string_pretty(&toml)?)?;
 
@@ -89,6 +85,7 @@ impl Config {
         self.settings = Settings::default();
         self.settings
             .merge(&loaded.get("settings").unwrap().clone().try_into()?);
+        self.binds = Binds::from_toml_array(loaded.get("binds").unwrap());
         Ok(())
     }
 

@@ -39,12 +39,31 @@ impl<T: PartialEq + Clone> SettingsField<T> {
             self.overwrite.clone_from(&old.overwrite);
         }
     }
+    pub fn apply_overwrite(&mut self, bind: &Self) {
+        if let Some(overwrite) = bind.overwrite.as_ref() {
+            self.overwrite = Some(overwrite.clone());
+        }
+    }
+    pub fn apply_overwrite_permanent(&mut self, bind: &Self) {
+        if let Some(overwrite) = bind.overwrite.as_ref() {
+            self.value = overwrite.clone();
+        }
+    }
+    pub fn clear_overwrites(&mut self) {
+        self.overwrite = None;
+    }
+    pub fn generate_overwrites(&mut self, new: &Self) {
+        if self.value != new.value {
+            self.overwrite = Some(new.value.clone());
+        }
+    }
 }
 
 settings!(
     aimbot {
         enabled: bool, false,
         fov: f32, 30.0,
+        draw_fov: bool, false,
     }
     esp {
         enabled: bool, false

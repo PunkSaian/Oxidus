@@ -69,14 +69,13 @@ pub struct Client {
     #[offset(35)]
     pub fram_stage_notify: extern "C" fn(stage: FrameStage),
     #[offset(59)]
-    pub get_player_view: extern "C" fn(view: &mut ViewSetup) -> bool,
+    pub _get_player_view: extern "C" fn(view: &mut ViewSetup) -> bool,
 }
 
 impl Client {
     #[allow(clippy::similar_names)]
     pub fn get_w2s_matrix(&self) -> VMatrix {
-        let mut view_setup = unsafe { MaybeUninit::zeroed().assume_init() };
-        self.get_player_view(&mut view_setup);
+        let view_setup = self.get_player_view();
 
         let mut w2v: VMatrix = unsafe { MaybeUninit::zeroed().assume_init() };
         let mut v2pr: VMatrix = unsafe { MaybeUninit::zeroed().assume_init() };
@@ -91,5 +90,10 @@ impl Client {
             &mut w2px,
         );
         w2s
+    }
+    pub fn get_player_view(&self) -> ViewSetup {
+        let mut view_setup = unsafe { MaybeUninit::zeroed().assume_init() };
+        self._get_player_view(&mut view_setup);
+        view_setup
     }
 }

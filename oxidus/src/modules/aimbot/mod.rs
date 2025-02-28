@@ -1,6 +1,9 @@
 use crate::{
     config::Config,
-    i, mdbg_angle, mdbg_point,
+    i,
+    math::Vector3,
+    mdbg_angle, mdbg_point,
+    overlay::Interfaces,
     sdk::{
         class_id::ClassId,
         interface::{
@@ -28,6 +31,7 @@ pub fn run(cmd: &mut UserCmd) -> bool {
     }
 
     let local_eyes = local_player.get_eye_position();
+    let view_setup = i!().client.get_player_view();
 
     let forward = cmd.viewangles.forward();
 
@@ -59,14 +63,16 @@ pub fn run(cmd: &mut UserCmd) -> bool {
 
             pos += ((hitbox.max + hitbox.min) / 2.0).rotate(&rotation);
 
-            let diff = pos - local_eyes;
+            let eyes_diff = pos - local_eyes;
+            let camera_diff = pos - view_setup.origin;
 
-            let Some(diff_normalized) = diff.normalized() else {
+            let Some(camera_diff_normalized) = camera_diff.normalized() else {
                 continue;
             };
-
-            let dot = forward.dot(&diff_normalized);
             let fov_threshold = aimbot_settings.fov.get().to_radians().cos();
+            if forward.dot(&camera_diff_normalized) < fov_threshold {
+                continue;
+            }
 
             let trace =
                 i!().engine_trace
@@ -74,11 +80,8 @@ pub fn run(cmd: &mut UserCmd) -> bool {
             if trace.entity != player {
                 continue;
             }
-            if dot < fov_threshold {
-                continue;
-            }
             cmd.buttons.set(ButtonFlags::InAttack, true);
-            let mut angle = diff.angle();
+            let mut angle = eyes_diff.angle();
             cmd.viewangles = angle;
 
             angle.pitch = 0.0;

@@ -1,9 +1,8 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, Expr, ExprField, Meta, Path};
+use syn::{parse_macro_input, Expr, ExprField};
 
 pub fn settings_field(attr: TokenStream, item: TokenStream) -> TokenStream {
-    // Parse the attribute as a path directly
     let field_path = parse_macro_input!(attr as ExprField);
 
     let item = parse_macro_input!(item as Expr);
