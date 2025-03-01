@@ -79,6 +79,7 @@ pub fn momentum_compensation(cmd: &mut UserCmd) {
     }
 }
 pub fn bhop(cmd: &mut UserCmd) {
+    dbg!("running bhop");
     let movement_settings = &Config::get_read().settings.movement;
     if !movement_settings.bhop.get() {
         return;

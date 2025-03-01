@@ -35,25 +35,25 @@ pub enum StencilOperation {
 
 #[vmt]
 pub struct MaterialRenderContext {
-    #[offset(11)]
-    pub cull_mode: extern "C" fn(cull_mode: MaterialCullMode),
     #[offset(12)]
     pub clear_buffers: extern "C" fn(clear_color: bool, clear_depth: bool, clear_stencil: bool),
+    #[offset(38)]
+    pub cull_mode: extern "C" fn(cull_mode: MaterialCullMode),
     // STENCIL
-    #[offset(115)]
-    pub set_stencil_enable: extern "C" fn(enable: bool),
-    #[offset(116)]
-    pub set_stencil_fail_operation: extern "C" fn(operation: StencilOperation),
     #[offset(117)]
-    pub set_stencil_zfail_operation: extern "C" fn(operation: StencilOperation),
+    pub set_stencil_enable: extern "C" fn(enable: bool),
     #[offset(118)]
-    pub set_stencil_pass_operation: extern "C" fn(operation: StencilOperation),
+    pub set_stencil_fail_operation: extern "C" fn(operation: StencilOperation),
     #[offset(119)]
-    pub set_stencil_compare_function: extern "C" fn(compare_fn: StencilComparisonFn),
+    pub set_stencil_zfail_operation: extern "C" fn(operation: StencilOperation),
     #[offset(120)]
-    pub set_stencil_refrence_value: extern "C" fn(val: i32),
+    pub set_stencil_pass_operation: extern "C" fn(operation: StencilOperation),
     #[offset(121)]
-    pub set_stencil_test_mask: extern "C" fn(mask: u32),
+    pub set_stencil_compare_function: extern "C" fn(compare_fn: StencilComparisonFn),
     #[offset(122)]
+    pub set_stencil_refrence_value: extern "C" fn(val: i32),
+    #[offset(123)]
+    pub set_stencil_test_mask: extern "C" fn(mask: u32),
+    #[offset(124)]
     pub set_stencil_write_mask: extern "C" fn(mask: u32),
 }

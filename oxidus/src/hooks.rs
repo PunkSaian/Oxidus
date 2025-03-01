@@ -164,9 +164,9 @@ pub unsafe extern "C" fn base_animating_internal_draw_model(
         render_context.clear_buffers(false, false, false);
         render_context.set_stencil_enable(true);
         render_context.set_stencil_compare_function(StencilComparisonFn::Alaway);
-        render_context.set_stencil_pass_operation(StencilOperation::Replace);
+        render_context.set_stencil_pass_operation(StencilOperation::Keep);
         render_context.set_stencil_fail_operation(StencilOperation::Keep);
-        render_context.set_stencil_zfail_operation(StencilOperation::Replace);
+        render_context.set_stencil_zfail_operation(StencilOperation::Keep);
         render_context.set_stencil_refrence_value(1);
         render_context.set_stencil_write_mask(0xFF);
         render_context.set_stencil_test_mask(0x0);
@@ -183,8 +183,11 @@ pub unsafe extern "C" fn base_animating_internal_draw_model(
                 true,
                 CString::new("OXIDUS").unwrap(),
             );
-            mat.increment_refrence_count();
-            MAT_GLOW_COLOR = mat;
+            if !mat.is_null() {
+                let mat = mat.as_mut_unchecked();
+                mat.increment_refrence_count();
+                MAT_GLOW_COLOR = mat;
+            }
         }
         i!().model_render
             .force_material_override(MAT_GLOW_COLOR.as_mut_unchecked(), OverrideType::Normal);
