@@ -2,6 +2,7 @@ pub mod base_entity;
 pub mod bone_matrix;
 pub mod client_class;
 pub mod collidable;
+pub mod material;
 pub mod model;
 pub mod networkable;
 pub mod renderable;

@@ -98,6 +98,10 @@ pub fn show_settings(ui: &mut imgui::Ui) {
                 {
                     ui.checkbox("enabled", enabled);
                 }
+                #[settings_field(config.settings.aimbot.draw_fov)]
+                {
+                    ui.checkbox("draw fov", draw_fov);
+                }
                 #[settings_field(config.settings.aimbot.fov)]
                 {
                     ui.input_float("fov", fov).step(1.0).build();

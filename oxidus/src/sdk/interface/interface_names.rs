@@ -8,3 +8,4 @@ pub const MODEL_INFO: &str = "VModelInfoClient006";
 pub const ENGINE_REPLAY: &str = "EngineReplay001";
 pub const ENGINE_TRACE: &str = "EngineTraceClient003";
 pub const ENGINE_CVAR: &str = "VEngineCvar004";
+pub const ENGINE_MODEL: &str = "VEngineModel016";

@@ -9,6 +9,9 @@ pub mod engine_render_view;
 pub mod engine_trace;
 pub mod global_vars;
 pub mod gui_surface;
+pub mod material_render_context;
+pub mod material_system;
 pub mod model_info;
+pub mod model_render;
 
 pub mod interfaces;

@@ -8,6 +8,7 @@
     clippy::cargo_common_metadata,
     clippy::cast_sign_loss,
     clippy::missing_panics_doc,
+    clippy::too_many_arguments,
     incomplete_features,
     dead_code
 )]
@@ -16,7 +17,8 @@
     generic_const_exprs,
     slice_as_array,
     stmt_expr_attributes,
-    proc_macro_hygiene
+    proc_macro_hygiene,
+    ptr_as_ref_unchecked
 )]
 
 extern crate thiserror;

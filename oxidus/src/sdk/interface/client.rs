@@ -57,7 +57,6 @@ pub enum FrameStage {
     RenderEnd,
 }
 
-//INFO: FIXED
 #[vmt]
 pub struct Client {
     #[offset(6)]

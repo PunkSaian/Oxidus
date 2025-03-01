@@ -3,6 +3,7 @@ use std::{mem::transmute, ptr};
 use super::{super::bindings::BaseEntity, renderable::Renderable};
 use macros::vmt;
 
+use crate::sdk::class_id::ClassId;
 use crate::sdk::models::networkable::Networkable;
 use crate::{math::Vector3, sdk::models::collidable::Collidable};
 
@@ -39,4 +40,13 @@ impl BaseEntity {
     pub fn get_team(&self) -> Team {
         unsafe { transmute(self.m_iTeamNum) }
     }
+    pub fn get_class_id(&self) -> ClassId {
+        self.as_networkable().get_client_class().class_id
+    }
 }
+
+    //let networkable = ent.as_networkable();
+    //let class = networkable.get_client_class();
+    //if class.class_id == ClassId::CFuncRespawnRoomVisualizer {
+    //    return false;
+    //}
