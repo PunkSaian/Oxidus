@@ -1,5 +1,7 @@
 use macros::vmt;
 
+use crate::sdk::models::texture::Texture;
+
 pub struct MaterialRenderContext;
 
 #[repr(C)]
@@ -35,10 +37,18 @@ pub enum StencilOperation {
 
 #[vmt]
 pub struct MaterialRenderContext {
+    #[offset(6)]
+    pub set_render_target: extern "C" fn(texture: &mut Texture),
+    #[offset(10)]
+    pub viewport: extern "C" fn(x: i32, y: i32, width: i32, height: i32),
     #[offset(12)]
     pub clear_buffers: extern "C" fn(clear_color: bool, clear_depth: bool, clear_stencil: bool),
     #[offset(38)]
     pub cull_mode: extern "C" fn(cull_mode: MaterialCullMode),
+    #[offset(73)]
+    pub clear_color_4ub: extern "C" fn(r: u8, g: u8, b: u8, a: u8),
+    #[offset(105)]
+    pub push_render_target_and_viewport: extern "C" fn(),
     // STENCIL
     #[offset(117)]
     pub set_stencil_enable: extern "C" fn(enable: bool),

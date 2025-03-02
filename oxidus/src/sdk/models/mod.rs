@@ -6,6 +6,7 @@ pub mod material;
 pub mod model;
 pub mod networkable;
 pub mod renderable;
+pub mod texture;
 pub mod tf_player;
 pub mod tf_weapon_base;
 pub mod unknown;

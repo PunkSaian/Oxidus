@@ -1,4 +1,8 @@
-use std::{ffi::CString, mem::MaybeUninit, ptr};
+use std::{
+    ffi::CString,
+    mem::MaybeUninit,
+    ptr::{self, null},
+};
 
 use macros::{detour_hook, sig, vmt_hook};
 
@@ -19,12 +23,17 @@ use crate::{
         interface::{
             client::{FrameStage, ViewSetup},
             material_render_context::{MaterialCullMode, StencilComparisonFn, StencilOperation},
+            material_system::{
+                CompiledVtfFlags, CreateRenderTargetFlags, ImageFormat, SizeMode, TargetDepth,
+            },
             model_render::{DrawModelState, ModelRender, ModelRenderInfo, OverrideType},
         },
         models::{
             bone_matrix::BoneMatrix, material::Material, model::Model, renderable::Renderable,
+            texture::Texture,
         },
         module_names::CLIENT,
+        texture_group_names::TEXTURE_GROUP_OTHER,
     },
 };
 
@@ -164,9 +173,9 @@ pub unsafe extern "C" fn base_animating_internal_draw_model(
         render_context.clear_buffers(false, false, false);
         render_context.set_stencil_enable(true);
         render_context.set_stencil_compare_function(StencilComparisonFn::Alaway);
-        render_context.set_stencil_pass_operation(StencilOperation::Keep);
+        render_context.set_stencil_pass_operation(StencilOperation::Replace);
         render_context.set_stencil_fail_operation(StencilOperation::Keep);
-        render_context.set_stencil_zfail_operation(StencilOperation::Keep);
+        render_context.set_stencil_zfail_operation(StencilOperation::Replace);
         render_context.set_stencil_refrence_value(1);
         render_context.set_stencil_write_mask(0xFF);
         render_context.set_stencil_test_mask(0x0);
@@ -175,28 +184,61 @@ pub unsafe extern "C" fn base_animating_internal_draw_model(
         i!().engine_render_view.set_blend(0.0);
         i!().engine_render_view
             .set_color_modulation(&[1.0, 1.0, 1.0]);
-        static mut MAT_GLOW_COLOR: *mut Material = std::ptr::null_mut();
-        if MAT_GLOW_COLOR.is_null() {
+        static mut MAT_GLOW_COLOR: Option<&'static mut Material> = None;
+        if MAT_GLOW_COLOR.is_none() {
             let mat = i!().material_system.find_material(
-                CString::new("dev/glow_color").unwrap(),
-                CString::new("Model textures").unwrap(),
+                CString::new("dev/glow_color").unwrap().as_ptr(),
+                CString::new(TEXTURE_GROUP_OTHER).unwrap().as_ptr(),
                 true,
-                CString::new("OXIDUS").unwrap(),
+                null(),
             );
-            if !mat.is_null() {
-                let mat = mat.as_mut_unchecked();
-                mat.increment_refrence_count();
-                MAT_GLOW_COLOR = mat;
-            }
+            MAT_GLOW_COLOR = Some(mat);
         }
         i!().model_render
-            .force_material_override(MAT_GLOW_COLOR.as_mut_unchecked(), OverrideType::Normal);
+            .force_material_override(MAT_GLOW_COLOR.as_mut().unwrap(), OverrideType::Normal);
 
-        //m_pMatGlowColor = I::MaterialSystem->FindMaterial("dev/glow_color", TEXTURE_GROUP_OTHER);
-        //m_pMatGlowColor->IncrementReferenceCount();
+        static mut RENDER_BUFFER: Option<&'static mut Texture> = None;
+
+        return original_function(this, 1);
+        original_function(this, flags);
+
+        let (w, h) = i!().engine.get_screen_size();
+        if RENDER_BUFFER.is_none() {
+            let texture = i!().material_system.create_render_target_texture_ex(
+                CString::new("oxidus_glow_buffer").unwrap(),
+                w,
+                h,
+                SizeMode::LITERAL,
+                ImageFormat::RGB888,
+                TargetDepth::SHARED,
+                CompiledVtfFlags::CLAMPS as i64
+                    | CompiledVtfFlags::CLAMPT as i64
+                    | CompiledVtfFlags::EIGHTBITALPHA as i64,
+                CreateRenderTargetFlags::HDR,
+            );
+            dbg!(std::ptr::from_mut(texture));
+            RENDER_BUFFER = Some(texture);
+        }
+
+        render_context.push_render_target_and_viewport();
+        render_context.set_render_target(RENDER_BUFFER.as_mut().unwrap());
+        render_context.viewport(0, 0, w, h);
+        render_context.clear_color_4ub(0, 0, 0, 0);
+        dbg!("1");
+        render_context.clear_buffers(true, false, true);
+        dbg!("1");
+        i!().engine_render_view
+            .set_color_modulation(&[1.0, 0.0, 1.0]);
+        dbg!("1");
+        i!().engine_render_view.set_blend(0.5);
+        dbg!("1");
+        original_function(this, flags);
+        dbg!("1");
 
         i!().engine_render_view.set_blend(old_blend);
+        dbg!("1");
         render_context.cull_mode(MaterialCullMode::Cw);
+        dbg!("1");
         return original_function(this, 1);
     }
     original_function(this, flags);

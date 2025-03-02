@@ -69,7 +69,7 @@ impl From<PlayerInfoUnparsed> for PlayerInfo {
 #[vmt]
 pub struct Engine {
     #[offset(5)]
-    pub get_screen_size: extern "C" fn(w: &mut isize, h: &mut isize),
+    pub _get_screen_size: extern "C" fn(w: &mut i32, h: &mut i32),
     #[offset(8)]
     pub _get_player_info: extern "C" fn(index: i32, info: &mut PlayerInfoUnparsed),
     #[offset(12)]
@@ -92,5 +92,11 @@ impl Engine {
             .get_client_entity_from_index(self.get_local_player_entindex())?;
 
         Some(unsafe { &mut *std::ptr::from_mut::<BaseEntity>(ent).cast::<TFPlayer>() })
+    }
+    pub fn get_screen_size(&self) -> (i32, i32) {
+        let mut w = 0;
+        let mut h = 0;
+        self._get_screen_size(&mut w, &mut h);
+        (w, h)
     }
 }
